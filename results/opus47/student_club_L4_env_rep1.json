@@ -1,0 +1,909 @@
+{
+  "run_id": "student_club_L4_env_rep1",
+  "dataset": "student_club",
+  "level": "L4",
+  "dimensions": [
+    "data_dictionary",
+    "query_patterns",
+    "business_context",
+    "domain_knowledge"
+  ],
+  "model": {
+    "provider": "anthropic",
+    "model": "claude-opus-4-7",
+    "base_url": ""
+  },
+  "runtime_params": {
+    "max_tokens": 4096,
+    "effective_max_tokens": 4096,
+    "temperature": 0.6,
+    "seed": 42,
+    "top_p": 0.95,
+    "presence_penalty": 0.0,
+    "top_k": 20,
+    "reasoning_effort": "medium",
+    "num_ctx": null,
+    "bird_docs_dir": "/Users/gary/myapps/4d-metadata-ablation/bird-docs-revised"
+  },
+  "rep": 1,
+  "timestamp": "2026-06-02T03:26:59.203734+00:00",
+  "elapsed_seconds": 120.6,
+  "aggregate_metrics": {
+    "total_cases": 48,
+    "execution_rate_pct": 79.2,
+    "value_match_pct": 60.4,
+    "column_match_pct": 0.0,
+    "soft_f1_mean": 0.6356,
+    "er_value_gap_pp": 18.7,
+    "error_count": 10,
+    "bird_ex_pct": 64.6,
+    "er_bex_gap_pp": 14.6,
+    "challenging_er_pct": 80.0,
+    "challenging_vm_pct": 40.0,
+    "challenging_soft_f1": 0.4857,
+    "challenging_bird_ex_pct": 60.0,
+    "moderate_er_pct": 72.7,
+    "moderate_vm_pct": 45.5,
+    "moderate_soft_f1": 0.4701,
+    "moderate_bird_ex_pct": 45.5,
+    "simple_er_pct": 85.7,
+    "simple_vm_pct": 81.0,
+    "simple_soft_f1": 0.8446,
+    "simple_bird_ex_pct": 85.7
+  },
+  "per_case_results": [
+    {
+      "question": "What's Angela Sanders's major?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T2.major_name FROM member AS T1 INNER JOIN major AS T2 ON T1.link_to_major = T2.major_id WHERE T1.first_name = 'Angela' AND T1.last_name = 'Sanders'",
+      "actual_sql": "SELECT \"major\".\"major_name\" FROM \"member\" INNER JOIN \"major\" ON \"member\".\"link_to_major\" = \"major\".\"major_id\" WHERE \"member\".\"first_name\" = 'Angela' AND \"member\".\"last_name\" = 'Sanders' LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Among the students from the Student_Club who attended the event \"Women's Soccer\", how many of them want a T-shirt that's in medium size?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T1.event_id) FROM event AS T1 INNER JOIN attendance AS T2 ON T1.event_id = T2.link_to_event INNER JOIN member AS T3 ON T2.link_to_member = T3.member_id WHERE T1.event_name = 'Women''s Soccer' AND T3.t_shirt_size = 'Medium'",
+      "actual_sql": "SELECT COUNT(*) FROM \"member\" AS m INNER JOIN \"attendance\" AS a ON m.\"member_id\" = a.\"link_to_member\" INNER JOIN \"event\" AS e ON a.\"link_to_event\" = e.\"event_id\" WHERE e.\"event_name\" = 'Women''s Soccer' AND m.\"t_shirt_size\" = 'Medium'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Among the events attended by more than 10 members of the Student_Club, how many of them are meetings?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(DISTINCT T1.event_id) FROM event AS T1 INNER JOIN attendance AS T2 ON T1.event_id = T2.link_to_event WHERE T1.type = 'Meeting' GROUP BY T1.event_id HAVING COUNT(T2.link_to_event) > 10",
+      "actual_sql": "SELECT COUNT(*) FROM (SELECT \"a\".\"link_to_event\" FROM \"attendance\" \"a\" INNER JOIN \"event\" \"e\" ON \"a\".\"link_to_event\" = \"e\".\"event_id\" WHERE \"e\".\"type\" = 'Meeting' GROUP BY \"a\".\"link_to_event\" HAVING COUNT(\"a\".\"link_to_member\") > 10) \"t\"\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List all the names of events that had an attendance of over 20 students but were not fundraisers.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.event_name FROM event AS T1 INNER JOIN attendance AS T2 ON T1.event_id = T2.link_to_event GROUP BY T1.event_id HAVING COUNT(T2.link_to_event) > 20 EXCEPT SELECT T1.event_name FROM event AS T1 WHERE T1.type = 'Fundraiser'",
+      "actual_sql": "SELECT \"e\".\"event_name\" FROM \"event\" AS \"e\" INNER JOIN \"attendance\" AS \"a\" ON \"a\".\"link_to_event\" = \"e\".\"event_id\" WHERE \"e\".\"type\" <> 'Fundraiser' GROUP BY \"e\".\"event_name\" HAVING COUNT(\"a\".\"link_to_event\") > 20 LIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 9,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.941176,
+        "soft_f1_precision": 0.888889,
+        "soft_f1_recall": 1.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the amount of the funds that the Vice President received?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T2.amount FROM member AS T1 INNER JOIN income AS T2 ON T1.member_id = T2.link_to_member WHERE T1.position = 'Vice President'",
+      "actual_sql": "SELECT \"i\".\"amount\" FROM \"income\" \"i\" INNER JOIN \"member\" \"m\" ON \"i\".\"link_to_member\" = \"m\".\"member_id\" WHERE \"m\".\"position\" = 'Vice President' LIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "List the full name of the Student_Club members that grew up in Illinois state.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T1.first_name, T1.last_name FROM member AS T1 INNER JOIN zip_code AS T2 ON T1.zip = T2.zip_code WHERE T2.state = 'Illinois'",
+      "actual_sql": "SELECT \"first_name\", \"last_name\" FROM \"member\" WHERE \"state\" = 'Illinois' LIMIT 100;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column \"state\" does not exist\nLINE 1: ...ECT \"first_name\", \"last_name\" FROM \"member\" WHERE \"state\" = ...\n                                                             ^\n[SQL: SELECT \"first_name\", \"last_name\" FROM \"member\" WHERE \"state\" = 'Illinois' LIMIT 100]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Was each expense in October Meeting on October 8, 2019 approved?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T3.approved FROM event AS T1 INNER JOIN budget AS T2 ON T1.event_id = T2.link_to_event INNER JOIN expense AS T3 ON T2.budget_id = T3.link_to_budget WHERE T1.event_name = 'October Meeting' AND T1.event_date LIKE '2019-10-08%'",
+      "actual_sql": "SELECT \"expense_id\", \"approved\" FROM \"expense\" WHERE \"link_to_budget\" IN (SELECT \"budget_id\" FROM \"budget\" WHERE \"link_to_event\" IN (SELECT \"event_id\" FROM \"event\" WHERE \"event_name\" = 'October Meeting' AND \"event_date\" = '2019-10-08')) LIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Calculate the total average cost that Elijah Allen spent in the events on September and October.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT AVG(T2.cost) FROM member AS T1 INNER JOIN expense AS T2 ON T1.member_id = T2.link_to_member WHERE T1.last_name = 'Allen' AND T1.first_name = 'Elijah' AND (SUBSTR(T2.expense_date, 6, 2) = '09' OR SUBSTR(T2.expense_date, 6, 2) = '10')",
+      "actual_sql": "SELECT AVG(\"expense\".\"cost\") AS \"average_cost\"\nFROM \"expense\"\nINNER JOIN \"member\" ON \"expense\".\"link_to_member\" = \"member\".\"member_id\"\nINNER JOIN \"budget\" ON \"expense\".\"link_to_budget\" = \"budget\".\"budget_id\"\nINNER JOIN \"event\" ON \"budget\".\"link_to_event\" = \"event\".\"event_id\"\nWHERE \"member\".\"first_name\" = 'Elijah'\n  AND \"member\".\"last_name\" = 'Allen'\n  AND (EXTRACT(MONTH FROM \"expense\".\"expense_date\") = 9\n       OR EXTRACT(MONTH FROM \"expense\".\"expense_date\") = 10);",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedFunction) function pg_catalog.extract(unknown, text) does not exist\nLINE 8:   AND (EXTRACT(MONTH FROM \"expense\".\"expense_date\") = 9\n               ^\nHINT:  No function matches the given name and argument types. You might need to add explicit type casts.\n[SQL: SELECT AVG(\"expense\".\"cost\") AS \"average_cost\"\nFROM \"expense\"\nINNER JOIN \"member\" ON \"expense\".\"link_to_member\" = \"member\".\"member_id\"\nINNER JOIN \"budget\" ON \"expense\".\"link_to_budget\" = \"budget\".\"budget_id\"\nINNER JOIN \"event\" ON \"budget\".\"link_to_event\" = \"event\".\"event_id\"\nWHERE \"member\".\"first_name\" = 'Elijah'\n  AND \"member\".\"last_name\" = 'Allen'\n  AND (EXTRACT(MONTH FROM \"expense\".\"expense_date\") = 9\n       OR EXTRACT(MONTH FROM \"expense\".\"expense_date\") = 10)\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Calculate the difference of the total amount spent in all events by the Student_Club in year 2019 and 2020.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT SUM(CASE WHEN SUBSTR(T1.event_date, 1, 4) = '2019' THEN T2.spent ELSE 0 END) - SUM(CASE WHEN SUBSTR(T1.event_date, 1, 4) = '2020' THEN T2.spent ELSE 0 END) AS num FROM event AS T1 INNER JOIN budget AS T2 ON T1.event_id = T2.link_to_event",
+      "actual_sql": "SELECT SUM(CASE WHEN EXTRACT(YEAR FROM \"event\".\"event_date\") = 2019 THEN \"budget\".\"spent\" ELSE 0 END) - SUM(CASE WHEN EXTRACT(YEAR FROM \"event\".\"event_date\") = 2020 THEN \"budget\".\"spent\" ELSE 0 END) AS \"difference\" FROM \"budget\" INNER JOIN \"event\" ON \"budget\".\"link_to_event\" = \"event\".\"event_id\";",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedFunction) function pg_catalog.extract(unknown, text) does not exist\nLINE 1: SELECT SUM(CASE WHEN EXTRACT(YEAR FROM \"event\".\"event_date\")...\n                             ^\nHINT:  No function matches the given name and argument types. You might need to add explicit type casts.\n[SQL: SELECT SUM(CASE WHEN EXTRACT(YEAR FROM \"event\".\"event_date\") = 2019 THEN \"budget\".\"spent\" ELSE 0 END) - SUM(CASE WHEN EXTRACT(YEAR FROM \"event\".\"event_date\") = 2020 THEN \"budget\".\"spent\" ELSE 0 END) AS \"difference\" FROM \"budget\" INNER JOIN \"event\" ON \"budget\".\"link_to_event\" = \"event\".\"event_id\"\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What was the notes of the fundraising on 2019/9/14?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT notes FROM income WHERE source = 'Fundraising' AND date_received = '2019-09-14'",
+      "actual_sql": "SELECT \"notes\" FROM \"income\" WHERE \"source\" = 'Fundraising' AND \"date_received\" = '2019-09-14' LIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Tell the phone number of \"Carlo Jacobs\".",
+      "difficulty": "simple",
+      "expected_sql": "SELECT phone FROM member WHERE first_name = 'Carlo' AND last_name = 'Jacobs'",
+      "actual_sql": "SELECT \"phone\" FROM \"member\" WHERE \"first_name\" = 'Carlo' AND \"last_name\" = 'Jacobs' LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "What is the status of the event which bought \"Post Cards, Posters\" on 2019/8/20?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.event_status FROM budget AS T1 INNER JOIN expense AS T2 ON T1.budget_id = T2.link_to_budget WHERE T2.expense_description = 'Post Cards, Posters' AND T2.expense_date = '2019-08-20'",
+      "actual_sql": "SELECT \"event\".\"event_status\" FROM \"event\" INNER JOIN \"expense\" ON \"expense\".\"link_to_event\" = \"event\".\"event_id\" WHERE \"expense\".\"expense_description\" = 'Post Cards, Posters' AND \"expense\".\"expense_date\" = '2019-8-20' LIMIT 1;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column expense.link_to_event does not exist\nLINE 1: ...vent_status\" FROM \"event\" INNER JOIN \"expense\" ON \"expense\"....\n                                                             ^\n[SQL: SELECT \"event\".\"event_status\" FROM \"event\" INNER JOIN \"expense\" ON \"expense\".\"link_to_event\" = \"event\".\"event_id\" WHERE \"expense\".\"expense_description\" = 'Post Cards, Posters' AND \"expense\".\"expense_date\" = '2019-8-20' LIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What was Brent Thomason's major?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T2.major_name FROM member AS T1 INNER JOIN major AS T2 ON T1.link_to_major = T2.major_id WHERE T1.first_name = 'Brent' AND T1.last_name = 'Thomason'",
+      "actual_sql": "SELECT \"major\".\"major_name\" FROM \"member\" INNER JOIN \"major\" ON \"member\".\"link_to_major\" = \"major\".\"major_id\" WHERE \"member\".\"first_name\" = 'Brent' AND \"member\".\"last_name\" = 'Thomason' LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "For all the club members from \"Business\" major, how many of them wear medium size t-shirt?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T1.member_id) FROM member AS T1 INNER JOIN major AS T2 ON T1.link_to_major = T2.major_id WHERE T2.major_name = 'Business' AND T1.t_shirt_size = 'Medium'",
+      "actual_sql": "SELECT COUNT(*) FROM \"member\" m INNER JOIN \"major\" mj ON m.\"link_to_major\" = mj.\"major_id\" WHERE mj.\"major_name\" = 'Business' AND m.\"t_shirt_size\" = 'Medium'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Which department was the President of the club in?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T2.department FROM member AS T1 INNER JOIN major AS T2 ON T1.link_to_major = T2.major_id WHERE T1.position = 'President'",
+      "actual_sql": "SELECT \"major\".\"department\" FROM \"member\" INNER JOIN \"major\" ON \"member\".\"link_to_major\" = \"major\".\"major_id\" WHERE \"member\".\"position\" = 'President' LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "State the date Connor Hilton paid his/her dues.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T2.date_received FROM member AS T1 INNER JOIN income AS T2 ON T1.member_id = T2.link_to_member WHERE T1.first_name = 'Connor' AND T1.last_name = 'Hilton' AND T2.source = 'Dues'",
+      "actual_sql": "SELECT \"i\".\"date_received\" FROM \"income\" AS \"i\" INNER JOIN \"member\" AS \"m\" ON \"i\".\"link_to_member\" = \"m\".\"member_id\" WHERE \"m\".\"first_name\" = 'Connor' AND \"m\".\"last_name\" = 'Hilton' AND \"i\".\"source\" = 'Dues' LIMIT 10",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 2,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "How many times was the budget in Advertisement for \"Yearly Kickoff\" meeting more than \"October Meeting\"?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN T2.event_name = 'Yearly Kickoff' THEN T1.amount ELSE 0 END) AS REAL) / NULLIF(SUM(CASE WHEN T2.event_name = 'October Meeting' THEN T1.amount ELSE 0 END), 0) FROM budget AS T1 INNER JOIN event AS T2 ON T1.link_to_event = T2.event_id WHERE T1.category = 'Advertisement' AND T2.type = 'Meeting'",
+      "actual_sql": "SELECT (SELECT SUM(\"amount\") FROM \"budget\" INNER JOIN \"event\" ON \"budget\".\"link_to_event\" = \"event\".\"event_id\" WHERE \"budget\".\"category\" = 'Advertisement' AND \"event\".\"event_name\" = 'Yearly Kickoff') / (SELECT SUM(\"amount\") FROM \"budget\" INNER JOIN \"event\" ON \"budget\".\"link_to_event\" = \"event\".\"event_id\" WHERE \"budget\".\"category\" = 'Advertisement' AND \"event\".\"event_name\" = 'October Meeting') AS \"times_more\"\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the total cost of the pizzas for all the events?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT SUM(cost) FROM expense WHERE expense_description = 'Pizza'",
+      "actual_sql": "SELECT SUM(\"cost\") FROM \"expense\" WHERE \"expense_description\" = 'Pizza'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "How many cities are there in Orange County, Virginia?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT COUNT(city) FROM zip_code WHERE county = 'Orange County' AND state = 'Virginia'",
+      "actual_sql": "SELECT COUNT(DISTINCT \"city\") FROM \"zip_code\" WHERE \"county\" = 'Orange County' AND \"state\" = 'Virginia'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "What does the person with the phone number \"809-555-3360\" major in?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T2.major_name FROM member AS T1 INNER JOIN major AS T2 ON T1.link_to_major = T2.major_id WHERE T1.phone = '809-555-3360'",
+      "actual_sql": "SELECT \"major\".\"major_name\" FROM \"member\" INNER JOIN \"major\" ON \"member\".\"link_to_major\" = \"major\".\"major_id\" WHERE \"member\".\"phone\" = '809-555-3360' LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "How many members attended the \"Women's Soccer\" event?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT COUNT(T2.link_to_member) FROM event AS T1 INNER JOIN attendance AS T2 ON T1.event_id = T2.link_to_event WHERE T1.event_name = 'Women''s Soccer'",
+      "actual_sql": "SELECT COUNT(*) FROM \"attendance\" INNER JOIN \"event\" ON \"attendance\".\"link_to_event\" = \"event\".\"event_id\" WHERE \"event\".\"event_name\" = 'Women''s Soccer'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "List all the members of the \"School of Applied Sciences, Technology and Education\" department.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.first_name, T1.last_name FROM member AS T1 INNER JOIN major AS T2 ON T1.link_to_major = T2.major_id WHERE T2.department = 'School of Applied Sciences, Technology and Education'",
+      "actual_sql": "SELECT \"first_name\", \"last_name\" FROM \"member\" INNER JOIN \"major\" ON \"member\".\"link_to_major\" = \"major\".\"major_id\" WHERE \"major\".\"department\" = 'School of Applied Sciences, Technology and Education' LIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 5,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Among all the closed events, which event has the highest spend-to-budget ratio?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T2.event_name FROM budget AS T1 INNER JOIN event AS T2 ON T1.link_to_event = T2.event_id WHERE T2.status = 'Closed' ORDER BY T1.spent / NULLIF(T1.amount, 0) DESC NULLS LAST LIMIT 1",
+      "actual_sql": "SELECT \"event\".\"event_name\" FROM \"budget\" INNER JOIN \"event\" ON \"budget\".\"link_to_event\" = \"event\".\"event_id\" WHERE \"event\".\"status\" = 'Closed' ORDER BY (\"budget\".\"spent\" / \"budget\".\"amount\") DESC LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "What is the highest amount of budget spend for an event?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT MAX(spent) FROM budget",
+      "actual_sql": "SELECT MAX(\"spent\") FROM \"budget\"\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "What is the total amount of money spent for food?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT SUM(spent) FROM budget WHERE category = 'Food'",
+      "actual_sql": "SELECT SUM(\"spent\") FROM \"budget\" WHERE \"category\" = 'Food'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "List the name of students that have attended more than 7 events.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.first_name, T1.last_name FROM member AS T1 INNER JOIN attendance AS T2 ON T1.member_id = T2.link_to_member GROUP BY T1.member_id, T1.first_name, T1.last_name HAVING COUNT(T2.link_to_event) > 7",
+      "actual_sql": "SELECT \"T1\".\"first_name\" || ' ' || \"T1\".\"last_name\" AS \"full_name\"\nFROM \"member\" AS \"T1\"\nINNER JOIN \"attendance\" AS \"T2\" ON \"T1\".\"member_id\" = \"T2\".\"link_to_member\"\nGROUP BY \"T1\".\"member_id\", \"T1\".\"first_name\", \"T1\".\"last_name\"\nHAVING COUNT(\"T2\".\"link_to_event\") > 7\nLIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 29,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Which student has been entrusted to manage the budget for the Yearly Kickoff?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T4.first_name, T4.last_name FROM event AS T1 INNER JOIN budget AS T2 ON T1.event_id = T2.link_to_event INNER JOIN expense AS T3 ON T2.budget_id = T3.link_to_budget INNER JOIN member AS T4 ON T3.link_to_member = T4.member_id WHERE T1.event_name = 'Yearly Kickoff'",
+      "actual_sql": "SELECT \"m\".\"first_name\" || ' ' || \"m\".\"last_name\" AS \"student_name\"\nFROM \"budget\" \"b\"\nINNER JOIN \"event\" \"e\" ON \"b\".\"link_to_event\" = \"e\".\"event_id\"\nINNER JOIN \"member\" \"m\" ON \"e\".\"link_to_member\" = \"m\".\"member_id\"\nWHERE \"e\".\"event_name\" = 'Yearly Kickoff'\nLIMIT 10;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column e.link_to_member does not exist\nLINE 4: INNER JOIN \"member\" \"m\" ON \"e\".\"link_to_member\" = \"m\".\"membe...\n                                   ^\n[SQL: SELECT \"m\".\"first_name\" || ' ' || \"m\".\"last_name\" AS \"student_name\"\nFROM \"budget\" \"b\"\nINNER JOIN \"event\" \"e\" ON \"b\".\"link_to_event\" = \"e\".\"event_id\"\nINNER JOIN \"member\" \"m\" ON \"e\".\"link_to_member\" = \"m\".\"member_id\"\nWHERE \"e\".\"event_name\" = 'Yearly Kickoff'\nLIMIT 10]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Which event has the lowest cost?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T1.event_name FROM event AS T1 INNER JOIN budget AS T2 ON T1.event_id = T2.link_to_event INNER JOIN expense AS T3 ON T2.budget_id = T3.link_to_budget ORDER BY T3.cost NULLS FIRST LIMIT 1",
+      "actual_sql": "SELECT \"event_name\" FROM \"event\" INNER JOIN \"budget\" ON \"budget\".\"link_to_event\" = \"event\".\"event_id\" ORDER BY \"cost\" ASC LIMIT 1",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column \"cost\" does not exist\nLINE 1: ...et\".\"link_to_event\" = \"event\".\"event_id\" ORDER BY \"cost\" ASC...\n                                                             ^\n[SQL: SELECT \"event_name\" FROM \"event\" INNER JOIN \"budget\" ON \"budget\".\"link_to_event\" = \"event\".\"event_id\" ORDER BY \"cost\" ASC LIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Based on the total cost for all event, what is the percentage of cost for Yearly Kickoff event?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN T1.event_name = 'Yearly Kickoff' THEN T3.cost ELSE 0 END) AS REAL) * 100 / NULLIF(SUM(T3.cost), 0) FROM event AS T1 INNER JOIN budget AS T2 ON T1.event_id = T2.link_to_event INNER JOIN expense AS T3 ON T2.budget_id = T3.link_to_budget",
+      "actual_sql": "SELECT (SUM(CASE WHEN \"event\".\"event_name\" = 'Yearly Kickoff' THEN \"expense\".\"cost\" ELSE 0 END) * 100.0) / SUM(\"expense\".\"cost\") AS \"percentage\"\nFROM \"expense\"\nINNER JOIN \"budget\" ON \"expense\".\"link_to_budget\" = \"budget\".\"budget_id\"\nINNER JOIN \"event\" ON \"budget\".\"link_to_event\" = \"event\".\"event_id\"\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Indicate the top source of funds received in September 2019 based on their amount.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT source FROM income WHERE date_received BETWEEN '2019-09-01' AND '2019-09-30' ORDER BY source DESC NULLS LAST LIMIT 1",
+      "actual_sql": "SELECT \"source\" FROM \"income\" WHERE \"date_received\" BETWEEN '2019-09-01' AND '2019-09-30' ORDER BY \"amount\" DESC LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "How many members of the Student_Club have major in 'Physics Teaching'?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT COUNT(T2.member_id) FROM major AS T1 INNER JOIN member AS T2 ON T1.major_id = T2.link_to_major WHERE T1.major_name = 'Physics Teaching'",
+      "actual_sql": "SELECT COUNT(*) FROM \"member\" INNER JOIN \"major\" ON \"member\".\"link_to_major\" = \"major\".\"major_id\" WHERE \"major\".\"major_name\" = 'Physics Teaching'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Name the event with the highest amount spent on advertisement.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T2.event_name FROM budget AS T1 INNER JOIN event AS T2 ON T1.link_to_event = T2.event_id WHERE T1.category = 'Advertisement' ORDER BY T1.spent DESC NULLS LAST LIMIT 1",
+      "actual_sql": "SELECT \"e\".\"event_name\" FROM \"event\" \"e\" INNER JOIN \"budget\" \"b\" ON \"b\".\"link_to_event\" = \"e\".\"event_id\" WHERE \"b\".\"category\" = 'Advertisement' ORDER BY \"b\".\"spent\" DESC LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Did Maya Mclean attend the 'Women's Soccer' event?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CASE WHEN T3.event_name = 'Women''s Soccer' THEN 'YES' END AS result FROM member AS T1 INNER JOIN attendance AS T2 ON T1.member_id = T2.link_to_member INNER JOIN event AS T3 ON T2.link_to_event = T3.event_id WHERE T1.first_name = 'Maya' AND T1.last_name = 'Mclean'",
+      "actual_sql": "SELECT EXISTS (\n  SELECT 1\n  FROM \"attendance\" a\n  INNER JOIN \"event\" e ON a.\"link_to_event\" = e.\"event_id\"\n  INNER JOIN \"member\" m ON a.\"link_to_member\" = m.\"member_id\"\n  WHERE e.\"event_name\" = 'Women''s Soccer'\n    AND m.\"first_name\" = 'Maya'\n    AND m.\"last_name\" = 'Mclean'\n) AS \"attended\"\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Indicate the cost of posters for 'September Speaker' event.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T3.cost FROM event AS T1 INNER JOIN budget AS T2 ON T1.event_id = T2.link_to_event INNER JOIN expense AS T3 ON T2.budget_id = T3.link_to_budget WHERE T1.event_name = 'September Speaker' AND T3.expense_description = 'Posters'",
+      "actual_sql": "SELECT \"expense\".\"cost\" FROM \"expense\" INNER JOIN \"event\" ON \"expense\".\"link_to_event\" = \"event\".\"event_id\" WHERE \"event\".\"event_name\" = 'September Speaker' AND \"expense\".\"expense_description\" = 'Posters' LIMIT 100;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column expense.link_to_event does not exist\nLINE 1: ...ense\".\"cost\" FROM \"expense\" INNER JOIN \"event\" ON \"expense\"....\n                                                             ^\n[SQL: SELECT \"expense\".\"cost\" FROM \"expense\" INNER JOIN \"event\" ON \"expense\".\"link_to_event\" = \"event\".\"event_id\" WHERE \"event\".\"event_name\" = 'September Speaker' AND \"expense\".\"expense_description\" = 'Posters' LIMIT 100]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Indicate the name of the closed event whose cost has exceeded the budget the most.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T2.event_name FROM budget AS T1 INNER JOIN event AS T2 ON T2.event_id = T1.link_to_event WHERE T1.event_status = 'Closed' AND T1.remaining < 0 ORDER BY T1.remaining NULLS FIRST LIMIT 1",
+      "actual_sql": "SELECT \"event\".\"event_name\" FROM \"budget\" INNER JOIN \"event\" ON \"budget\".\"link_to_event\" = \"event\".\"event_id\" WHERE \"event\".\"status\" = 'Closed' AND \"budget\".\"remaining\" < 0 ORDER BY \"budget\".\"remaining\" ASC LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Identify the type of expenses and their total value approved for 'October Meeting' event.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.type, SUM(T3.cost) FROM event AS T1 INNER JOIN budget AS T2 ON T1.event_id = T2.link_to_event INNER JOIN expense AS T3 ON T2.budget_id = T3.link_to_budget WHERE T1.event_name = 'October Meeting' GROUP BY T1.type",
+      "actual_sql": "SELECT \"category\", SUM(\"cost\") AS \"total_value\" FROM \"expense\" INNER JOIN \"event\" ON \"expense\".\"link_to_event\" = \"event\".\"event_id\" WHERE \"event\".\"event_name\" = 'October Meeting' AND \"expense\".\"approved\" = TRUE GROUP BY \"category\" LIMIT 100;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column expense.link_to_event does not exist\nLINE 1: ...total_value\" FROM \"expense\" INNER JOIN \"event\" ON \"expense\"....\n                                                             ^\n[SQL: SELECT \"category\", SUM(\"cost\") AS \"total_value\" FROM \"expense\" INNER JOIN \"event\" ON \"expense\".\"link_to_event\" = \"event\".\"event_id\" WHERE \"event\".\"event_name\" = 'October Meeting' AND \"expense\".\"approved\" = TRUE GROUP BY \"category\" LIMIT 100]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Calculate the amount budgeted for 'April Speaker' event. List all the budgeted categories for said event in an ascending order based on their amount budgeted.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T2.category, SUM(T2.amount) FROM event AS T1 INNER JOIN budget AS T2 ON T1.event_id = T2.link_to_event WHERE T1.event_name = 'April Speaker' GROUP BY T2.category ORDER BY SUM(T2.amount) ASC",
+      "actual_sql": "SELECT \"b\".\"category\", SUM(\"b\".\"amount\") AS \"amount_budgeted\"\nFROM \"budget\" AS \"b\"\nINNER JOIN \"event\" AS \"e\" ON \"b\".\"link_to_event\" = \"e\".\"event_id\"\nWHERE \"e\".\"event_name\" = 'April Speaker'\nGROUP BY \"b\".\"category\"\nORDER BY \"amount_budgeted\" ASC\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 4,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Mention the total expense used on 8/20/2019.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT SUM(cost) FROM expense WHERE expense_date = '2019-08-20'",
+      "actual_sql": "SELECT SUM(\"cost\") FROM \"expense\" WHERE \"expense_date\" = '2019-08-20'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "List out the full name and total cost that member id \"rec4BLdZHS2Blfp4v\" incurred?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T1.first_name, T1.last_name, SUM(T2.cost) FROM member AS T1 INNER JOIN expense AS T2 ON T1.member_id = T2.link_to_member WHERE T1.member_id = 'rec4BLdZHS2Blfp4v' GROUP BY T1.first_name, T1.last_name",
+      "actual_sql": "SELECT \"m\".\"first_name\", \"m\".\"last_name\", SUM(\"e\".\"cost\") AS \"total_cost\"\nFROM \"member\" \"m\"\nINNER JOIN \"expense\" \"e\" ON \"e\".\"link_to_member\" = \"m\".\"member_id\"\nWHERE \"m\".\"member_id\" = 'rec4BLdZHS2Blfp4v'\nGROUP BY \"m\".\"first_name\", \"m\".\"last_name\"\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "State what kind of expenses that Sacha Harrison incurred?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T2.expense_description FROM member AS T1 INNER JOIN expense AS T2 ON T1.member_id = T2.link_to_member WHERE T1.first_name = 'Sacha' AND T1.last_name = 'Harrison'",
+      "actual_sql": "SELECT DISTINCT \"e\".\"expense_description\" FROM \"expense\" \"e\" INNER JOIN \"member\" \"m\" ON \"e\".\"link_to_member\" = \"m\".\"member_id\" WHERE \"m\".\"first_name\" = 'Sacha' AND \"m\".\"last_name\" = 'Harrison' LIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 7,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.736842,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 0.583333,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "State the category of events were held at MU 215.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT DISTINCT T2.category FROM event AS T1 INNER JOIN budget AS T2 ON T1.event_id = T2.link_to_event WHERE T1.location = 'MU 215'",
+      "actual_sql": "SELECT DISTINCT \"category\" FROM \"event\" WHERE \"location\" = 'MU 215' LIMIT 100;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column \"category\" does not exist\nLINE 1: SELECT DISTINCT \"category\" FROM \"event\" WHERE \"location\" = '...\n                        ^\n[SQL: SELECT DISTINCT \"category\" FROM \"event\" WHERE \"location\" = 'MU 215' LIMIT 100]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List the last name of members with a major in environmental engineering and include its department and college name.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T2.last_name, T1.department, T1.college FROM major AS T1 INNER JOIN member AS T2 ON T1.major_id = T2.link_to_major WHERE T2.position = 'Member' AND T1.major_name = 'Environmental Engineering'",
+      "actual_sql": "SELECT \"m\".\"last_name\", \"mj\".\"department\", \"mj\".\"college\" FROM \"member\" AS \"m\" INNER JOIN \"major\" AS \"mj\" ON \"m\".\"link_to_major\" = \"mj\".\"major_id\" WHERE \"mj\".\"major_name\" = 'Environmental Engineering' LIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 2,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "What are the budget category of the events located at MU 215 and a guest speaker type with a 0 budget spent?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT T2.category, T1.type FROM event AS T1 INNER JOIN budget AS T2 ON T1.event_id = T2.link_to_event WHERE T1.location = 'MU 215' AND T2.spent = 0 AND T1.type = 'Guest Speaker'",
+      "actual_sql": "SELECT \"budget\".\"category\" FROM \"budget\" INNER JOIN \"event\" ON \"budget\".\"link_to_event\" = \"event\".\"event_id\" WHERE \"event\".\"location\" = 'MU 215' AND \"event\".\"type\" = 'Guest Speaker' AND \"budget\".\"spent\" = 0 LIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 16,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.4,
+        "soft_f1_precision": 0.25,
+        "soft_f1_recall": 1.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the members with t-shirt size of medium, what is the percentage of the amount 50 received by the Student_Club?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN T2.amount = 50 THEN 1.0 ELSE 0 END) AS REAL) * 100 / NULLIF(COUNT(T2.income_id), 0) FROM member AS T1 INNER JOIN income AS T2 ON T1.member_id = T2.link_to_member WHERE T1.position = 'Member' AND T1.t_shirt_size = 'Medium'",
+      "actual_sql": "SELECT CAST(SUM(CASE WHEN \"i\".\"amount\" = 50 THEN 1 ELSE 0 END) AS REAL) * 100 / COUNT(\"m\".\"member_id\") FROM \"member\" AS \"m\" INNER JOIN \"income\" AS \"i\" ON \"i\".\"link_to_member\" = \"m\".\"member_id\" WHERE \"m\".\"t_shirt_size\" = 'Medium'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "List the names of closed event as \"game\" that was closed from 3/15/2019 to 3/20/2020.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT event_name FROM event WHERE type = 'Game' AND DATE(SUBSTR(event_date, 1, 10)) BETWEEN '2019-03-15' AND '2020-03-20' AND status = 'Closed'",
+      "actual_sql": "SELECT \"event_name\" FROM \"event\" WHERE \"type\" = 'Game' AND \"event_status\" = 'Closed' AND \"event_date\" BETWEEN '2019-03-15' AND '2020-03-20' LIMIT 100;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column \"event_status\" does not exist\nLINE 1: ...vent_name\" FROM \"event\" WHERE \"type\" = 'Game' AND \"event_sta...\n                                                             ^\n[SQL: SELECT \"event_name\" FROM \"event\" WHERE \"type\" = 'Game' AND \"event_status\" = 'Closed' AND \"event_date\" BETWEEN '2019-03-15' AND '2020-03-20' LIMIT 100]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Give the full name and contact number of members who had to spend more than average on each expense.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT DISTINCT T3.first_name, T3.last_name, T3.phone FROM expense AS T1 INNER JOIN budget AS T2 ON T1.link_to_budget = T2.budget_id INNER JOIN member AS T3 ON T3.member_id = T1.link_to_member WHERE T1.cost > (SELECT AVG(T1.cost) FROM expense AS T1 INNER JOIN budget AS T2 ON T1.link_to_budget = T2.budget_id INNER JOIN member AS T3 ON T3.member_id = T1.link_to_member)",
+      "actual_sql": "SELECT \"m\".\"first_name\", \"m\".\"last_name\", \"m\".\"phone\" FROM \"member\" AS \"m\" INNER JOIN \"expense\" AS \"e\" ON \"e\".\"link_to_member\" = \"m\".\"member_id\" WHERE \"e\".\"cost\" > (SELECT AVG(\"cost\") FROM \"expense\") LIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 11,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.428571,
+        "soft_f1_precision": 0.272727,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Write the full name of the member who spent money for water, veggie tray and supplies and include the cost of it.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT T2.first_name, T2.last_name, T1.cost FROM expense AS T1 INNER JOIN member AS T2 ON T1.link_to_member = T2.member_id WHERE T1.expense_description = 'Water, Veggie tray, supplies'",
+      "actual_sql": "SELECT \"m\".\"first_name\", \"m\".\"last_name\", \"e\".\"cost\" FROM \"expense\" \"e\" INNER JOIN \"member\" \"m\" ON \"e\".\"link_to_member\" = \"m\".\"member_id\" WHERE \"e\".\"expense_description\" = 'Water, Veggie tray, supplies' LIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Write the full names of students who received funds on the date of 9/9/2019 and include the amount received.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT DISTINCT T3.first_name, T3.last_name, T4.amount FROM event AS T1 INNER JOIN attendance AS T2 ON T1.event_id = T2.link_to_event INNER JOIN member AS T3 ON T3.member_id = T2.link_to_member INNER JOIN income AS T4 ON T4.link_to_member = T3.member_id WHERE T4.date_received = '2019-09-09'",
+      "actual_sql": "SELECT \"m\".\"first_name\", \"m\".\"last_name\", \"i\".\"amount\" FROM \"income\" AS \"i\" INNER JOIN \"member\" AS \"m\" ON \"i\".\"link_to_member\" = \"m\".\"member_id\" WHERE \"i\".\"date_received\" = '2019-09-09' LIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 2,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    }
+  ]
+}

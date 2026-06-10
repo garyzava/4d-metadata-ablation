@@ -1,0 +1,761 @@
+{
+  "run_id": "toxicology_EVIDENCE_env_rep1",
+  "dataset": "toxicology",
+  "level": "EVIDENCE",
+  "dimensions": [],
+  "model": {
+    "provider": "huggingface",
+    "model": "Qwen/Qwen3.5-9B",
+    "base_url": ""
+  },
+  "runtime_params": {
+    "max_tokens": 4096,
+    "effective_max_tokens": 4096,
+    "temperature": 0.6,
+    "seed": 42,
+    "top_p": 0.95,
+    "presence_penalty": 0.0,
+    "top_k": 20,
+    "reasoning_effort": "medium",
+    "num_ctx": null,
+    "bird_docs_dir": "/Users/gary/myapps/4d-metadata-ablation/bird-docs-revised"
+  },
+  "rep": 1,
+  "timestamp": "2026-06-01T01:50:09.866413+00:00",
+  "elapsed_seconds": 654.3,
+  "aggregate_metrics": {
+    "total_cases": 40,
+    "execution_rate_pct": 77.5,
+    "value_match_pct": 30.0,
+    "column_match_pct": 0.0,
+    "soft_f1_mean": 0.3681,
+    "er_value_gap_pp": 47.5,
+    "error_count": 9,
+    "bird_ex_pct": 35.0,
+    "er_bex_gap_pp": 42.5,
+    "challenging_er_pct": 77.8,
+    "challenging_vm_pct": 16.7,
+    "challenging_soft_f1": 0.2564,
+    "challenging_bird_ex_pct": 22.2,
+    "moderate_er_pct": 82.4,
+    "moderate_vm_pct": 41.2,
+    "moderate_soft_f1": 0.451,
+    "moderate_bird_ex_pct": 47.1,
+    "simple_er_pct": 60.0,
+    "simple_vm_pct": 40.0,
+    "simple_soft_f1": 0.4889,
+    "simple_bird_ex_pct": 40.0
+  },
+  "per_case_results": [
+    {
+      "question": "-- External Knowledge: most common bond type refers MAX(COUNT(bond_type))\nWhat is the most common bond type?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T.bond_type FROM (SELECT bond_type, COUNT(bond_id) FROM bond GROUP BY bond_type ORDER BY COUNT(bond_id) DESC NULLS LAST LIMIT 1) AS T",
+      "actual_sql": "SELECT \"bond_type\"\nFROM \"bond\"\nGROUP BY \"bond_type\"\nORDER BY COUNT(*) DESC\nLIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "-- External Knowledge: single-bonded molecules refers to bond_type = '-' ; average number of oxygen atom = AVG(element = 'o')\nCalculate the average number of oxygen atoms in single-bonded molecules.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT AVG(oxygen_count) FROM (SELECT T1.molecule_id, COUNT(T1.element) AS oxygen_count FROM atom AS T1 INNER JOIN bond AS T2 ON T1.molecule_id = T2.molecule_id WHERE T2.bond_type = '-' AND T1.element = 'o' GROUP BY T1.molecule_id) AS oxygen_counts",
+      "actual_sql": "SELECT AVG(\"oxygen_count\")\nFROM (\n    SELECT \"molecule_id\", COUNT(*) AS \"oxygen_count\"\n    FROM \"atom\"\n    WHERE \"element\" = 'o'\n    AND \"molecule_id\" IN (\n        SELECT \"molecule_id\"\n        FROM \"bond\"\n        GROUP BY \"molecule_id\"\n        HAVING COUNT(*) = SUM(CASE WHEN \"bond_type\" = '-' THEN 1 ELSE 0 END)\n    )\n    GROUP BY \"molecule_id\"\n) AS \"subquery\"\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "-- External Knowledge: carcinogenic molecules refers to label = '+'; single-bonded refers to bond_type = '-'; average = DIVIDE(SUM(bond_type = '-'), COUNT(atom_id))\nOn average how many carcinogenic molecules are single bonded?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT AVG(single_bond_count) FROM (SELECT T3.molecule_id, COUNT(T1.bond_type) AS single_bond_count FROM bond AS T1 INNER JOIN atom AS T2 ON T1.molecule_id = T2.molecule_id INNER JOIN molecule AS T3 ON T3.molecule_id = T2.molecule_id WHERE T1.bond_type = '-' AND T3.label = '+' GROUP BY T3.molecule_id) AS subquery",
+      "actual_sql": "",
+      "execution_success": false,
+      "error": "text2sql failed: LLM returned empty response (token budget exhausted in reasoning?)",
+      "status": "empty_response_token_exhaustion",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "-- External Knowledge: triple-bonded molecules refers to bond_type = '#'; carcinogenic refers to label = '+'\nFind the triple-bonded molecules which are carcinogenic.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT DISTINCT T2.molecule_id FROM bond AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id WHERE T1.bond_type = '#' AND T2.label = '+'",
+      "actual_sql": "",
+      "execution_success": false,
+      "error": "text2sql failed: LLM returned empty response (token budget exhausted in reasoning?)",
+      "status": "empty_response_token_exhaustion",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "-- External Knowledge: carbon refers to element = 'c'; double-bond molecules refers to bond_type = '='; percentage = DIVIDE(SUM(element = 'c'), COUNT(atom_id))\nWhat is the percentage of carbon in double-bond molecules?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(COUNT(DISTINCT CASE WHEN T1.element = 'c' THEN T1.atom_id ELSE NULL END) AS REAL) * 100 / NULLIF(COUNT(DISTINCT T1.atom_id), 0) FROM atom AS T1 INNER JOIN bond AS T2 ON T1.molecule_id = T2.molecule_id WHERE T2.bond_type = '='",
+      "actual_sql": "SELECT \n    (SUM(CASE WHEN \"atom\".\"element\" = 'c' THEN 1 ELSE 0 END) * 100.0 / COUNT(*)) AS percentage\nFROM \"atom\"\nWHERE \"atom\".\"molecule_id\" IN (\n    SELECT DISTINCT \"bond\".\"molecule_id\"\n    FROM \"bond\"\n    WHERE \"bond\".\"bond_type\" = '='\n)\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "-- External Knowledge: TR004_8_9 bond atoms refers to bond_id = 'TR004_8_9';\nWhat elements are in the TR004_8_9 bond atoms?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT DISTINCT T1.element FROM atom AS T1 INNER JOIN connected AS T2 ON T1.atom_id = T2.atom_id WHERE T2.bond_id = 'TR004_8_9'",
+      "actual_sql": "SELECT DISTINCT \"a\".\"element\"\nFROM \"atom\" \"a\"\nJOIN \"connected\" \"c\" ON \"a\".\"atom_id\" = \"c\".\"atom_id2\"\nJOIN \"bond\" \"b\" ON \"c\".\"bond_id\" = \"b\".\"bond_id\"\nWHERE \"b\".\"bond_id\" = 'TR004_8_9'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "-- External Knowledge: double type bond refers to bond_type = '=';\nWhat elements are in a double type bond?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT DISTINCT T1.element FROM atom AS T1 INNER JOIN bond AS T2 ON T1.molecule_id = T2.molecule_id INNER JOIN connected AS T3 ON T1.atom_id = T3.atom_id WHERE T2.bond_type = '='",
+      "actual_sql": "SELECT DISTINCT \"a\".\"element\"\nFROM \"bond\" \"b\"\nINNER JOIN \"connected\" \"c\" ON \"b\".\"bond_id\" = \"c\".\"bond_id\"\nINNER JOIN \"atom\" \"a\" ON \"c\".\"atom_id\" = \"a\".\"atom_id\"\nWHERE \"b\".\"bond_type\" = '='\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 5,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.555556,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 0.384615,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "-- External Knowledge: with hydrogen refers to element = 'h'; label most numerous in atoms refers to MAX(COUNT(label));\nWhich type of label is the most numerous in atoms with hydrogen?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T.label FROM (SELECT T2.label, COUNT(T2.molecule_id) FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id WHERE T1.element = 'h' GROUP BY T2.label ORDER BY COUNT(T2.molecule_id) DESC NULLS LAST LIMIT 1) AS t",
+      "actual_sql": "SELECT \"m\".\"label\", COUNT(*) \nFROM \"atom\" AS \"a\"\nJOIN \"molecule\" AS \"m\" ON \"a\".\"molecule_id\" = \"m\".\"molecule_id\"\nWHERE \"a\".\"element\" = 'h'\nGROUP BY \"m\".\"label\"\nORDER BY COUNT(*) DESC\nLIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "-- External Knowledge: label = '-' means molecules are non-carcinogenic; least numerous refers to MIN(COUNT(element));\nWhich element is the least numerous in non-carcinogenic molecules?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT T.element FROM (SELECT T1.element, COUNT(DISTINCT T1.molecule_id) FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id WHERE T2.label = '-' GROUP BY T1.element ORDER BY COUNT(DISTINCT T1.molecule_id) ASC NULLS FIRST LIMIT 1) AS t",
+      "actual_sql": "SELECT \"element\"\nFROM \"atom\" \"a\"\nJOIN \"molecule\" \"m\" ON \"a\".\"molecule_id\" = \"m\".\"molecule_id\"\nWHERE \"m\".\"label\" = '-'\nGROUP BY \"element\"\nORDER BY COUNT(*) ASC\nLIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "-- External Knowledge: type of bond refers to bond_type; between the atoms TR004_8 and TR004_20 refers to atom_id = 'TR004_8' AND atom_id2 = 'TR004_20' OR another way around\nWhat type of bond is there between the atoms TR004_8 and TR004_20?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.bond_type FROM bond AS T1 INNER JOIN connected AS T2 ON T1.bond_id = T2.bond_id WHERE T2.atom_id = 'TR004_8' AND T2.atom_id2 = 'TR004_20' OR T2.atom_id2 = 'TR004_8' AND T2.atom_id = 'TR004_20'",
+      "actual_sql": "SELECT \"bond\".\"bond_type\"\nFROM \"connected\"\nJOIN \"bond\" ON \"connected\".\"bond_id\" = \"bond\".\"bond_id\"\nWHERE (\"connected\".\"atom_id\" = 'TR004_8' AND \"connected\".\"atom_id2\" = 'TR004_20')\n   OR (\"connected\".\"atom_id\" = 'TR004_20' AND \"connected\".\"atom_id2\" = 'TR004_8')\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 2,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "-- External Knowledge: with iodine element refer to element = 'i'; with sulfur element refers to element = 's'; single type bond refers to bond_type = '-'; Should consider the distinct atoms when counting;\nHow many atoms with iodine and with sulfur type elements are there in single bond molecules?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT COUNT(DISTINCT CASE WHEN T1.element = 'i' THEN T1.atom_id ELSE NULL END) AS iodine_nums, COUNT(DISTINCT CASE WHEN T1.element = 's' THEN T1.atom_id ELSE NULL END) AS sulfur_nums FROM atom AS T1 INNER JOIN connected AS T2 ON T1.atom_id = T2.atom_id INNER JOIN bond AS T3 ON T2.bond_id = T3.bond_id WHERE T3.bond_type = '-'",
+      "actual_sql": "SELECT COUNT(DISTINCT \"atom\".\"atom_id\")\nFROM \"atom\"\nWHERE \"atom\".\"molecule_id\" IN (\n    SELECT \"molecule_id\"\n    FROM \"bond\"\n    GROUP BY \"molecule_id\"\n    HAVING SUM(CASE WHEN \"bond_type\" = '-' THEN 1 ELSE 0 END) = COUNT(*)\n)\nAND \"atom\".\"element\" IN ('i', 's')\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "-- External Knowledge: label = '+' mean molecules are carcinogenic; contain fluorine refers to element = 'f'; percentage = DIVIDE(SUM(element = 'f') * 100, COUNT(molecule_id)) where label = '+'; Should consider the distinct atoms when counting;\nWhat percentage of carcinogenic-type molecules does not contain fluorine?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT CAST(COUNT(DISTINCT CASE WHEN T1.element <> 'f' THEN T2.molecule_id ELSE NULL END) AS REAL) * 100 / NULLIF(COUNT(DISTINCT T2.molecule_id), 0) FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id WHERE T2.label = '+'",
+      "actual_sql": "SELECT \n    (COUNT(DISTINCT \"m\".\"molecule_id\") FILTER (WHERE \"m\".\"label\" = '+' AND \"a\".\"element\" IS NULL)) * 100.0 / COUNT(DISTINCT \"m\".\"molecule_id\") FILTER (WHERE \"m\".\"label\" = '+') AS percentage\nFROM \"molecule\" \"m\"\nLEFT JOIN \"atom\" \"a\" ON \"m\".\"molecule_id\" = \"a\".\"molecule_id\" AND \"a\".\"element\" = 'f'\nWHERE \"m\".\"label\" = '+'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "-- External Knowledge: label = '+' mean molecules are carcinogenic; triple bond refers to bond_type = '#'; percentage = DIVIDE(SUM(bond_type = '#') * 100, COUNT(bond_id)) as percent where label = '+'\nWhat is the percentage of carcinogenic molecules in triple type bonds?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT CAST(COUNT(DISTINCT CASE WHEN T2.label = '+' THEN T2.molecule_id ELSE NULL END) AS REAL) * 100 / NULLIF(COUNT(DISTINCT T2.molecule_id), 0) FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id INNER JOIN bond AS T3 ON T2.molecule_id = T3.molecule_id WHERE T3.bond_type = '#'",
+      "actual_sql": "SELECT (SUM(CASE WHEN \"bond\".\"bond_type\" = '#' THEN 1 ELSE 0 END) * 100.0 / COUNT(\"bond\".\"bond_id\")) AS \"percentage\"\nFROM \"bond\"\nJOIN \"molecule\" ON \"bond\".\"molecule_id\" = \"molecule\".\"molecule_id\"\nWHERE \"molecule\".\"label\" = '+'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "-- External Knowledge: TR000 is the molecule id;\nPlease list top three elements of the toxicology of the molecule TR000 in alphabetical order.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT DISTINCT T.element FROM atom AS T WHERE T.molecule_id = 'TR000' ORDER BY T.element NULLS FIRST LIMIT 3",
+      "actual_sql": "SELECT DISTINCT \"element\"\nFROM \"atom\"\nWHERE \"molecule_id\" = 'TR000'\nORDER BY \"element\"\nLIMIT 3",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 3,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "-- External Knowledge: double bond refers to bond_type = '='; TR008 is the molecule id; percentage = DIVIDE(SUM(bond_type = '='), COUNT(bond_id)) as percent where molecule_id = 'TR008'\nWhat is the percentage of double bonds in the molecule TR008? Please provide your answer as a percentage with five decimal places.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT ROUND(CAST(COUNT(CASE WHEN T.bond_type = '=' THEN T.bond_id ELSE NULL END) AS NUMERIC) * 100 / CAST(COUNT(T.bond_id) AS NUMERIC), 5) AS percentage FROM bond AS T WHERE T.molecule_id = 'TR008'",
+      "actual_sql": "SELECT ROUND((SUM(CASE WHEN \"bond_type\" = '=' THEN 1 ELSE 0 END) * 100.0) / COUNT(*), 5) FROM \"bond\" WHERE \"molecule_id\" = 'TR008'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "-- External Knowledge: label = '+' mean molecules are carcinogenic; percentage = DIVIDE(SUM(label = '+'), COUNT(molecule_id)) as percent\nWhat is the percentage of molecules that are carcinogenic? Please provide your answer as a percentage with three decimal places.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT ROUND(CAST((CAST(COUNT(CASE WHEN t.label = '+' THEN t.molecule_id ELSE NULL END) AS REAL) / NULLIF(COUNT(t.molecule_id), 0) * 100) AS NUMERIC), 3) AS percentage FROM molecule t",
+      "actual_sql": "SELECT ROUND(SUM(\"label\" = '+') * 100.0 / COUNT(\"molecule_id\"), 3) AS \"percent\" FROM \"molecule\"",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedFunction) function sum(boolean) does not exist\nLINE 1: SELECT ROUND(SUM(\"label\" = '+') * 100.0 / COUNT(\"molecule_id...\n                     ^\nHINT:  No function matches the given name and argument types. You might need to add explicit type casts.\n[SQL: SELECT ROUND(SUM(\"label\" = '+') * 100.0 / COUNT(\"molecule_id\"), 3) AS \"percent\" FROM \"molecule\"\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "-- External Knowledge: hydrogen refers to element = 'h'; TR206 is the molecule id; percentage = DIVIDE(SUM(element = 'h'), COUNT(atom_id)) as percent where molecule_id = 'TR206'\nHow much of the hydrogen in molecule TR206 is accounted for? Please provide your answer as a percentage with four decimal places.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT ROUND(CAST((CAST(COUNT(CASE WHEN T.element = 'h' THEN T.atom_id ELSE NULL END) AS REAL) * 100 / NULLIF(COUNT(T.atom_id), 0)) AS NUMERIC), 4) AS percentage FROM atom AS T WHERE T.molecule_id = 'TR206'",
+      "actual_sql": "",
+      "execution_success": false,
+      "error": "text2sql failed: LLM returned empty response (token budget exhausted in reasoning?)",
+      "status": "empty_response_token_exhaustion",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "-- External Knowledge: TR060 is the molecule id;\nWhat are the elements of the toxicology and label of molecule TR060?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT DISTINCT T1.element, T2.label FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id WHERE T2.molecule_id = 'TR060'",
+      "actual_sql": "",
+      "execution_success": false,
+      "error": "text2sql failed: LLM returned empty response (token budget exhausted in reasoning?)",
+      "status": "empty_response_token_exhaustion",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "-- External Knowledge: TR010 is the molecule id; majority of the bond found refers to MAX(COUNT(bond_type));\nWhich bond type accounted for the majority of the bonds found in molecule TR010 and state whether or not this molecule is carcinogenic?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT T.bond_type FROM (SELECT T1.bond_type, COUNT(T1.molecule_id) FROM bond AS T1 WHERE T1.molecule_id = 'TR010' GROUP BY T1.bond_type ORDER BY COUNT(T1.molecule_id) DESC NULLS LAST LIMIT 1) AS T",
+      "actual_sql": "SELECT \"bond_type\",\n       CASE WHEN \"label\" LIKE '%carcinogenic%' THEN 'Yes' ELSE 'No' END AS \"is_carcinogenic\"\nFROM \"bond\"\nJOIN \"molecule\" ON \"bond\".\"molecule_id\" = \"molecule\".\"molecule_id\"\nWHERE \"molecule\".\"molecule_id\" = 'TR010'\nGROUP BY \"bond_type\"\nORDER BY COUNT(*) DESC\nLIMIT 1;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.GroupingError) column \"molecule.label\" must appear in the GROUP BY clause or be used in an aggregate function\nLINE 2:        CASE WHEN \"label\" LIKE '%carcinogenic%' THEN 'Yes' EL...\n                         ^\n[SQL: SELECT \"bond_type\",\n       CASE WHEN \"label\" LIKE '%%carcinogenic%%' THEN 'Yes' ELSE 'No' END AS \"is_carcinogenic\"\nFROM \"bond\"\nJOIN \"molecule\" ON \"bond\".\"molecule_id\" = \"molecule\".\"molecule_id\"\nWHERE \"molecule\".\"molecule_id\" = 'TR010'\nGROUP BY \"bond_type\"\nORDER BY COUNT(*) DESC\nLIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "-- External Knowledge: label = '-' means molecules are not carcinogenic; single type bond refers to bond_type = '-'; list top three molecules refers to return molecule_id and order by molecule_id;\nPlease list top three molecules that have single bonds between two atoms and are not carcinogenic in alphabetical order.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT T2.molecule_id FROM bond AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id WHERE T1.bond_type = '-' AND T2.label = '-' ORDER BY T2.molecule_id NULLS FIRST LIMIT 3",
+      "actual_sql": "SELECT DISTINCT \"m\".\"molecule_id\"\nFROM \"molecule\" \"m\"\nJOIN \"bond\" \"b\" ON \"m\".\"molecule_id\" = \"b\".\"molecule_id\"\nWHERE \"m\".\"label\" = '-'\n  AND \"b\".\"bond_type\" = '-'\nORDER BY \"m\".\"molecule_id\"\nLIMIT 3",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 3,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "-- External Knowledge: TR009 is the molecule id;  involved atom 12 refers to atom_id = 'TR009_12' or atom_id2 = 'TR009_12'\nHow many bonds which involved atom 12 does molecule TR009 have?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T2.bond_id) FROM bond AS T1 INNER JOIN connected AS T2 ON T1.bond_id = T2.bond_id WHERE T1.molecule_id = 'TR009' AND T2.atom_id = T1.molecule_id || '_1' OR T2.atom_id2 = T1.molecule_id || '_2'",
+      "actual_sql": "SELECT COUNT(DISTINCT \"bond_id\")\nFROM \"connected\" \"c\"\nJOIN \"bond\" \"b\" ON \"c\".\"bond_id\" = \"b\".\"bond_id\"\nWHERE (\"c\".\"atom_id\" = 'TR009_12' OR \"c\".\"atom_id2\" = 'TR009_12')\nAND \"b\".\"molecule_id\" = 'TR009'",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.AmbiguousColumn) column reference \"bond_id\" is ambiguous\nLINE 1: SELECT COUNT(DISTINCT \"bond_id\")\n                              ^\n[SQL: SELECT COUNT(DISTINCT \"bond_id\")\nFROM \"connected\" \"c\"\nJOIN \"bond\" \"b\" ON \"c\".\"bond_id\" = \"b\".\"bond_id\"\nWHERE (\"c\".\"atom_id\" = 'TR009_12' OR \"c\".\"atom_id2\" = 'TR009_12')\nAND \"b\".\"molecule_id\" = 'TR009'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "-- External Knowledge: atoms refer to atom_id or atom_id2\nWhat are the bond type and the atoms of the bond ID of TR001_6_9?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.bond_type, T2.atom_id, T2.atom_id2 FROM bond AS T1 INNER JOIN connected AS T2 ON T1.bond_id = T2.bond_id WHERE T2.bond_id = 'TR001_6_9'",
+      "actual_sql": "SELECT \"bond_type\", \"atom_id\", \"atom_id2\" FROM \"bond\" JOIN \"connected\" ON \"bond\".\"bond_id\" = \"connected\".\"bond_id\" WHERE \"bond\".\"bond_id\" = 'TR001_6_9' LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.666667,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 0.5,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "-- External Knowledge: connections refers to bond_id; atom 19 refers to atom_id like 'TR%_19';\nHow many connections does the atom 19 have?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT COUNT(T.bond_id) FROM connected AS T WHERE RIGHT(T.atom_id, 2) = '19'",
+      "actual_sql": "SELECT COUNT(\"bond_id\") FROM \"connected\" WHERE \"atom_id\" LIKE 'TR%_19'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "-- External Knowledge: TR004 is the molecule id;\nList all the elements of the toxicology of the molecule \"TR004\".",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT DISTINCT T.element FROM atom AS T WHERE T.molecule_id = 'TR004'",
+      "actual_sql": "SELECT \"atom\".\"element\"\nFROM \"atom\"\nWHERE \"atom\".\"molecule_id\" = 'TR004'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 24,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.4,
+        "soft_f1_precision": 0.25,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "-- External Knowledge: atoms from 21 to 25 refers to SUBSTR(atom_id, 7, 2) between '21' and '25'; label = '+' mean molecules are carcinogenic\nAmong all the atoms from 21 to 25, list all the molecules that are carcinogenic.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT T2.molecule_id FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id WHERE RIGHT(T1.atom_id, 2) BETWEEN '21' AND '25' AND T2.label = '+'",
+      "actual_sql": "SELECT DISTINCT \"molecule\".\"label\", \"molecule\".\"molecule_id\"\nFROM \"atom\"\nJOIN \"molecule\" ON \"atom\".\"molecule_id\" = \"molecule\".\"molecule_id\"\nWHERE \"molecule\".\"label\" = '+'\n  AND SUBSTR(\"atom\".\"atom_id\", 7, 2) BETWEEN '21' AND '25'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 75,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "-- External Knowledge: have phosphorus as atom elements refers to element = 'p'; have nitrogen as atom elements refers to element = 'n'\nWhat are the bonds that have phosphorus and nitrogen as their atom elements?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T2.bond_id FROM atom AS T1 INNER JOIN connected AS T2 ON T1.atom_id = T2.atom_id WHERE T2.bond_id IN (SELECT T3.bond_id FROM connected AS T3 INNER JOIN atom AS T4 ON T3.atom_id = T4.atom_id WHERE T4.element = 'p') AND T1.element = 'n'",
+      "actual_sql": "SELECT DISTINCT \"connected\".\"bond_id\"\nFROM \"connected\"\nJOIN \"atom\" ON \"connected\".\"atom_id\" = \"atom\".\"atom_id\"\nJOIN \"atom\" AS \"atom2\" ON \"connected\".\"atom_id2\" = \"atom2\".\"atom_id\"\nWHERE (\"atom\".\"element\" = 'p' AND \"atom2\".\"element\" = 'n')\n   OR (\"atom\".\"element\" = 'n' AND \"atom2\".\"element\" = 'p')\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 6,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "-- External Knowledge: double bond refers to bond_type = ' = '; label = '+' mean molecules are carcinogenic\nIs the molecule with the most double bonds carcinogenic?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.label FROM molecule AS T1 INNER JOIN (SELECT T.molecule_id, COUNT(T.bond_type) FROM bond AS T WHERE T.bond_type = '=' GROUP BY T.molecule_id ORDER BY COUNT(T.bond_type) DESC NULLS LAST LIMIT 1) AS T2 ON T1.molecule_id = T2.molecule_id",
+      "actual_sql": "SELECT m.\"label\"\nFROM \"molecule\" m\nJOIN \"bond\" b ON m.\"molecule_id\" = b.\"molecule_id\"\nWHERE b.\"bond_type\" = ' = '\nGROUP BY m.\"molecule_id\", m.\"label\"\nORDER BY COUNT(*) DESC\nLIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "-- External Knowledge: atoms with the element iodine refers to element = 'i'; average = DIVIDE(COUND(bond_id), COUNT(atom_id)) where element = 'i'\nWhat is the average number of bonds the atoms with the element iodine have?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(COUNT(T2.bond_id) AS REAL) / NULLIF(COUNT(T1.atom_id), 0) FROM atom AS T1 INNER JOIN connected AS T2 ON T1.atom_id = T2.atom_id WHERE T1.element = 'i'",
+      "actual_sql": "SELECT COUNT(\"connected\".\"bond_id\") * 1.0 / COUNT(\"atom\".\"atom_id\")\nFROM \"atom\"\nINNER JOIN \"connected\" ON \"atom\".\"atom_id\" = \"connected\".\"atom_id\"\nWHERE \"atom\".\"element\" = 'i'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "-- External Knowledge: atoms cannot bond with other atoms means atom_id NOT in connected table;\nList all the elements of atoms that can not bond with any other atoms.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT DISTINCT T.element FROM atom AS T WHERE NOT T.element IN (SELECT DISTINCT T1.element FROM atom AS T1 INNER JOIN connected AS T2 ON T1.atom_id = T2.atom_id)",
+      "actual_sql": "SELECT \"element\" FROM \"atom\" WHERE \"atom_id\" NOT IN (SELECT \"atom_id\" FROM \"connected\" UNION SELECT \"atom_id2\" FROM \"connected\")\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 38,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.146341,
+        "soft_f1_precision": 0.078947,
+        "soft_f1_recall": 1.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "-- External Knowledge: TR041 is the molecule id; triple bond refers to bond_type = '#';\nWhat are the atoms of the triple bond with the molecule \"TR041\"?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T2.atom_id, T2.atom_id2 FROM atom AS T1 INNER JOIN connected AS T2 ON T1.atom_id = T2.atom_id INNER JOIN bond AS T3 ON T2.bond_id = T3.bond_id WHERE T3.bond_type = '#' AND T3.molecule_id = 'TR041'",
+      "actual_sql": "SELECT DISTINCT \"atom\".\"atom_id\"\nFROM \"atom\"\nJOIN \"bond\" ON \"atom\".\"molecule_id\" = \"bond\".\"molecule_id\"\nJOIN \"connected\" ON \"atom\".\"atom_id\" = \"connected\".\"atom_id\"\nWHERE \"bond\".\"molecule_id\" = 'TR041'\n  AND \"bond\".\"bond_type\" = '#'\n\nUNION\n\nSELECT DISTINCT \"atom\".\"atom_id\"\nFROM \"atom\"\nJOIN \"bond\" ON \"atom\".\"molecule_id\" = \"bond\".\"molecule_id\"\nJOIN \"connected\" ON \"atom\".\"atom_id\" = \"connected\".\"atom_id2\"\nWHERE \"bond\".\"molecule_id\" = 'TR041'\n  AND \"bond\".\"bond_type\" = '#'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 14,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.444444,
+        "soft_f1_precision": 0.285714,
+        "soft_f1_recall": 1.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "-- External Knowledge: TR144_8_19 is the bond id;\nWhat are the elements of the atoms of TR144_8_19?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT T2.element FROM connected AS T1 INNER JOIN atom AS T2 ON T1.atom_id = T2.atom_id WHERE T1.bond_id = 'TR144_8_19'",
+      "actual_sql": "",
+      "execution_success": false,
+      "error": "text2sql failed: LLM returned empty response (token budget exhausted in reasoning?)",
+      "status": "empty_response_token_exhaustion",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "-- External Knowledge: triple bond refers to bond_type = '#';\nList the elements of all the triple bonds.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT DISTINCT T3.element FROM bond AS T1 INNER JOIN connected AS T2 ON T1.bond_id = T2.bond_id INNER JOIN atom AS T3 ON T2.atom_id = T3.atom_id WHERE T1.bond_type = '#'",
+      "actual_sql": "SELECT \"atom\".\"element\"\nFROM \"bond\"\nJOIN \"connected\" ON \"bond\".\"bond_id\" = \"connected\".\"bond_id\"\nJOIN \"atom\" ON \"connected\".\"atom_id2\" = \"atom\".\"atom_id\"\nWHERE \"bond\".\"bond_type\" = '#'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 10,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.571429,
+        "soft_f1_precision": 0.4,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "-- External Knowledge: single bond refers to bond_type = '-'; label = '+' mean molecules are carcinogenic; proportion = DIVIDE(SUM(label = '+') * 100, COUNT(bond_id)) where bond_type = '-'\nWhat proportion of single bonds are carcinogenic? Please provide your answer as a percentage with five decimal places.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT ROUND(CAST((CAST(COUNT(CASE WHEN T2.label = '+' THEN T1.bond_id ELSE NULL END) AS REAL) * 100 / NULLIF(COUNT(T1.bond_id), 0)) AS NUMERIC), 5) AS percentage FROM bond AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id WHERE T1.bond_type = '-'",
+      "actual_sql": "SELECT ROUND(\n  (SUM(CASE WHEN \"m\".\"label\" = '+' THEN 1 ELSE 0 END) * 100.0) / COUNT(*), \n  5\n)\nFROM \"bond\" \"b\"\nJOIN \"molecule\" \"m\" ON \"b\".\"molecule_id\" = \"m\".\"molecule_id\"\nWHERE \"b\".\"bond_type\" = '-'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "-- External Knowledge: triple bond refers to bond_type = '#'; phosphorus refers to element = 'p'; bromine refers to element = 'br'\nCalculate the total atoms with triple-bond molecules containing the element phosphorus or bromine.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T1.atom_id) FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id INNER JOIN bond AS T3 ON T2.molecule_id = T3.molecule_id WHERE T3.bond_type = '#' AND T1.element IN ('p', 'br')",
+      "actual_sql": "",
+      "execution_success": false,
+      "error": "text2sql failed: LLM returned empty response (token budget exhausted in reasoning?)",
+      "status": "empty_response_token_exhaustion",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "-- External Knowledge: element chlorine refers to element = 'cl'; single bond refers to bond_type = '-'; percentage = DIVIDE(SUM(element = 'cl'), COUNT(atom_id)) as percent where bond_type = '-'\nWhat is the composition of element chlorine in percentage among the single bond molecules?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT CAST(COUNT(CASE WHEN T.element = 'cl' THEN T.atom_id ELSE NULL END) AS REAL) * 100 / NULLIF(COUNT(T.atom_id), 0) FROM (SELECT T1.atom_id, T1.element FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id INNER JOIN bond AS T3 ON T2.molecule_id = T3.molecule_id WHERE T3.bond_type = '-') AS T",
+      "actual_sql": "SELECT (SUM(CASE WHEN \"atom\".\"element\" = 'cl' THEN 1 ELSE 0 END) * 100.0 / COUNT(\"atom\".\"atom_id\")) AS \"percentage\"\nFROM \"atom\"\nWHERE \"atom\".\"molecule_id\" IN (\n    SELECT DISTINCT \"bond\".\"molecule_id\"\n    FROM \"bond\"\n    WHERE \"bond\".\"bond_type\" = '-'\n)\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "-- External Knowledge: TR001_10_11 is the bond id;\nWhat are the elements for bond id TR001_10_11?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT T2.element FROM connected AS T1 INNER JOIN atom AS T2 ON T1.atom_id = T2.atom_id WHERE T1.bond_id = 'TR001_10_11'",
+      "actual_sql": "SELECT \"a1\".\"element\" AS \"element1\", \"a2\".\"element\" AS \"element2\"\nFROM \"connected\" \"c\"\nJOIN \"atom\" \"a1\" ON \"c\".\"atom_id\" = \"a1\".\"atom_id\"\nJOIN \"atom\" \"a2\" ON \"c\".\"atom_id2\" = \"a2\".\"atom_id\"\nWHERE \"c\".\"bond_id\" = 'TR001_10_11'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 2,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "-- External Knowledge: chlorine refers to element = 'cl'; label = '+' mean molecules are carcinogenic; percentage = DIVIDE(SUM(element = 'pb'); COUNT(molecule_id)) as percentage where label = '+'\nWhat is the percentage of element chlorine in carcinogenic molecules?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(COUNT(CASE WHEN T1.element = 'cl' THEN T1.element ELSE NULL END) AS REAL) * 100 / NULLIF(COUNT(T1.element), 0) FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id WHERE T2.label = '+'",
+      "actual_sql": "SELECT \n    SUM(CASE WHEN \"element\" = 'cl' THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS \"percentage\"\nFROM \"atom\"\nJOIN \"molecule\" ON \"atom\".\"molecule_id\" = \"molecule\".\"molecule_id\"\nWHERE \"molecule\".\"label\" = '+'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "-- External Knowledge: label = '+' means molecules are carcinogenic; 4th atom of each molecule refers to substr(atom_id, 7, 1) = '4';\nTally the toxicology element of the 4th atom of each molecule that was carcinogenic.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT DISTINCT T1.element FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id WHERE T2.label = '+' AND RIGHT(T1.atom_id, 1) = '4' AND LENGTH(T1.atom_id) = 7",
+      "actual_sql": "SELECT \"element\", COUNT(*) \nFROM \"atom\" \"a\"\nJOIN \"molecule\" \"m\" ON \"a\".\"molecule_id\" = \"m\".\"molecule_id\"\nWHERE \"m\".\"label\" = '+'\nAND substr(\"a\".\"atom_id\", 7, 1) = '4'\nGROUP BY \"element\"\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 9,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.941176,
+        "soft_f1_precision": 0.888889,
+        "soft_f1_recall": 1.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "-- External Knowledge: hydrogen refers to element = 'h'; ratio = DIVIDE(SUM(element = 'h'), count(element)) where molecule_id = 'TR006' ; label = '+' mean molecules are carcinogenic; label = '-' means molecules are non-carcinogenic\nWhat is the ratio of Hydrogen elements in molecule ID TR006? List the ratio with its label.",
+      "difficulty": "challenging",
+      "expected_sql": "WITH SubQuery AS (SELECT DISTINCT T1.atom_id, T1.element, T1.molecule_id, T2.label FROM atom AS T1 INNER JOIN molecule AS T2 ON T1.molecule_id = T2.molecule_id WHERE T2.molecule_id = 'TR006') SELECT CAST(COUNT(CASE WHEN element = 'h' THEN atom_id ELSE NULL END) AS REAL) / NULLIF(COUNT(atom_id), 0) AS ratio, label FROM SubQuery GROUP BY label",
+      "actual_sql": "SELECT \"m\".\"label\", COUNT(CASE WHEN \"a\".\"element\" = 'h' THEN 1 END) * 1.0 / COUNT(*) AS \"ratio\"\nFROM \"atom\" \"a\"\nJOIN \"molecule\" \"m\" ON \"a\".\"molecule_id\" = \"m\".\"molecule_id\"\nWHERE \"a\".\"molecule_id\" = 'TR006'\nGROUP BY \"m\".\"label\"\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "-- External Knowledge: label = '-' means molecules are non-carcinogenic; molecules consisted more than 5 atoms refers to COUNT(molecule_id) > 5\nWhich non-carcinogenic molecules consisted more than 5 atoms?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T.molecule_id FROM (SELECT T1.molecule_id, COUNT(T2.atom_id) FROM molecule AS T1 INNER JOIN atom AS T2 ON T1.molecule_id = T2.molecule_id WHERE T1.label = '-' GROUP BY T1.molecule_id HAVING COUNT(T2.atom_id) > 5) AS t",
+      "actual_sql": "SELECT \"m\".\"label\", \"m\".\"molecule_id\", COUNT(\"a\".\"atom_id\") AS atom_count\nFROM \"molecule\" \"m\"\nJOIN \"atom\" \"a\" ON \"m\".\"molecule_id\" = \"a\".\"molecule_id\"\nWHERE \"m\".\"label\" = '-'\nGROUP BY \"m\".\"label\", \"m\".\"molecule_id\"\nHAVING COUNT(\"a\".\"atom_id\") > 5\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 186,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": false
+      }
+    }
+  ]
+}

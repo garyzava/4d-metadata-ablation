@@ -1,0 +1,919 @@
+{
+  "run_id": "european_football_2_L0-PAD_env_rep1",
+  "dataset": "european_football_2",
+  "level": "L0-PAD",
+  "dimensions": [],
+  "model": {
+    "provider": "huggingface",
+    "model": "Qwen/Qwen3.5-27B",
+    "base_url": ""
+  },
+  "runtime_params": {
+    "max_tokens": 4096,
+    "effective_max_tokens": 4096,
+    "temperature": 0.6,
+    "seed": 42,
+    "top_p": 0.95,
+    "presence_penalty": 0.0,
+    "top_k": 20,
+    "reasoning_effort": "medium",
+    "num_ctx": null,
+    "bird_docs_dir": "/Users/gary/myapps/4d-metadata-ablation/bird-docs-revised"
+  },
+  "rep": 1,
+  "timestamp": "2026-05-31T01:06:06.005897+00:00",
+  "elapsed_seconds": 376.2,
+  "aggregate_metrics": {
+    "total_cases": 51,
+    "execution_rate_pct": 2.0,
+    "value_match_pct": 0.0,
+    "column_match_pct": 0.0,
+    "soft_f1_mean": 0.0,
+    "er_value_gap_pp": 2.0,
+    "error_count": 50,
+    "bird_ex_pct": 0.0,
+    "er_bex_gap_pp": 2.0,
+    "challenging_er_pct": 0.0,
+    "challenging_vm_pct": 0.0,
+    "challenging_soft_f1": 0.0,
+    "challenging_bird_ex_pct": 0.0,
+    "moderate_er_pct": 4.0,
+    "moderate_vm_pct": 0.0,
+    "moderate_soft_f1": 0.0,
+    "moderate_bird_ex_pct": 0.0,
+    "simple_er_pct": 0.0,
+    "simple_vm_pct": 0.0,
+    "simple_soft_f1": 0.0,
+    "simple_bird_ex_pct": 0.0
+  },
+  "per_case_results": [
+    {
+      "question": "Give the name of the league had the most goals in the 2016 season?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT t2.name FROM Match AS t1 INNER JOIN League AS t2 ON t1.league_id = t2.id WHERE t1.season = '2015/2016' GROUP BY t2.name ORDER BY SUM(t1.home_team_goal + t1.away_team_goal) DESC NULLS LAST LIMIT 1",
+      "actual_sql": "The provided database schema does not contain any tables related to sports leagues, goals, or seasons. The schema only includes tables for ad campaigns, concert seating, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory.\n\nI cannot generate a meaningful SQL query for this question as the necessary data (league names, goals, seasons) does not exist in the provided schema.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"The\"\nLINE 1: The provided database schema does not contain any tables rel...\n        ^\n[SQL: The provided database schema does not contain any tables related to sports leagues, goals, or seasons. The schema only includes tables for ad campaigns, concert seating, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory.\n\nI cannot generate a meaningful SQL query for this question as the necessary data (league names, goals, seasons) does not exist in the provided schema.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "In Scotland Premier League, which away team won the most during the 2010 season?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT teamInfo.team_long_name FROM League AS leagueData INNER JOIN Match AS matchData ON leagueData.id = matchData.league_id INNER JOIN Team AS teamInfo ON matchData.away_team_api_id = teamInfo.team_api_id WHERE leagueData.name = 'Scotland Premier League' AND matchData.season = '2009/2010' AND matchData.away_team_goal - matchData.home_team_goal > 0 GROUP BY teamInfo.team_long_name, matchData.away_team_api_id ORDER BY COUNT(*) DESC LIMIT 1",
+      "actual_sql": "The provided database schema does not contain any tables related to sports, football leagues, or match results. The available tables cover ad campaigns, concert seating, fleet dispatch, loyalty programs, ticket audits, and warehouse inventory. This question cannot be answered with the given schema.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"The\"\nLINE 1: The provided database schema does not contain any tables rel...\n        ^\n[SQL: The provided database schema does not contain any tables related to sports, football leagues, or match results. The available tables cover ad campaigns, concert seating, fleet dispatch, loyalty programs, ticket audits, and warehouse inventory. This question cannot be answered with the given schema.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What are the speed in which attacks are put together of the top 4 teams with the highest build Up Play Speed?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT t1.buildUpPlaySpeed FROM Team_Attributes AS t1 INNER JOIN Team AS t2 ON t1.team_api_id = t2.team_api_id ORDER BY t1.buildUpPlaySpeed ASC NULLS FIRST LIMIT 4",
+      "actual_sql": "I cannot generate a valid SQL query for this question because the provided database schema contains no tables related to sports, teams, attacks, or build-up play speed. The available tables cover:\n\n- Advertising campaign pacing\n- Concert seat inventory\n- Fleet dispatch routing\n- Loyalty tier calculation\n- Ticket audit workflow\n- Warehouse inventory management\n\nNone of these domains contain the data needed to answer questions about team attack speeds or build-up play metrics. Please verify you're asking about the correct database, or provide the relevant sports analytics schema.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"I\"\nLINE 1: I cannot generate a valid SQL query for this question becaus...\n        ^\n[SQL: I cannot generate a valid SQL query for this question because the provided database schema contains no tables related to sports, teams, attacks, or build-up play speed. The available tables cover:\n\n- Advertising campaign pacing\n- Concert seat inventory\n- Fleet dispatch routing\n- Loyalty tier calculation\n- Ticket audit workflow\n- Warehouse inventory management\n\nNone of these domains contain the data needed to answer questions about team attack speeds or build-up play metrics. Please verify you're asking about the correct database, or provide the relevant sports analytics schema.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Give the name of the league had the most matches end as draw in the 2016 season?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT t2.name FROM Match AS t1 INNER JOIN League AS t2 ON t1.league_id = t2.id WHERE t1.season = '2015/2016' AND t1.home_team_goal = t1.away_team_goal GROUP BY t2.name ORDER BY COUNT(t1.id) DESC NULLS LAST LIMIT 1",
+      "actual_sql": "This question cannot be answered with the provided database schema. The schema contains tables for ad campaigns, concert seat inventory, fleet dispatch, loyalty tiers, ticket audit workflows, and warehouse inventory - none of which contain sports league, match, or season data.\n\nIf you have a sports/league database schema, please provide it and I can generate the appropriate query.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"This\"\nLINE 1: This question cannot be answered with the provided database ...\n        ^\n[SQL: This question cannot be answered with the provided database schema. The schema contains tables for ad campaigns, concert seat inventory, fleet dispatch, loyalty tiers, ticket audit workflows, and warehouse inventory - none of which contain sports league, match, or season data.\n\nIf you have a sports/league database schema, please provide it and I can generate the appropriate query.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "At present, calculate for the player's age who have a sprint speed of no less than 97 between 2013 to 2015.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT DISTINCT EXTRACT(YEAR FROM AGE(NOW(), t2.birthday::timestamp)) + (CASE WHEN EXTRACT(MONTH FROM AGE(NOW(), t2.birthday::timestamp)) > 0 OR EXTRACT(DAY FROM AGE(NOW(), t2.birthday::timestamp)) > 0 THEN 1 ELSE 0 END) AS age FROM Player_Attributes AS t1 INNER JOIN Player AS t2 ON t1.player_api_id = t2.player_api_id WHERE EXTRACT(YEAR FROM t1.date::date) BETWEEN 2013 AND 2015 AND t1.sprint_speed >= 97",
+      "actual_sql": "I cannot generate a valid SQL query for this question because the provided database schema does not contain any tables related to players, age, or sprint speed data. The schema only includes tables for:\n\n- ad_campaign_pacing\n- concert_seat_inventory\n- fleet_dispatch_routing\n- loyalty_tier_calculation\n- ticket_audit_workflow\n- warehouse_inventory_basics\n\nNone of these tables contain sports/player information. Please provide a schema that includes player data with age and sprint speed attributes, or clarify which table you'd like me to query.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"I\"\nLINE 1: I cannot generate a valid SQL query for this question becaus...\n        ^\n[SQL: I cannot generate a valid SQL query for this question because the provided database schema does not contain any tables related to players, age, or sprint speed data. The schema only includes tables for:\n\n- ad_campaign_pacing\n- concert_seat_inventory\n- fleet_dispatch_routing\n- loyalty_tier_calculation\n- ticket_audit_workflow\n- warehouse_inventory_basics\n\nNone of these tables contain sports/player information. Please provide a schema that includes player data with age and sprint speed attributes, or clarify which table you'd like me to query.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Give the name of the league with the highest matches of all time and how many matches were played in the said league.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT t2.name, t1.max_count FROM League AS t2 JOIN (SELECT league_id, MAX(cnt) AS max_count FROM (SELECT league_id, COUNT(id) AS cnt FROM Match GROUP BY league_id) AS subquery GROUP BY league_id ORDER BY MAX(cnt) DESC LIMIT 1) AS t1 ON t1.league_id = t2.id",
+      "actual_sql": "SELECT \"league_name\", COUNT(*) AS \"total_matches\"\nFROM \"matches\"\nINNER JOIN \"leagues\" ON \"matches\".\"league_id\" = \"leagues\".\"id\"\nGROUP BY \"league_name\"\nORDER BY \"total_matches\" DESC\nLIMIT 1;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"matches\" does not exist\nLINE 2: FROM \"matches\"\n             ^\n[SQL: SELECT \"league_name\", COUNT(*) AS \"total_matches\"\nFROM \"matches\"\nINNER JOIN \"leagues\" ON \"matches\".\"league_id\" = \"leagues\".\"id\"\nGROUP BY \"league_name\"\nORDER BY \"total_matches\" DESC\nLIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Give the team_fifa_api_id of teams with more than 50 but less than 60 build-up play speed.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT DISTINCT team_fifa_api_id FROM Team_Attributes WHERE buildUpPlaySpeed > 50 AND buildUpPlaySpeed < 60",
+      "actual_sql": "The provided database schema does not contain any tables related to teams or build-up play speed. The schema only includes systems for ad campaign pacing, concert seat inventory, fleet dispatch routing, loyalty tier calculation, ticket audit workflow, and warehouse inventory. No query can be generated without the relevant team/football data tables.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"The\"\nLINE 1: The provided database schema does not contain any tables rel...\n        ^\n[SQL: The provided database schema does not contain any tables related to teams or build-up play speed. The schema only includes systems for ad campaign pacing, concert seat inventory, fleet dispatch routing, loyalty tier calculation, ticket audit workflow, and warehouse inventory. No query can be generated without the relevant team/football data tables.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List the long name of teams with above-average build-up play passing in 2012.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT DISTINCT t4.team_long_name FROM Team_Attributes AS t3 INNER JOIN Team AS t4 ON t3.team_api_id = t4.team_api_id WHERE SUBSTR(t3.\"date\", 1, 4) = '2012' AND t3.buildUpPlayPassing > (SELECT CAST(SUM(t2.buildUpPlayPassing) AS REAL) / NULLIF(COUNT(t1.id), 0) FROM Team AS t1 INNER JOIN Team_Attributes AS t2 ON t1.team_api_id = t2.team_api_id WHERE TO_CHAR(CAST(t2.\"date\" AS TIMESTAMP), 'YYYY') = '2012')",
+      "actual_sql": "The provided database schema does not contain any tables related to sports, teams, or passing statistics. The schema includes tables for:\n\n- ad_campaign_pacing\n- concert_seat_inventory  \n- fleet_dispatch_routing\n- loyalty_tier_calculation\n- ticket_audit_workflow\n- warehouse_inventory_basics\n\nNone of these tables contain team information or passing statistics data. A query cannot be generated for this question with the available schema.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"The\"\nLINE 1: The provided database schema does not contain any tables rel...\n        ^\n[SQL: The provided database schema does not contain any tables related to sports, teams, or passing statistics. The schema includes tables for:\n\n- ad_campaign_pacing\n- concert_seat_inventory  \n- fleet_dispatch_routing\n- loyalty_tier_calculation\n- ticket_audit_workflow\n- warehouse_inventory_basics\n\nNone of these tables contain team information or passing statistics data. A query cannot be generated for this question with the available schema.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Calculate the percentage of players who prefer left foot, who were born between 1987 and 1992.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT CAST(COUNT(CASE WHEN t2.preferred_foot = 'left' THEN t1.id ELSE NULL END) AS REAL) * 100 / NULLIF(COUNT(t1.id), 0) AS percent FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE SUBSTR(t1.birthday, 1, 4) BETWEEN '1987' AND '1992'",
+      "actual_sql": "SELECT \n    COUNT(CASE WHEN \"preferred_foot\" = 'left' THEN 1 END) * 100.0 / COUNT(*) AS \"percentage\"\nFROM \"players\"\nWHERE \"birth_year\" BETWEEN 1987 AND 1992\n\n-- Note: No player-related schema was provided in the database schema. This query assumes a \"players\" table with \"preferred_foot\" and \"birth_year\" columns.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"players\" does not exist\nLINE 3: FROM \"players\"\n             ^\n[SQL: SELECT \n    COUNT(CASE WHEN \"preferred_foot\" = 'left' THEN 1 END) * 100.0 / COUNT(*) AS \"percentage\"\nFROM \"players\"\nWHERE \"birth_year\" BETWEEN 1987 AND 1992\n\n-- Note: No player-related schema was provided in the database schema. This query assumes a \"players\" table with \"preferred_foot\" and \"birth_year\" columns.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Find the average number of long-shot done by Ahmed Samir Farag.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT CAST(SUM(t2.long_shots) AS REAL) / NULLIF(COUNT(t2.\"date\"), 0) FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE t1.player_name = 'Ahmed Samir Farag'",
+      "actual_sql": "SELECT AVG(\"long_shot_count\") AS \"average_long_shots\"\nFROM \"athlete_performance\"\nWHERE \"athlete_name\" = 'Ahmed Samir Farag'\n\n-- Note: This query is based on an assumption since no actual table schema was provided. \n-- The provided domain knowledge describes ad campaigns, concert seating, fleet routing, \n-- loyalty tiers, ticket auditing, and warehouse inventory - none of which contain \n-- athlete performance data. A real query would require tables with athlete and \n-- performance metrics columns.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"athlete_performance\" does not exist\nLINE 2: FROM \"athlete_performance\"\n             ^\n[SQL: SELECT AVG(\"long_shot_count\") AS \"average_long_shots\"\nFROM \"athlete_performance\"\nWHERE \"athlete_name\" = 'Ahmed Samir Farag'\n\n-- Note: This query is based on an assumption since no actual table schema was provided. \n-- The provided domain knowledge describes ad campaigns, concert seating, fleet routing, \n-- loyalty tiers, ticket auditing, and warehouse inventory - none of which contain \n-- athlete performance data. A real query would require tables with athlete and \n-- performance metrics columns.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List the top 10 players' names whose heights are above 180 in descending order of average heading accuracy.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT t1.player_name FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE t1.height > 180 GROUP BY t1.id ORDER BY CAST(SUM(t2.heading_accuracy) AS REAL) / NULLIF(COUNT(t2.\"player_fifa_api_id\"), 0) DESC NULLS LAST LIMIT 10",
+      "actual_sql": "I cannot generate a valid SQL query for this question. The provided database schema contains tables related to ad campaigns, concert seating, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory - none of which contain player, height, or heading accuracy data.\n\nThis appears to be a sports/football-related query that requires a players table with columns like name, height, and heading_accuracy, which are not present in the available schema.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"I\"\nLINE 1: I cannot generate a valid SQL query for this question. The p...\n        ^\n[SQL: I cannot generate a valid SQL query for this question. The provided database schema contains tables related to ad campaigns, concert seating, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory - none of which contain player, height, or heading accuracy data.\n\nThis appears to be a sports/football-related query that requires a players table with columns like name, height, and heading_accuracy, which are not present in the available schema.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List the name of leagues in which the average goals by the home team is higher than the away team in the 2009/2010 season.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT t1.name FROM League AS t1 INNER JOIN Match AS t2 ON t1.id = t2.league_id WHERE t2.season = '2009/2010' GROUP BY t1.name HAVING (CAST(SUM(t2.home_team_goal) AS REAL) / NULLIF(COUNT(DISTINCT t2.id), 0)) - (CAST(SUM(t2.away_team_goal) AS REAL) / NULLIF(COUNT(DISTINCT t2.id), 0)) > 0",
+      "actual_sql": "The provided database schema does not contain any tables related to sports leagues, teams, goals, or seasons. The available tables are for ad campaigns, concert seat inventory, fleet dispatch, loyalty programs, ticket auditing, and warehouse inventory.\n\nThis question cannot be answered with the given schema as there are no tables containing league, team, goal, or season data.\n\nIf you have a sports database schema with tables like `leagues`, `matches`, `teams`, or `seasons`, please provide that schema so I can generate the appropriate query.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"The\"\nLINE 1: The provided database schema does not contain any tables rel...\n        ^\n[SQL: The provided database schema does not contain any tables related to sports leagues, teams, goals, or seasons. The available tables are for ad campaigns, concert seat inventory, fleet dispatch, loyalty programs, ticket auditing, and warehouse inventory.\n\nThis question cannot be answered with the given schema as there are no tables containing league, team, goal, or season data.\n\nIf you have a sports database schema with tables like `leagues`, `matches`, `teams`, or `seasons`, please provide that schema so I can generate the appropriate query.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List the football players with a birthyear of 1970 and a birthmonth of October.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT player_name FROM Player WHERE SUBSTR(birthday, 1, 7) = '1970-10'",
+      "actual_sql": "This question cannot be answered with the provided database schema. The schema contains tables for ad campaigns, concert seats, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory - none of which contain football player data.\n\nNo valid SQL query can be generated for this question as the required tables (e.g., players, athletes, or sports-related tables) do not exist in the provided schema.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"This\"\nLINE 1: This question cannot be answered with the provided database ...\n        ^\n[SQL: This question cannot be answered with the provided database schema. The schema contains tables for ad campaigns, concert seats, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory - none of which contain football player data.\n\nNo valid SQL query can be generated for this question as the required tables (e.g., players, athletes, or sports-related tables) do not exist in the provided schema.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the overall rating of the football player Gabriel Tamas in year 2011?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT t2.overall_rating FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE t1.player_name = 'Gabriel Tamas' AND TO_CHAR(CAST(t2.date AS TIMESTAMP), 'YYYY') = '2011'",
+      "actual_sql": "SELECT \"overall_rating\" \nFROM \"football_players\" \nWHERE \"player_name\" = 'Gabriel Tamas' \nAND \"year\" = 2011;\n\n-- Note: The provided database schema does not contain tables related to football players or ratings. This query assumes a hypothetical table structure.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"LIMIT\"\nLINE 7: LIMIT 500\n        ^\n[SQL: SELECT \"overall_rating\" \nFROM \"football_players\" \nWHERE \"player_name\" = 'Gabriel Tamas' \nAND \"year\" = 2011;\n\n-- Note: The provided database schema does not contain tables related to football players or ratings. This query assumes a hypothetical table structure.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Calculate the average home team goal in the 2010/2011 season in the country of Poland.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(SUM(t2.home_team_goal) AS REAL) / NULLIF(COUNT(t2.id), 0) FROM Country AS t1 INNER JOIN Match AS t2 ON t1.id = t2.country_id WHERE t1.name = 'Poland' AND t2.season = '2010/2011'",
+      "actual_sql": "The provided database schema does not contain any tables related to sports, soccer matches, goals, seasons, or country information. The available tables are for ad campaigns, concert seating, fleet dispatch, loyalty programs, ticket audits, and warehouse inventory.\n\nThis query cannot be answered with the given schema. If you have a sports/football database schema with tables like matches, teams, seasons, or goals, please provide it for an accurate SQL query.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"The\"\nLINE 1: The provided database schema does not contain any tables rel...\n        ^\n[SQL: The provided database schema does not contain any tables related to sports, soccer matches, goals, seasons, or country information. The available tables are for ad campaigns, concert seating, fleet dispatch, loyalty programs, ticket audits, and warehouse inventory.\n\nThis query cannot be answered with the given schema. If you have a sports/football database schema with tables like matches, teams, seasons, or goals, please provide it for an accurate SQL query.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Who has the highest average finishing rate between the highest and shortest football player?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT A FROM (SELECT AVG(finishing) AS result, 'Max' AS A FROM Player AS T1 INNER JOIN Player_Attributes AS T2 ON T1.player_api_id = T2.player_api_id WHERE T1.height = (SELECT MAX(height) FROM Player) UNION SELECT AVG(finishing) AS result, 'Min' AS A FROM Player AS T1 INNER JOIN Player_Attributes AS T2 ON T1.player_api_id = T2.player_api_id WHERE T1.height = (SELECT MIN(height) FROM Player)) AS subquery ORDER BY result DESC LIMIT 1",
+      "actual_sql": "I cannot generate a valid SQL query for this question because the provided database schema does not contain any tables related to football players, finishing rates, height, or sports data. The schema only includes tables for:\n\n- Ad campaign pacing\n- Concert seat inventory\n- Fleet dispatch routing\n- Loyalty tier calculation\n- Ticket audit workflow\n- Warehouse inventory basics\n\nNone of these domains contain football player information. Please provide the correct database schema for football/sports data.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"I\"\nLINE 1: I cannot generate a valid SQL query for this question becaus...\n        ^\n[SQL: I cannot generate a valid SQL query for this question because the provided database schema does not contain any tables related to football players, finishing rates, height, or sports data. The schema only includes tables for:\n\n- Ad campaign pacing\n- Concert seat inventory\n- Fleet dispatch routing\n- Loyalty tier calculation\n- Ticket audit workflow\n- Warehouse inventory basics\n\nNone of these domains contain football player information. Please provide the correct database schema for football/sports data.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "From 2010 to 2015, what was the average overall rating of players who are higher than 170?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(SUM(t2.overall_rating) AS REAL) / NULLIF(COUNT(t2.id), 0) FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE t1.height > 170 AND TO_CHAR(CAST(t2.\"date\" AS TIMESTAMP), 'YYYY') >= '2010' AND TO_CHAR(CAST(t2.\"date\" AS TIMESTAMP), 'YYYY') <= '2015'",
+      "actual_sql": "The provided database schema does not contain any tables related to players, ratings, or height information. The schema includes tables for ad campaigns, concert seating, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory - none of which contain player data.\n\nI cannot generate a valid SQL query for this question as the required data does not exist in the provided schema.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"The\"\nLINE 1: The provided database schema does not contain any tables rel...\n        ^\n[SQL: The provided database schema does not contain any tables related to players, ratings, or height information. The schema includes tables for ad campaigns, concert seating, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory - none of which contain player data.\n\nI cannot generate a valid SQL query for this question as the required data does not exist in the provided schema.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the difference of the average ball control score between Abdou Diallo and Aaron Appindangoye\n?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN t1.player_name = 'Abdou Diallo' THEN t2.ball_control ELSE 0 END) AS REAL) / NULLIF(COUNT(CASE WHEN t1.player_name = 'Abdou Diallo' THEN t2.id ELSE NULL END), 0) - CAST(SUM(CASE WHEN t1.player_name = 'Aaron Appindangoye' THEN t2.ball_control ELSE 0 END) AS REAL) / NULLIF(COUNT(CASE WHEN t1.player_name = 'Aaron Appindangoye' THEN t2.id ELSE NULL END), 0) FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id",
+      "actual_sql": "This question cannot be answered with the provided database schema. The schema contains tables for ad campaigns, concert seating, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory - none of which contain player data or ball control scores. There is no sports/player information in this database.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"This\"\nLINE 1: This question cannot be answered with the provided database ...\n        ^\n[SQL: This question cannot be answered with the provided database schema. The schema contains tables for ad campaigns, concert seating, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory - none of which contain player data or ball control scores. There is no sports/player information in this database.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Which player is older, Aaron Lennon or Abdelaziz Barrada?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT player_name FROM Player WHERE player_name IN ('Aaron Lennon', 'Abdelaziz Barrada') ORDER BY birthday ASC NULLS FIRST LIMIT 1",
+      "actual_sql": "This question cannot be answered with the provided database schema. The schema contains tables for ad campaigns, concert seating, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory - none of which contain player information, names, or age data. There is no table that stores information about Aaron Lennon, Abdelaziz Barrada, or any sports players.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"This\"\nLINE 1: This question cannot be answered with the provided database ...\n        ^\n[SQL: This question cannot be answered with the provided database schema. The schema contains tables for ad campaigns, concert seating, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory - none of which contain player information, names, or age data. There is no table that stores information about Aaron Lennon, Abdelaziz Barrada, or any sports players.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Which player is the tallest?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT player_name FROM Player ORDER BY height DESC NULLS LAST LIMIT 1",
+      "actual_sql": "The provided database schema contains no tables related to players or height information. The schema includes business operations domains (ad campaigns, concert seating, fleet dispatch, loyalty tiers, ticket audit, warehouse inventory) but no sports/athlete data. This question cannot be answered with the available schema.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"The\"\nLINE 1: The provided database schema contains no tables related to p...\n        ^\n[SQL: The provided database schema contains no tables related to players or height information. The schema includes business operations domains (ad campaigns, concert seating, fleet dispatch, loyalty tiers, ticket audit, warehouse inventory) but no sports/athlete data. This question cannot be answered with the available schema.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the players whose preferred foot was the left foot when attacking, how many of them would remain in his position when the team attacked?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(player_api_id) FROM Player_Attributes WHERE preferred_foot = 'left' AND attacking_work_rate = 'low'",
+      "actual_sql": "The provided database schema does not contain any tables related to players, preferred foot, positions, or football/soccer data. The schema only includes tables for:\n\n- ad_campaign_pacing\n- concert_seat_inventory  \n- fleet_dispatch_routing\n- loyalty_tier_calculation\n- ticket_audit_workflow\n- warehouse_inventory_basics\n\nNone of these tables contain player or sports-related information. Please provide the correct schema with player data to answer this question.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"The\"\nLINE 1: The provided database schema does not contain any tables rel...\n        ^\n[SQL: The provided database schema does not contain any tables related to players, preferred foot, positions, or football/soccer data. The schema only includes tables for:\n\n- ad_campaign_pacing\n- concert_seat_inventory  \n- fleet_dispatch_routing\n- loyalty_tier_calculation\n- ticket_audit_workflow\n- warehouse_inventory_basics\n\nNone of these tables contain player or sports-related information. Please provide the correct schema with player data to answer this question.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the players born before the year 1986, how many of them would remain in his position and defense while the team attacked?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT COUNT(DISTINCT t1.player_name) FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE TO_CHAR(CAST(t1.birthday AS TIMESTAMP), 'YYYY') < '1986' AND t2.defensive_work_rate = 'high'",
+      "actual_sql": "This question cannot be answered with the provided database schema. The schema contains tables for:\n\n- Ad campaign pacing\n- Concert seat inventory\n- Fleet dispatch routing\n- Loyalty tier calculation\n- Ticket audit workflow\n- Warehouse inventory basics\n\nNone of these tables contain information about players, birth years, positions, or defensive behavior. There is no sports/player-related data in this database.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"This\"\nLINE 1: This question cannot be answered with the provided database ...\n        ^\n[SQL: This question cannot be answered with the provided database schema. The schema contains tables for:\n\n- Ad campaign pacing\n- Concert seat inventory\n- Fleet dispatch routing\n- Loyalty tier calculation\n- Ticket audit workflow\n- Warehouse inventory basics\n\nNone of these tables contain information about players, birth years, positions, or defensive behavior. There is no sports/player-related data in this database.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Please list the names of the players whose volley score and dribbling score are over 70.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT t1.player_name FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE t2.volleys > 70 AND t2.dribbling > 70",
+      "actual_sql": "The provided database schema does not contain any tables related to players, volleyball scores, or dribbling scores. The schema only includes tables for ad campaigns, concert seating, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory.\n\nA query cannot be generated for this question with the available schema. Please provide a schema that includes player performance data with volley and dribbling scores.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"The\"\nLINE 1: The provided database schema does not contain any tables rel...\n        ^\n[SQL: The provided database schema does not contain any tables related to players, volleyball scores, or dribbling scores. The schema only includes tables for ad campaigns, concert seating, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory.\n\nA query cannot be generated for this question with the available schema. Please provide a schema that includes player performance data with volley and dribbling scores.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many matches were held in the Belgium Jupiler League in April, 2009?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(t2.id) FROM League AS t1 INNER JOIN Match AS t2 ON t1.id = t2.league_id WHERE t1.name = 'Belgium Jupiler League' AND SUBSTR(t2.\"date\", 1, 7) = '2009-04'",
+      "actual_sql": "I cannot answer this question with the provided database schema. The schema contains tables for ad campaigns, concert seating, fleet dispatch, loyalty tiers, ticket auditing, and warehouse inventory - but there are no tables related to sports matches, football leagues, or the Belgium Jupiler League.\n\nTo answer this question, I would need access to a sports/football database with tables containing match data, league information, and dates.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"I\"\nLINE 1: I cannot answer this question with the provided database sch...\n        ^\n[SQL: I cannot answer this question with the provided database schema. The schema contains tables for ad campaigns, concert seating, fleet dispatch, loyalty tiers, ticket auditing, and warehouse inventory - but there are no tables related to sports matches, football leagues, or the Belgium Jupiler League.\n\nTo answer this question, I would need access to a sports/football database with tables containing match data, league information, and dates.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Give the name of the league had the most matches in the 2008/2009 season?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT t1.name FROM League AS t1 JOIN Match AS t2 ON t1.id = t2.league_id WHERE t2.season = '2008/2009' GROUP BY t1.name HAVING COUNT(t2.id) = (SELECT MAX(match_count) FROM (SELECT COUNT(t2.id) AS match_count FROM Match AS t2 WHERE t2.season = '2008/2009' GROUP BY t2.league_id) AS subquery)",
+      "actual_sql": "This question cannot be answered with the provided database schema. The schema contains tables related to ad campaigns, concert seat inventory, fleet dispatch routing, loyalty tier calculation, ticket audit workflows, and warehouse inventory - but no tables related to sports leagues, matches, or seasons.\n\nThere is no data available in this schema about leagues, matches, or the 2008/2009 season.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"This\"\nLINE 1: This question cannot be answered with the provided database ...\n        ^\n[SQL: This question cannot be answered with the provided database schema. The schema contains tables related to ad campaigns, concert seat inventory, fleet dispatch routing, loyalty tier calculation, ticket audit workflows, and warehouse inventory - but no tables related to sports leagues, matches, or seasons.\n\nThere is no data available in this schema about leagues, matches, or the 2008/2009 season.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How much higher in percentage is Ariel Borysiuk's overall rating than that of Paulin Puel?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT (SUM(CASE WHEN t1.player_name = 'Ariel Borysiuk' THEN t2.overall_rating ELSE 0 END) * 1.0 - SUM(CASE WHEN t1.player_name = 'Paulin Puel' THEN t2.overall_rating ELSE 0 END)) * 100 / NULLIF(SUM(CASE WHEN t1.player_name = 'Paulin Puel' THEN t2.overall_rating ELSE 0 END), 0) FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id",
+      "actual_sql": "SELECT \n    ROUND(\n        ((a.rating - p.rating) * 100.0 / NULLIF(p.rating, 0)), \n        2\n    ) AS rating_difference_percentage\nFROM \n    \"people_ratings\" a\nJOIN \n    \"people_ratings\" p ON 1=1\nWHERE \n    a.\"name\" = 'Ariel Borysiuk' \n    AND p.\"name\" = 'Paulin Puel';\n\n-- This query cannot be executed without the actual schema. Please provide table definitions for person ratings data.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"LIMIT\"\nLINE 15: LIMIT 500\n         ^\n[SQL: SELECT \n    ROUND(\n        ((a.rating - p.rating) * 100.0 / NULLIF(p.rating, 0)), \n        2\n    ) AS rating_difference_percentage\nFROM \n    \"people_ratings\" a\nJOIN \n    \"people_ratings\" p ON 1=1\nWHERE \n    a.\"name\" = 'Ariel Borysiuk' \n    AND p.\"name\" = 'Paulin Puel';\n\n-- This query cannot be executed without the actual schema. Please provide table definitions for person ratings data.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Calculate the average overall rating of Pietro Marino.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(SUM(t2.overall_rating) AS REAL) / NULLIF(COUNT(t2.id), 0) FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE t1.player_name = 'Pietro Marino'",
+      "actual_sql": "SELECT AVG(\"overall_rating\") \nFROM \"ratings\" \nJOIN \"users\" ON \"ratings\".\"user_id\" = \"users\".\"id\" \nWHERE \"users\".\"name\" = 'Pietro Marino'\n\n-- Note: Schema not provided. Assuming typical structure with users table (id, name) and ratings table (user_id, overall_rating)",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"ratings\" does not exist\nLINE 2: FROM \"ratings\" \n             ^\n[SQL: SELECT AVG(\"overall_rating\") \nFROM \"ratings\" \nJOIN \"users\" ON \"ratings\".\"user_id\" = \"users\".\"id\" \nWHERE \"users\".\"name\" = 'Pietro Marino'\n\n-- Note: Schema not provided. Assuming typical structure with users table (id, name) and ratings table (user_id, overall_rating)\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is Ajax's highest chance creation passing score and what is it classified as?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT t2.chanceCreationPassing, t2.chanceCreationPassingClass FROM Team AS t1 INNER JOIN Team_Attributes AS t2 ON t1.team_api_id = t2.team_api_id WHERE t1.team_long_name = 'Ajax' ORDER BY t2.chanceCreationPassing DESC NULLS LAST LIMIT 1",
+      "actual_sql": "I cannot answer this question with the provided schema. The database schema contains domain knowledge about advertising campaigns, concert seating, fleet dispatch, loyalty programs, ticket auditing, and warehouse inventory - none of which contain sports analytics data about Ajax, chance creation passing scores, or player performance metrics.\n\nThere are no tables defined in the schema that would contain player statistics, passing scores, or classification data for Ajax (whether referring to the football club or a player).\n\nTo answer this question, I would need a schema with tables containing:\n- Player/team information (e.g., \"ajax\" as a team or player identifier)\n- Passing metrics or chance creation scores\n- Classification categories for those scores\n\nWithout this schema, no valid SQL query can be generated.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"I\"\nLINE 1: I cannot answer this question with the provided schema. The ...\n        ^\n[SQL: I cannot answer this question with the provided schema. The database schema contains domain knowledge about advertising campaigns, concert seating, fleet dispatch, loyalty programs, ticket auditing, and warehouse inventory - none of which contain sports analytics data about Ajax, chance creation passing scores, or player performance metrics.\n\nThere are no tables defined in the schema that would contain player statistics, passing scores, or classification data for Ajax (whether referring to the football club or a player).\n\nTo answer this question, I would need a schema with tables containing:\n- Player/team information (e.g., \"ajax\" as a team or player identifier)\n- Passing metrics or chance creation scores\n- Classification categories for those scores\n\nWithout this schema, no valid SQL query can be generated.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For the players who had a 77 points overall rating on 2016/6/23, who was the oldest? Give the name of the player.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT t1.player_name FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE SUBSTR(t2.\"date\", 1, 10) = '2016-06-23' AND t2.overall_rating = 77 ORDER BY t1.birthday ASC NULLS FIRST LIMIT 1",
+      "actual_sql": "The provided database schema does not contain any tables related to players, ratings, or sports data. The schema includes tables for ad campaigns, concert seats, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory. None of these contain player information or rating data.\n\nThis question cannot be answered with the provided schema. You may need to provide a different database schema that includes player and rating tables.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"The\"\nLINE 1: The provided database schema does not contain any tables rel...\n        ^\n[SQL: The provided database schema does not contain any tables related to players, ratings, or sports data. The schema includes tables for ad campaigns, concert seats, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory. None of these contain player information or rating data.\n\nThis question cannot be answered with the provided schema. You may need to provide a different database schema that includes player and rating tables.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What was the overall rating for Aaron Mooy on 2016/2/4?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT t2.overall_rating FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE SUBSTR(t2.\"date\", 1, 10) = '2016-02-04' AND t1.player_name = 'Aaron Mooy'",
+      "actual_sql": "The provided database schema does not contain any tables related to player ratings, sports data, or information about Aaron Mooy. The schema only includes tables for ad campaigns, concert seat inventory, fleet dispatch, loyalty tiers, ticket audit workflows, and warehouse inventory.\n\nThis question cannot be answered with the available schema.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"The\"\nLINE 1: The provided database schema does not contain any tables rel...\n        ^\n[SQL: The provided database schema does not contain any tables related to player ratings, sports data, or information about Aaron Mooy. The schema only includes tables for ad campaigns, concert seat inventory, fleet dispatch, loyalty tiers, ticket audit workflows, and warehouse inventory.\n\nThis question cannot be answered with the available schema.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How was Francesco Migliore's attacking work rate on 2015/5/1?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT t2.attacking_work_rate FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE t2.\"date\" LIKE '2015-05-01%' AND t1.player_name = 'Francesco Migliore'",
+      "actual_sql": "SELECT \"attacking_work_rate\" \nFROM \"player_performance\" \nWHERE \"player_name\" = 'Francesco Migliore' \n  AND \"date\" = '2015-05-01'\nLIMIT 1;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"player_performance\" does not exist\nLINE 2: FROM \"player_performance\" \n             ^\n[SQL: SELECT \"attacking_work_rate\" \nFROM \"player_performance\" \nWHERE \"player_name\" = 'Francesco Migliore' \n  AND \"date\" = '2015-05-01'\nLIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "When was the first time did Kevin Constant have his highest crossing score? Give the date.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT \"date\" FROM (SELECT t2.crossing, t2.\"date\" FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_fifa_api_id = t2.player_fifa_api_id WHERE t1.player_name = 'Kevin Constant' ORDER BY t2.crossing DESC) AS subquery ORDER BY \"date\" DESC LIMIT 1",
+      "actual_sql": "This question cannot be answered with the provided database schema. The schema contains tables related to ad campaigns, concert seats, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory - none of which contain sports player data, crossing scores, or information about \"Kevin Constant.\"\n\nIf you have a sports-related database schema with player statistics, please provide that schema so I can generate the appropriate query.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"This\"\nLINE 1: This question cannot be answered with the provided database ...\n        ^\n[SQL: This question cannot be answered with the provided database schema. The schema contains tables related to ad campaigns, concert seats, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory - none of which contain sports player data, crossing scores, or information about \"Kevin Constant.\"\n\nIf you have a sports-related database schema with player statistics, please provide that schema so I can generate the appropriate query.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Tell the build Up play passing class for \"FC Lorient\" on 2010/2/22.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT t2.buildUpPlayPassingClass FROM Team AS t1 INNER JOIN Team_Attributes AS t2 ON t1.team_api_id = t2.team_api_id WHERE t1.team_long_name = 'FC Lorient' AND t2.\"date\" LIKE '2010-02-22%'",
+      "actual_sql": "SELECT 'No football/soccer data available in this schema' AS message\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For the team \"Hannover 96\", what was its defence aggression class on 2015/9/10?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT t2.defenceAggressionClass FROM Team AS t1 INNER JOIN Team_Attributes AS t2 ON t1.team_api_id = t2.team_api_id WHERE t1.team_long_name = 'Hannover 96' AND t2.\"date\" LIKE '2015-09-10%'",
+      "actual_sql": "This question cannot be answered with the provided schema. The database schema contains domain knowledge about ad campaigns, concert seating, fleet dispatch, loyalty tiers, ticket auditing, and warehouse inventory - but there is no sports/football data, team information, or match statistics tables that would contain information about \"Hannover 96\" or \"defence aggression class\".\n\nThe schema provided does not include any table definitions or column names that would support this query.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"This\"\nLINE 1: This question cannot be answered with the provided schema. T...\n        ^\n[SQL: This question cannot be answered with the provided schema. The database schema contains domain knowledge about ad campaigns, concert seating, fleet dispatch, loyalty tiers, ticket auditing, and warehouse inventory - but there is no sports/football data, team information, or match statistics tables that would contain information about \"Hannover 96\" or \"defence aggression class\".\n\nThe schema provided does not include any table definitions or column names that would support this query.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What was the average overall rating for Marko Arnautovic from 2007/2/22 to 2016/4/21?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT CAST(SUM(t2.overall_rating) AS REAL) / NULLIF(COUNT(t2.id), 0) FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_fifa_api_id = t2.player_fifa_api_id WHERE t1.player_name = 'Marko Arnautovic' AND SUBSTR(t2.\"date\", 1, 10) BETWEEN '2007-02-22' AND '2016-04-21'",
+      "actual_sql": "SELECT AVG(\"overall_rating\") AS \"average_rating\"\nFROM \"player_ratings\"\nWHERE \"player_name\" = 'Marko Arnautovic'\n  AND \"rating_date\" >= '2007-02-22'\n  AND \"rating_date\" <= '2016-04-21';\n\n-- Note: No matching table schema provided in the database schema. This query assumes a \"player_ratings\" table exists with columns for player name, rating date, and overall rating.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"LIMIT\"\nLINE 8: LIMIT 500\n        ^\n[SQL: SELECT AVG(\"overall_rating\") AS \"average_rating\"\nFROM \"player_ratings\"\nWHERE \"player_name\" = 'Marko Arnautovic'\n  AND \"rating_date\" >= '2007-02-22'\n  AND \"rating_date\" <= '2016-04-21';\n\n-- Note: No matching table schema provided in the database schema. This query assumes a \"player_ratings\" table exists with columns for player name, rating date, and overall rating.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What percentage is Landon Donovan's overall rating higher than Jordan Bowery on 2013/7/12?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT (SUM(CASE WHEN t1.player_name = 'Landon Donovan' THEN t2.overall_rating ELSE 0 END) * 1.0 - SUM(CASE WHEN t1.player_name = 'Jordan Bowery' THEN t2.overall_rating ELSE 0 END)) * 100 / NULLIF(SUM(CASE WHEN t1.player_name = 'Landon Donovan' THEN t2.overall_rating ELSE 0 END), 0) AS LvsJ_percent FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_fifa_api_id = t2.player_fifa_api_id WHERE SUBSTR(t2.\"date\", 1, 10) = '2013-07-12'",
+      "actual_sql": "This question cannot be answered with the provided database schema. The schema contains tables for:\n\n- ad_campaign_pacing\n- concert_seat_inventory\n- fleet_dispatch_routing\n- loyalty_tier_calculation\n- ticket_audit_workflow\n- warehouse_inventory_basics\n\nNone of these tables contain soccer player data, ratings, or information about Landon Donovan or Jordan Bowery. There is no player ratings table in this schema.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"This\"\nLINE 1: This question cannot be answered with the provided database ...\n        ^\n[SQL: This question cannot be answered with the provided database schema. The schema contains tables for:\n\n- ad_campaign_pacing\n- concert_seat_inventory\n- fleet_dispatch_routing\n- loyalty_tier_calculation\n- ticket_audit_workflow\n- warehouse_inventory_basics\n\nNone of these tables contain soccer player data, ratings, or information about Landon Donovan or Jordan Bowery. There is no player ratings table in this schema.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List down most tallest players' name.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT player_name FROM (SELECT player_name, height, DENSE_RANK() OVER (ORDER BY height DESC) AS rank FROM Player) AS subquery WHERE rank = 1",
+      "actual_sql": "-- Note: The provided schema contains no tables related to players or sports data. \n-- Available tables are: ad_campaign_pacing, concert_seat_inventory, \n-- fleet_dispatch_routing, loyalty_tier_calculation, ticket_audit_workflow, \n-- warehouse_inventory_basics (and their versions). None contain player height information.\n-- Cannot generate a valid query for this question with the given schema.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"LIMIT\"\nLINE 6: LIMIT 500\n        ^\n[SQL: -- Note: The provided schema contains no tables related to players or sports data. \n-- Available tables are: ad_campaign_pacing, concert_seat_inventory, \n-- fleet_dispatch_routing, loyalty_tier_calculation, ticket_audit_workflow, \n-- warehouse_inventory_basics (and their versions). None contain player height information.\n-- Cannot generate a valid query for this question with the given schema.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "State the name of the most strongest player.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT DISTINCT t1.player_name FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE t2.overall_rating = (SELECT MAX(overall_rating) FROM Player_Attributes)",
+      "actual_sql": "SELECT \"name\" FROM \"players\" ORDER BY \"strength\" DESC LIMIT 1;\n\n-- Note: This schema does not contain any player-related tables. The available tables cover ad campaigns, concert seating, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory. No player data exists in this database.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"players\" does not exist\nLINE 1: SELECT \"name\" FROM \"players\" ORDER BY \"strength\" DESC LIMIT ...\n                           ^\n[SQL: SELECT \"name\" FROM \"players\" ORDER BY \"strength\" DESC LIMIT 1;\n\n-- Note: This schema does not contain any player-related tables. The available tables cover ad campaigns, concert seating, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory. No player data exists in this database.]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Who are the players that tend to be attacking when their mates were doing attack moves? List down their name.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT t1.player_name FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE t2.attacking_work_rate = 'high'",
+      "actual_sql": "I cannot answer this question because the provided database schema does not contain any tables related to players, sports, or game data. The schema only includes tables for:\n\n- ad_campaign_pacing (advertising campaigns)\n- concert_seat_inventory (ticket sales)\n- fleet_dispatch_routing (delivery logistics)\n- loyalty_tier_calculation (customer loyalty)\n- ticket_audit_workflow (ticket auditing)\n- warehouse_inventory_basics (warehouse inventory)\n\nNone of these tables contain player names, attack moves, or teammate relationships needed to answer this question.\n\nIf you have a different schema with sports/player data, please provide it and I can generate the appropriate query.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"I\"\nLINE 1: I cannot answer this question because the provided database ...\n        ^\n[SQL: I cannot answer this question because the provided database schema does not contain any tables related to players, sports, or game data. The schema only includes tables for:\n\n- ad_campaign_pacing (advertising campaigns)\n- concert_seat_inventory (ticket sales)\n- fleet_dispatch_routing (delivery logistics)\n- loyalty_tier_calculation (customer loyalty)\n- ticket_audit_workflow (ticket auditing)\n- warehouse_inventory_basics (warehouse inventory)\n\nNone of these tables contain player names, attack moves, or teammate relationships needed to answer this question.\n\nIf you have a different schema with sports/player data, please provide it and I can generate the appropriate query.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What are the short name of team who played safe while creating chance of passing?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT t1.team_short_name FROM Team AS t1 INNER JOIN Team_Attributes AS t2 ON t1.team_api_id = t2.team_api_id WHERE t2.chanceCreationPassingClass = 'Safe'",
+      "actual_sql": "This question cannot be answered with the provided database schema. The schema contains tables for ad campaigns, concert seat inventory, fleet dispatch, loyalty tiers, ticket audit, and warehouse inventory - none of which contain sports team data, passing statistics, or defensive play information. There is no table with team names, match data, or passing/chance creation metrics.\n\nTo answer this question, you would need a sports analytics schema with tables containing team information, match events, passing statistics, and defensive play data.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"This\"\nLINE 1: This question cannot be answered with the provided database ...\n        ^\n[SQL: This question cannot be answered with the provided database schema. The schema contains tables for ad campaigns, concert seat inventory, fleet dispatch, loyalty tiers, ticket audit, and warehouse inventory - none of which contain sports team data, passing statistics, or defensive play information. There is no table with team names, match data, or passing/chance creation metrics.\n\nTo answer this question, you would need a sports analytics schema with tables containing team information, match events, passing statistics, and defensive play data.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many football players born after the 1990s have the first name \"Aaron\"?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT COUNT(id) FROM Player WHERE birthday > '1990' AND player_name LIKE 'Aaron%'",
+      "actual_sql": "SELECT COUNT(*) \nFROM \"football_players\" \nWHERE \"first_name\" = 'Aaron' \n  AND EXTRACT(YEAR FROM \"birth_date\") > 1990;\n\n-- Note: This query cannot be executed as the provided schema does not contain any football players table. The schema only includes tables for ad campaigns, concert inventory, fleet dispatch, loyalty tiers, ticket audit, and warehouse inventory.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"LIMIT\"\nLINE 7: LIMIT 500\n        ^\n[SQL: SELECT COUNT(*) \nFROM \"football_players\" \nWHERE \"first_name\" = 'Aaron' \n  AND EXTRACT(YEAR FROM \"birth_date\") > 1990;\n\n-- Note: This query cannot be executed as the provided schema does not contain any football players table. The schema only includes tables for ad campaigns, concert inventory, fleet dispatch, loyalty tiers, ticket audit, and warehouse inventory.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the difference between players 6 and 23's jumping scores?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT SUM(CASE WHEN t1.id = 6 THEN t1.jumping ELSE 0 END) - SUM(CASE WHEN t1.id = 23 THEN t1.jumping ELSE 0 END) FROM Player_Attributes AS t1",
+      "actual_sql": "This question cannot be answered with the provided database schema. The schema contains tables for ad campaigns, concert seats, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory - none of which contain player data or jumping scores. There is no table with player information or athletic performance metrics in the provided schema.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"This\"\nLINE 1: This question cannot be answered with the provided database ...\n        ^\n[SQL: This question cannot be answered with the provided database schema. The schema contains tables for ad campaigns, concert seats, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory - none of which contain player data or jumping scores. There is no table with player information or athletic performance metrics in the provided schema.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Please provide top four football players' IDs who are among the lowest potential players and prefer to use the right foot when attacking.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT id FROM Player_Attributes WHERE preferred_foot = 'right' ORDER BY potential ASC NULLS LAST LIMIT 4",
+      "actual_sql": "The provided database schema does not contain any tables related to football players. The schema includes tables for:\n\n- Ad campaign pacing\n- Concert seat inventory\n- Fleet dispatch routing\n- Loyalty tier calculation\n- Ticket audit workflow\n- Warehouse inventory basics\n\nNone of these contain football player data. I cannot generate a valid SQL query for this question with the given schema. Please provide the correct database schema containing football player information.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"The\"\nLINE 1: The provided database schema does not contain any tables rel...\n        ^\n[SQL: The provided database schema does not contain any tables related to football players. The schema includes tables for:\n\n- Ad campaign pacing\n- Concert seat inventory\n- Fleet dispatch routing\n- Loyalty tier calculation\n- Ticket audit workflow\n- Warehouse inventory basics\n\nNone of these contain football player data. I cannot generate a valid SQL query for this question with the given schema. Please provide the correct database schema containing football player information.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many players had the highest potential score for crossing that preferred to use their left foots while attacking?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(t1.id) FROM Player_Attributes AS t1 WHERE t1.preferred_foot = 'left' AND t1.crossing = (SELECT MAX(crossing) FROM Player_Attributes)",
+      "actual_sql": "I cannot answer this question because the provided database schema does not contain any tables related to players, sports statistics, crossing scores, or foot preference. The schema only includes tables for:\n\n- ad_campaign_pacing (advertising campaigns)\n- concert_seat_inventory (ticket sales)\n- fleet_dispatch_routing (vehicle logistics)\n- loyalty_tier_calculation (customer loyalty programs)\n- ticket_audit_workflow (ticket auditing)\n- warehouse_inventory_basics (inventory management)\n\nNone of these tables contain player or sports-related data. Please provide a schema with player statistics tables, or clarify if you meant a different question that matches the available schema.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"I\"\nLINE 1: I cannot answer this question because the provided database ...\n        ^\n[SQL: I cannot answer this question because the provided database schema does not contain any tables related to players, sports statistics, crossing scores, or foot preference. The schema only includes tables for:\n\n- ad_campaign_pacing (advertising campaigns)\n- concert_seat_inventory (ticket sales)\n- fleet_dispatch_routing (vehicle logistics)\n- loyalty_tier_calculation (customer loyalty programs)\n- ticket_audit_workflow (ticket auditing)\n- warehouse_inventory_basics (inventory management)\n\nNone of these tables contain player or sports-related data. Please provide a schema with player statistics tables, or clarify if you meant a different question that matches the available schema.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What was the final score for the match on September 24, 2008, in the Belgian Jupiler League between the home team and the away team?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT t2.home_team_goal, t2.away_team_goal FROM League AS t1 INNER JOIN Match AS t2 ON t1.id = t2.league_id WHERE t1.name = 'Belgium Jupiler League' AND t2.\"date\" LIKE '2008-09-24%'",
+      "actual_sql": "The provided database schema does not contain any tables related to sports matches, leagues, or scores. The schema only includes tables for:\n\n- Ad campaign pacing\n- Concert seat inventory\n- Fleet dispatch routing\n- Loyalty tier calculation\n- Ticket audit workflow\n- Warehouse inventory basics\n\nNone of these tables contain Belgian Jupiler League match data or scores. This question cannot be answered with the available database schema.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"The\"\nLINE 1: The provided database schema does not contain any tables rel...\n        ^\n[SQL: The provided database schema does not contain any tables related to sports matches, leagues, or scores. The schema only includes tables for:\n\n- Ad campaign pacing\n- Concert seat inventory\n- Fleet dispatch routing\n- Loyalty tier calculation\n- Ticket audit workflow\n- Warehouse inventory basics\n\nNone of these tables contain Belgian Jupiler League match data or scores. This question cannot be answered with the available database schema.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Does the KSV Cercle Brugge team have a slow, balanced or fast speed class?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT t1.buildUpPlaySpeedClass FROM Team_Attributes AS t1 INNER JOIN Team AS t2 ON t1.team_api_id = t2.team_api_id WHERE t2.team_long_name = 'KSV Cercle Brugge'",
+      "actual_sql": "The provided database schema does not contain any tables related to sports teams, football clubs, or team speed classifications. The schema includes only domain knowledge for ad campaigns, concert inventory, fleet routing, loyalty tiers, ticket auditing, and warehouse inventory - none of which contain information about KSV Cercle Brugge or team speed classes.\n\nThis query cannot be answered from the available schema.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"The\"\nLINE 1: The provided database schema does not contain any tables rel...\n        ^\n[SQL: The provided database schema does not contain any tables related to sports teams, football clubs, or team speed classifications. The schema includes only domain knowledge for ad campaigns, concert inventory, fleet routing, loyalty tiers, ticket auditing, and warehouse inventory - none of which contain information about KSV Cercle Brugge or team speed classes.\n\nThis query cannot be answered from the available schema.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Please state the finishing rate and curve score of the player who has the heaviest weight.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT id, finishing, curve FROM Player_Attributes WHERE player_api_id = (SELECT player_api_id FROM Player ORDER BY weight DESC NULLS LAST LIMIT 1) LIMIT 1",
+      "actual_sql": "This query cannot be answered with the provided database schema. The schema contains tables for ad campaigns, concert seating, fleet dispatch, loyalty tiers, ticket auditing, and warehouse inventory - none of which contain player data, finishing rates, curve scores, or weight information. There is no table that tracks sports player statistics in this database.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"This\"\nLINE 1: This query cannot be answered with the provided database sch...\n        ^\n[SQL: This query cannot be answered with the provided database schema. The schema contains tables for ad campaigns, concert seating, fleet dispatch, loyalty tiers, ticket auditing, and warehouse inventory - none of which contain player data, finishing rates, curve scores, or weight information. There is no table that tracks sports player statistics in this database.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Which top 4 leagues had the most games in the 2015-2016 season?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT t1.name FROM League AS t1 INNER JOIN Match AS t2 ON t1.id = t2.league_id WHERE t2.season = '2015/2016' GROUP BY t1.name ORDER BY COUNT(t2.id) DESC NULLS LAST LIMIT 4",
+      "actual_sql": "SELECT * FROM nonexistent_leagues_table LIMIT 0;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"nonexistent_leagues_table\" does not exist\nLINE 1: SELECT * FROM nonexistent_leagues_table LIMIT 0\n                      ^\n[SQL: SELECT * FROM nonexistent_leagues_table LIMIT 0]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Please provide the full name of the away team that scored the most goals.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT t2.team_long_name FROM Match AS t1 INNER JOIN Team AS t2 ON t1.away_team_api_id = t2.team_api_id ORDER BY t1.away_team_goal DESC NULLS LAST LIMIT 1",
+      "actual_sql": "The provided database schema does not contain any tables related to sports, teams, or goals. The available tables are for ad campaigns, concert seats, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory. This question cannot be answered with the given schema.\n\nIf you have a different schema with sports/team data, please provide it and I'll generate the appropriate query.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"The\"\nLINE 1: The provided database schema does not contain any tables rel...\n        ^\n[SQL: The provided database schema does not contain any tables related to sports, teams, or goals. The available tables are for ad campaigns, concert seats, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory. This question cannot be answered with the given schema.\n\nIf you have a different schema with sports/team data, please provide it and I'll generate the appropriate query.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Please name one player whose overall strength is the greatest.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT DISTINCT t1.player_name FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE t2.overall_rating = (SELECT MAX(overall_rating) FROM Player_Attributes)",
+      "actual_sql": "This question cannot be answered with the provided database schema. The schema contains tables related to:\n- Ad campaign pacing\n- Concert seat inventory\n- Fleet dispatch routing\n- Loyalty tier calculation\n- Ticket audit workflow\n- Warehouse inventory\n\nNone of these tables contain player or strength data. There is no table that tracks players, sports statistics, or strength metrics in this database.\n\nIf you have a different schema with player-related tables, please provide it so I can generate an appropriate query.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"This\"\nLINE 1: This question cannot be answered with the provided database ...\n        ^\n[SQL: This question cannot be answered with the provided database schema. The schema contains tables related to:\n- Ad campaign pacing\n- Concert seat inventory\n- Fleet dispatch routing\n- Loyalty tier calculation\n- Ticket audit workflow\n- Warehouse inventory\n\nNone of these tables contain player or strength data. There is no table that tracks players, sports statistics, or strength metrics in this database.\n\nIf you have a different schema with player-related tables, please provide it so I can generate an appropriate query.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the percentage of players that are under 180 cm who have an overall strength of more than 70?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(COUNT(CASE WHEN t2.overall_rating > 70 AND t1.height < 180 THEN t1.id ELSE NULL END) AS REAL) * 100 / NULLIF(COUNT(t1.id), 0) AS percent FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id",
+      "actual_sql": "I cannot generate a valid SQL query for this question because the provided database schema does not contain any tables related to players, height, or strength data. The schema only includes tables for:\n\n- ad_campaign_pacing (versions 1-3)\n- concert_seat_inventory (versions 1-3)\n- fleet_dispatch_routing (versions 1-3)\n- loyalty_tier_calculation (versions 1-4)\n- ticket_audit_workflow (versions 1-3)\n- warehouse_inventory_basics (versions 1-3)\n\nNone of these tables contain player information with height or strength attributes. To answer this question, you would need a table like `players` with columns for height (in cm) and overall strength.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"I\"\nLINE 1: I cannot generate a valid SQL query for this question becaus...\n        ^\n[SQL: I cannot generate a valid SQL query for this question because the provided database schema does not contain any tables related to players, height, or strength data. The schema only includes tables for:\n\n- ad_campaign_pacing (versions 1-3)\n- concert_seat_inventory (versions 1-3)\n- fleet_dispatch_routing (versions 1-3)\n- loyalty_tier_calculation (versions 1-4)\n- ticket_audit_workflow (versions 1-3)\n- warehouse_inventory_basics (versions 1-3)\n\nNone of these tables contain player information with height or strength attributes. To answer this question, you would need a table like `players` with columns for height (in cm) and overall strength.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    }
+  ]
+}

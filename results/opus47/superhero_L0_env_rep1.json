@@ -1,0 +1,985 @@
+{
+  "run_id": "superhero_L0_env_rep1",
+  "dataset": "superhero",
+  "level": "L0",
+  "dimensions": [],
+  "model": {
+    "provider": "anthropic",
+    "model": "claude-opus-4-7",
+    "base_url": ""
+  },
+  "runtime_params": {
+    "max_tokens": 4096,
+    "effective_max_tokens": 4096,
+    "temperature": 0.6,
+    "seed": 42,
+    "top_p": 0.95,
+    "presence_penalty": 0.0,
+    "top_k": 20,
+    "reasoning_effort": "medium",
+    "num_ctx": null,
+    "bird_docs_dir": "/Users/gary/myapps/4d-metadata-ablation/bird-docs-revised"
+  },
+  "rep": 1,
+  "timestamp": "2026-06-02T03:29:40.742452+00:00",
+  "elapsed_seconds": 160.8,
+  "aggregate_metrics": {
+    "total_cases": 52,
+    "execution_rate_pct": 96.2,
+    "value_match_pct": 65.4,
+    "column_match_pct": 0.0,
+    "soft_f1_mean": 0.6038,
+    "er_value_gap_pp": 30.8,
+    "error_count": 2,
+    "bird_ex_pct": 65.4,
+    "er_bex_gap_pp": 30.8,
+    "challenging_er_pct": 100.0,
+    "challenging_vm_pct": 25.0,
+    "challenging_soft_f1": 0.2029,
+    "challenging_bird_ex_pct": 25.0,
+    "moderate_er_pct": 92.3,
+    "moderate_vm_pct": 80.8,
+    "moderate_soft_f1": 0.6937,
+    "moderate_bird_ex_pct": 80.8,
+    "simple_er_pct": 100.0,
+    "simple_vm_pct": 71.4,
+    "simple_soft_f1": 0.7803,
+    "simple_bird_ex_pct": 71.4
+  },
+  "per_case_results": [
+    {
+      "question": "Please list all the superpowers of 3-D Man.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T3.power_name FROM superhero AS T1 INNER JOIN hero_power AS T2 ON T1.id = T2.hero_id INNER JOIN superpower AS T3 ON T2.power_id = T3.id WHERE T1.superhero_name = '3-D Man'",
+      "actual_sql": "SELECT \"s\".\"power_name\" FROM \"hero_power\" \"hp\" JOIN \"superpower\" \"s\" ON \"hp\".\"power_id\" = \"s\".\"id\" WHERE \"hp\".\"hero_id\" = 1 LIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 4,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Among the superheroes with the super power of \"Super Strength\", how many of them have a height of over 200cm?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T1.id) FROM superhero AS T1 INNER JOIN hero_power AS T2 ON T1.id = T2.hero_id INNER JOIN superpower AS T3 ON T2.power_id = T3.id WHERE T3.power_name = 'Super Strength' AND T1.height_cm > 200",
+      "actual_sql": "SELECT COUNT(*) FROM \"superhero\" s JOIN \"hero_power\" hp ON s.\"id\" = hp.\"hero_id\" JOIN \"superpower\" sp ON hp.\"power_id\" = sp.\"id\" WHERE sp.\"power_name\" = 'Super Strength' AND s.\"height_cm\" > 200\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Among the superheroes with blue eyes, how many of them have the super power of \"Agility\"?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T1.id) FROM superhero AS T1 INNER JOIN hero_power AS T2 ON T1.id = T2.hero_id INNER JOIN superpower AS T3 ON T2.power_id = T3.id INNER JOIN colour AS T4 ON T1.eye_colour_id = T4.id WHERE T3.power_name = 'Agility' AND T4.colour = 'Blue'",
+      "actual_sql": "SELECT COUNT(*) FROM \"superhero\" s JOIN \"colour\" c ON s.\"eye_colour_id\" = c.\"id\" JOIN \"hero_power\" hp ON s.\"id\" = hp.\"hero_id\" JOIN \"superpower\" sp ON hp.\"power_id\" = sp.\"id\" WHERE c.\"colour\" = 'Blue' AND sp.\"power_name\" = 'Agility'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Please list the superhero names of all the superheroes that have blue eyes and blond hair.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT T1.superhero_name FROM superhero AS T1 INNER JOIN colour AS T2 ON T1.eye_colour_id = T2.id INNER JOIN colour AS T3 ON T1.hair_colour_id = T3.id WHERE T2.colour = 'Blue' AND T3.colour = 'Blond'",
+      "actual_sql": "SELECT \"s\".\"superhero_name\" FROM \"superhero\" \"s\" JOIN \"colour\" \"ec\" ON \"s\".\"eye_colour_id\" = \"ec\".\"id\" JOIN \"colour\" \"hc\" ON \"s\".\"hair_colour_id\" = \"hc\".\"id\" WHERE \"ec\".\"colour\" = 'Blue' AND \"hc\".\"colour\" = 'Blond' LIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 90,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Rank heroes published by Marvel Comics by their height in descending order.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT superhero_name, height_cm, RANK() OVER (ORDER BY height_cm DESC NULLS LAST) AS HeightRank FROM superhero INNER JOIN publisher ON superhero.publisher_id = publisher.id WHERE publisher.publisher_name = 'Marvel Comics'",
+      "actual_sql": "SELECT \"s\".\"superhero_name\", \"s\".\"height_cm\" FROM \"superhero\" \"s\" JOIN \"publisher\" \"p\" ON \"s\".\"publisher_id\" = \"p\".\"id\" WHERE \"p\".\"publisher_name\" = 'Marvel Comics' ORDER BY \"s\".\"height_cm\" DESC LIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 100,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.410678,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 0.258398,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Rank superheroes from Marvel Comics by their eye color popularity, starting with the most common color.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT colour.colour AS EyeColor, COUNT(superhero.id) AS Count, RANK() OVER (ORDER BY COUNT(superhero.id) DESC NULLS LAST) AS PopularityRank FROM superhero INNER JOIN colour ON superhero.eye_colour_id = colour.id INNER JOIN publisher ON superhero.publisher_id = publisher.id WHERE publisher.publisher_name = 'Marvel Comics' GROUP BY colour.colour",
+      "actual_sql": "SELECT \"c\".\"colour\", COUNT(*) AS \"hero_count\", RANK() OVER (ORDER BY COUNT(*) DESC) AS \"rank\"\nFROM \"superhero\" \"s\"\nJOIN \"publisher\" \"p\" ON \"s\".\"publisher_id\" = \"p\".\"id\"\nJOIN \"colour\" \"c\" ON \"s\".\"eye_colour_id\" = \"c\".\"id\"\nWHERE \"p\".\"publisher_name\" = 'Marvel Comics'\nGROUP BY \"c\".\"colour\"\nORDER BY \"hero_count\" DESC\nLIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 19,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "List the superheroes from Marvel Comics who have the super power of 'Super Strength'.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT superhero_name FROM superhero AS T1 WHERE EXISTS(SELECT 1 FROM hero_power AS T2 INNER JOIN superpower AS T3 ON T2.power_id = T3.id WHERE T3.power_name = 'Super Strength' AND T1.id = T2.hero_id) AND EXISTS(SELECT 1 FROM publisher AS T4 WHERE T4.publisher_name = 'Marvel Comics' AND T1.publisher_id = T4.id)",
+      "actual_sql": "SELECT \"s\".\"superhero_name\" FROM \"superhero\" \"s\" JOIN \"publisher\" \"p\" ON \"s\".\"publisher_id\" = \"p\".\"id\" JOIN \"hero_power\" \"hp\" ON \"s\".\"id\" = \"hp\".\"hero_id\" JOIN \"superpower\" \"sp\" ON \"hp\".\"power_id\" = \"sp\".\"id\" WHERE \"p\".\"publisher_name\" = 'Marvel Comics' AND \"sp\".\"power_name\" = 'Super Strength' LIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 100,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.664452,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 0.497512,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Which publisher published the slowest superhero?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T2.publisher_name FROM superhero AS T1 INNER JOIN publisher AS T2 ON T1.publisher_id = T2.id INNER JOIN hero_attribute AS T3 ON T1.id = T3.hero_id INNER JOIN attribute AS T4 ON T3.attribute_id = T4.id WHERE T4.attribute_name = 'Speed' ORDER BY T3.attribute_value NULLS FIRST LIMIT 1",
+      "actual_sql": "SELECT \"p\".\"publisher_name\"\nFROM \"superhero\" \"s\"\nJOIN \"hero_attribute\" \"ha\" ON \"ha\".\"hero_id\" = \"s\".\"id\"\nJOIN \"publisher\" \"p\" ON \"p\".\"id\" = \"s\".\"publisher_id\"\nWHERE \"ha\".\"attribute_id\" = 2\nORDER BY \"ha\".\"attribute_value\" ASC\nLIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many gold-eyed superheroes did Marvel Comics publish?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T1.id) FROM superhero AS T1 INNER JOIN publisher AS T2 ON T1.publisher_id = T2.id INNER JOIN colour AS T3 ON T1.eye_colour_id = T3.id WHERE T2.publisher_name = 'Marvel Comics' AND T3.colour = 'Gold'",
+      "actual_sql": "SELECT COUNT(*) FROM \"superhero\" s JOIN \"colour\" c ON s.\"eye_colour_id\" = c.\"id\" JOIN \"publisher\" p ON s.\"publisher_id\" = p.\"id\" WHERE c.\"colour\" = 'Gold' AND p.\"publisher_name\" = 'Marvel Comics'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Who is the dumbest superhero?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.superhero_name FROM superhero AS T1 INNER JOIN hero_attribute AS T2 ON T1.id = T2.hero_id INNER JOIN attribute AS T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'Intelligence' ORDER BY T2.attribute_value NULLS FIRST LIMIT 1",
+      "actual_sql": "SELECT \"s\".\"superhero_name\"\nFROM \"superhero\" \"s\"\nJOIN \"hero_attribute\" \"ha\" ON \"s\".\"id\" = \"ha\".\"hero_id\"\nWHERE \"ha\".\"attribute_id\" = 1\nORDER BY \"ha\".\"attribute_value\" ASC\nLIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "What is Copycat's race?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T2.race FROM superhero AS T1 INNER JOIN race AS T2 ON T1.race_id = T2.id WHERE T1.superhero_name = 'Copycat'",
+      "actual_sql": "SELECT \"r\".\"race\" FROM \"superhero\" \"s\" JOIN \"race\" \"r\" ON \"s\".\"race_id\" = \"r\".\"id\" WHERE \"s\".\"superhero_name\" = 'Copycat' LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Which superheroes have a durability attribute value of less than 50?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT superhero_name FROM superhero AS T1 WHERE EXISTS(SELECT 1 FROM hero_attribute AS T2 INNER JOIN attribute AS T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'Durability' AND T2.attribute_value < 50 AND T1.id = T2.hero_id)",
+      "actual_sql": "SELECT \"s\".\"superhero_name\" FROM \"superhero\" \"s\" JOIN \"hero_attribute\" \"ha\" ON \"s\".\"id\" = \"ha\".\"hero_id\" JOIN \"attribute\" \"a\" ON \"ha\".\"attribute_id\" = \"a\".\"id\" WHERE \"a\".\"attribute_name\" = 'Durability' AND \"ha\".\"attribute_value\" < 50 LIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 100,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.424628,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 0.269542,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What are the names of the superheroes with the power of death touch?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.superhero_name FROM superhero AS T1 INNER JOIN hero_power AS T2 ON T1.id = T2.hero_id INNER JOIN superpower AS T3 ON T2.power_id = T3.id WHERE T3.power_name = 'Death Touch'",
+      "actual_sql": "SELECT \"s\".\"superhero_name\" FROM \"superhero\" \"s\" JOIN \"hero_power\" \"hp\" ON \"s\".\"id\" = \"hp\".\"hero_id\" JOIN \"superpower\" \"sp\" ON \"hp\".\"power_id\" = \"sp\".\"id\" WHERE \"sp\".\"power_name\" = 'Death Touch' LIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 7,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "How many female superheroes have a strength value of 100?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T1.id) FROM superhero AS T1 INNER JOIN hero_attribute AS T2 ON T1.id = T2.hero_id INNER JOIN attribute AS T3 ON T2.attribute_id = T3.id INNER JOIN gender AS T4 ON T1.gender_id = T4.id WHERE T3.attribute_name = 'Strength' AND T2.attribute_value = 100 AND T4.gender = 'Female'",
+      "actual_sql": "SELECT COUNT(*) FROM \"superhero\" s JOIN \"gender\" g ON s.\"gender_id\" = g.\"id\" JOIN \"hero_attribute\" ha ON ha.\"hero_id\" = s.\"id\" JOIN \"attribute\" a ON ha.\"attribute_id\" = a.\"id\" WHERE g.\"gender\" = 'Female' AND a.\"attribute_name\" = 'Strength' AND ha.\"attribute_value\" = 100\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "What is the percentage of superheroes who act in their own self-interest or make decisions based on their own moral code? Indicate how many of the said superheroes were published by Marvel Comics.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT (CAST(COUNT(*) AS REAL) * 100 / NULLIF((SELECT COUNT(*) FROM superhero), 0)), CAST(SUM(CASE WHEN T2.publisher_name = 'Marvel Comics' THEN 1 ELSE 0 END) AS REAL) FROM superhero AS T1 INNER JOIN publisher AS T2 ON T1.publisher_id = T2.id INNER JOIN alignment AS T3 ON T3.id = T1.alignment_id WHERE T3.alignment = 'Bad'",
+      "actual_sql": "SELECT \n  CAST(SUM(CASE WHEN \"a\".\"alignment\" = 'Neutral' THEN 1 ELSE 0 END) AS REAL) * 100 / COUNT(*) AS \"percentage\",\n  SUM(CASE WHEN \"a\".\"alignment\" = 'Neutral' AND \"p\".\"publisher_name\" = 'Marvel Comics' THEN 1 ELSE 0 END) AS \"marvel_neutral_count\"\nFROM \"superhero\" \"s\"\nLEFT JOIN \"alignment\" \"a\" ON \"s\".\"alignment_id\" = \"a\".\"id\"\nLEFT JOIN \"publisher\" \"p\" ON \"s\".\"publisher_id\" = \"p\".\"id\"\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Between DC and Marvel Comics, which publisher has published more superheroes? Find the difference in the number of superheroes they have published.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT SUM(CASE WHEN T2.publisher_name = 'Marvel Comics' THEN 1 ELSE 0 END) - SUM(CASE WHEN T2.publisher_name = 'DC Comics' THEN 1 ELSE 0 END) FROM superhero AS T1 INNER JOIN publisher AS T2 ON T1.publisher_id = T2.id",
+      "actual_sql": "SELECT ABS(SUM(CASE WHEN \"p\".\"publisher_name\" = 'DC Comics' THEN 1 ELSE 0 END) - SUM(CASE WHEN \"p\".\"publisher_name\" = 'Marvel Comics' THEN 1 ELSE 0 END)) AS \"difference\", CASE WHEN SUM(CASE WHEN \"p\".\"publisher_name\" = 'DC Comics' THEN 1 ELSE 0 END) > SUM(CASE WHEN \"p\".\"publisher_name\" = 'Marvel Comics' THEN 1 ELSE 0 END) THEN 'DC Comics' ELSE 'Marvel Comics' END AS \"publisher_with_more\" FROM \"superhero\" \"s\" JOIN \"publisher\" \"p\" ON \"s\".\"publisher_id\" = \"p\".\"id\" WHERE \"p\".\"publisher_name\" IN ('DC Comics', 'Marvel Comics')\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Give the publisher ID of Star Trek.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT id FROM publisher WHERE publisher_name = 'Star Trek'",
+      "actual_sql": "SELECT \"id\" FROM \"publisher\" WHERE \"publisher_name\" = 'Star Trek'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "What is the total number of superheroes without full name?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT COUNT(id) FROM superhero WHERE full_name IS NULL",
+      "actual_sql": "SELECT COUNT(*) FROM \"superhero\" WHERE \"full_name\" IS NULL OR \"full_name\" = ''\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "What is the average weight of all female superheroes?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT AVG(T1.weight_kg) FROM superhero AS T1 INNER JOIN gender AS T2 ON T1.gender_id = T2.id WHERE T2.gender = 'Female'",
+      "actual_sql": "SELECT AVG(\"s\".\"weight_kg\") FROM \"superhero\" \"s\" JOIN \"gender\" \"g\" ON \"s\".\"gender_id\" = \"g\".\"id\" WHERE \"g\".\"gender\" = 'Female'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "List down at least five superpowers of male superheroes.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T3.power_name FROM superhero AS T1 INNER JOIN hero_power AS T2 ON T1.id = T2.hero_id INNER JOIN superpower AS T3 ON T3.id = T2.power_id INNER JOIN gender AS T4 ON T4.id = T1.gender_id WHERE T4.gender = 'Male' LIMIT 5",
+      "actual_sql": "SELECT \"sp\".\"power_name\"\nFROM \"superpower\" \"sp\"\nJOIN \"hero_power\" \"hp\" ON \"hp\".\"power_id\" = \"sp\".\"id\"\nJOIN \"superhero\" \"s\" ON \"s\".\"id\" = \"hp\".\"hero_id\"\nJOIN \"gender\" \"g\" ON \"g\".\"id\" = \"s\".\"gender_id\"\nWHERE \"g\".\"gender\" = 'Male'\nLIMIT 5",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 5,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Among the superheroes with height from 170 to 190, list the names of the superheroes with no eye color.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT T1.superhero_name FROM superhero AS T1 INNER JOIN colour AS T2 ON T1.eye_colour_id = T2.id WHERE T1.height_cm BETWEEN 170 AND 190 AND T2.colour = 'No Colour'",
+      "actual_sql": "SELECT \"s\".\"superhero_name\" FROM \"superhero\" \"s\" JOIN \"colour\" \"c\" ON \"s\".\"eye_colour_id\" = \"c\".\"id\" WHERE \"s\".\"height_cm\" BETWEEN 170 AND 190 AND \"c\".\"colour\" = 'No Colour' LIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 15,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Provide the hair colour of the human superhero who is 185 cm tall.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT T3.colour FROM superhero AS T1 INNER JOIN race AS T2 ON T1.race_id = T2.id INNER JOIN colour AS T3 ON T1.hair_colour_id = T3.id WHERE T1.height_cm = 185 AND T2.race = 'Human'",
+      "actual_sql": "SELECT \"c\".\"colour\" FROM \"superhero\" \"s\" JOIN \"race\" \"r\" ON \"s\".\"race_id\" = \"r\".\"id\" JOIN \"colour\" \"c\" ON \"s\".\"hair_colour_id\" = \"c\".\"id\" WHERE \"r\".\"race\" = 'Human' AND \"s\".\"height_cm\" = 185 LIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 11,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.625,
+        "soft_f1_precision": 0.454545,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "In superheroes with height between 150 to 180, what is the percentage of heroes published by Marvel Comics?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT CAST(COUNT(CASE WHEN T2.publisher_name = 'Marvel Comics' THEN 1 ELSE NULL END) AS REAL) * 100 / NULLIF(COUNT(T1.id), 0) FROM superhero AS T1 INNER JOIN publisher AS T2 ON T1.publisher_id = T2.id WHERE T1.height_cm BETWEEN 150 AND 180",
+      "actual_sql": "SELECT 100.0 * SUM(CASE WHEN \"p\".\"publisher_name\" = 'Marvel Comics' THEN 1 ELSE 0 END) / COUNT(*) AS \"percentage\" FROM \"superhero\" \"s\" JOIN \"publisher\" \"p\" ON \"s\".\"publisher_id\" = \"p\".\"id\" WHERE \"s\".\"height_cm\" BETWEEN 150 AND 180\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Among the male superheroes, list the super hero names of superheroes with weight greater than the 79% average weight of all superheroes.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.superhero_name FROM superhero AS T1 INNER JOIN gender AS T2 ON T1.gender_id = T2.id WHERE T2.gender = 'Male' AND T1.weight_kg * 100 > (SELECT AVG(weight_kg) FROM superhero) * 79",
+      "actual_sql": "SELECT \"s\".\"superhero_name\" FROM \"superhero\" \"s\" JOIN \"gender\" \"g\" ON \"s\".\"gender_id\" = \"g\".\"id\" WHERE \"g\".\"gender\" = 'Male' AND \"s\".\"weight_kg\" > (SELECT AVG(\"weight_kg\") * 0.79 FROM \"superhero\") LIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "What are the superpowers of heroes with ID 1?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT DISTINCT T2.power_name FROM hero_power AS T1 INNER JOIN superpower AS T2 ON T1.power_id = T2.id WHERE T1.hero_id = 1",
+      "actual_sql": "SELECT \"s\".\"power_name\" FROM \"hero_power\" \"hp\" JOIN \"superpower\" \"s\" ON \"hp\".\"power_id\" = \"s\".\"id\" WHERE \"hp\".\"hero_id\" = 1 LIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 4,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "How many heroes have stealth power?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT COUNT(T1.hero_id) FROM hero_power AS T1 INNER JOIN superpower AS T2 ON T1.power_id = T2.id WHERE T2.power_name = 'Stealth'",
+      "actual_sql": "SELECT COUNT(DISTINCT \"hp\".\"hero_id\") FROM \"hero_power\" \"hp\" JOIN \"superpower\" \"sp\" ON \"hp\".\"power_id\" = \"sp\".\"id\" WHERE \"sp\".\"power_name\" = 'Stealth'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "What is the hero's full name with the highest attribute in strength?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.full_name FROM superhero AS T1 INNER JOIN hero_attribute AS T2 ON T1.id = T2.hero_id INNER JOIN attribute AS T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'Strength' ORDER BY T2.attribute_value DESC NULLS LAST LIMIT 1",
+      "actual_sql": "SELECT \"s\".\"full_name\" FROM \"superhero\" \"s\" JOIN \"hero_attribute\" \"ha\" ON \"s\".\"id\" = \"ha\".\"hero_id\" JOIN \"attribute\" \"a\" ON \"ha\".\"attribute_id\" = \"a\".\"id\" WHERE \"a\".\"attribute_name\" = 'Strength' ORDER BY \"ha\".\"attribute_value\" DESC LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Which superhero has the most durability published by Dark Horse Comics?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT T1.superhero_name FROM superhero AS T1 INNER JOIN hero_attribute AS T2 ON T1.id = T2.hero_id INNER JOIN attribute AS T3 ON T3.id = T2.attribute_id INNER JOIN publisher AS T4 ON T4.id = T1.publisher_id WHERE T4.publisher_name = 'Dark Horse Comics' AND T3.attribute_name = 'Durability' ORDER BY T2.attribute_value DESC NULLS LAST LIMIT 1",
+      "actual_sql": "SELECT \"s\".\"superhero_name\" FROM \"superhero\" \"s\" JOIN \"publisher\" \"p\" ON \"s\".\"publisher_id\" = \"p\".\"id\" JOIN \"hero_attribute\" \"ha\" ON \"ha\".\"hero_id\" = \"s\".\"id\" WHERE \"p\".\"publisher_name\" = 'Dark Horse Comics' AND \"ha\".\"attribute_id\" = 2 ORDER BY \"ha\".\"attribute_value\" DESC LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List the eyes, hair and skin colour of all female superheroes published by Dark Horse Comics.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT T1.eye_colour_id, T1.hair_colour_id, T1.skin_colour_id FROM superhero AS T1 INNER JOIN publisher AS T2 ON T2.id = T1.publisher_id INNER JOIN gender AS T3 ON T3.id = T1.gender_id WHERE T2.publisher_name = 'Dark Horse Comics' AND T3.gender = 'Female'",
+      "actual_sql": "SELECT ec.\"colour\" AS \"eye_colour\", hc.\"colour\" AS \"hair_colour\", sc.\"colour\" AS \"skin_colour\"\nFROM \"superhero\" s\nJOIN \"gender\" g ON s.\"gender_id\" = g.\"id\"\nJOIN \"publisher\" p ON s.\"publisher_id\" = p.\"id\"\nLEFT JOIN \"colour\" ec ON s.\"eye_colour_id\" = ec.\"id\"\nLEFT JOIN \"colour\" hc ON s.\"hair_colour_id\" = hc.\"id\"\nLEFT JOIN \"colour\" sc ON s.\"skin_colour_id\" = sc.\"id\"\nWHERE g.\"gender\" = 'Female' AND p.\"publisher_name\" = 'Dark Horse Comics'\nLIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 5,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Which superhero has the same eyes, hair and skin colour? Indicate the publisher of the superhero.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT T1.superhero_name, T2.publisher_name FROM superhero AS T1 INNER JOIN publisher AS T2 ON T1.publisher_id = T2.id WHERE T1.eye_colour_id = T1.hair_colour_id AND T1.eye_colour_id = T1.skin_colour_id",
+      "actual_sql": "SELECT s.\"superhero_name\", p.\"publisher_name\" FROM \"superhero\" s LEFT JOIN \"publisher\" p ON s.\"publisher_id\" = p.\"id\" WHERE s.\"eye_colour_id\" = s.\"hair_colour_id\" AND s.\"hair_colour_id\" = s.\"skin_colour_id\" LIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 100,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.770428,
+        "soft_f1_precision": 0.99,
+        "soft_f1_recall": 0.630573,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the percentage of blue female superheroes among all female superheroes?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT CAST(COUNT(CASE WHEN T3.colour = 'Blue' THEN T1.id ELSE NULL END) AS REAL) * 100 / NULLIF(COUNT(T1.id), 0) FROM superhero AS T1 INNER JOIN gender AS T2 ON T1.gender_id = T2.id INNER JOIN colour AS T3 ON T1.skin_colour_id = T3.id WHERE T2.gender = 'Female'",
+      "actual_sql": "SELECT 100.0 * SUM(CASE WHEN \"c\".\"colour\" = 'Blue' THEN 1 ELSE 0 END) / COUNT(*) AS \"percentage\"\nFROM \"superhero\" \"s\"\nJOIN \"gender\" \"g\" ON \"s\".\"gender_id\" = \"g\".\"id\"\nJOIN \"colour\" \"c\" ON \"s\".\"eye_colour_id\" = \"c\".\"id\"\nWHERE \"g\".\"gender\" = 'Female'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many powers does Amazo hero have?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT COUNT(T1.power_id) FROM hero_power AS T1 INNER JOIN superhero AS T2 ON T1.hero_id = T2.id WHERE T2.superhero_name = 'Amazo'",
+      "actual_sql": "SELECT COUNT(*) FROM \"hero_power\" hp JOIN \"superhero\" s ON hp.\"hero_id\" = s.\"id\" WHERE s.\"superhero_name\" = 'Amazo'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Provide the heights of the heroes whose eye colours are amber.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T1.height_cm FROM superhero AS T1 INNER JOIN colour AS T2 ON T1.eye_colour_id = T2.id WHERE T2.colour = 'Amber'",
+      "actual_sql": "SELECT \"s\".\"superhero_name\", \"s\".\"height_cm\" FROM \"superhero\" \"s\" JOIN \"colour\" \"c\" ON \"s\".\"eye_colour_id\" = \"c\".\"id\" WHERE \"c\".\"colour\" = 'Amber' LIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 3,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List the heroes' names whose eyes and hair colours are both black.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.superhero_name FROM superhero AS T1 INNER JOIN colour AS T2 ON T1.eye_colour_id = T2.id AND T1.hair_colour_id = T2.id WHERE T2.colour = 'Black'",
+      "actual_sql": "SELECT \"superhero_name\" FROM \"superhero\" s JOIN \"colour\" e ON s.\"eye_colour_id\" = e.\"id\" JOIN \"colour\" h ON s.\"hair_colour_id\" = h.\"id\" WHERE e.\"colour\" = 'Black' AND h.\"colour\" = 'Black' LIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 11,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Describe the names of neutral alignment superheroes.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T1.superhero_name FROM superhero AS T1 INNER JOIN alignment AS T2 ON T1.alignment_id = T2.id WHERE T2.alignment = 'Neutral'",
+      "actual_sql": "SELECT \"s\".\"superhero_name\" FROM \"superhero\" \"s\" JOIN \"alignment\" \"a\" ON \"s\".\"alignment_id\" = \"a\".\"id\" WHERE \"a\".\"alignment\" = 'Neutral' LIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 28,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "How many heroes have the highest attribute value in strength?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T1.hero_id) FROM hero_attribute AS T1 INNER JOIN attribute AS T2 ON T1.attribute_id = T2.id WHERE T2.attribute_name = 'Strength' AND T1.attribute_value = (SELECT MAX(attribute_value) FROM hero_attribute)",
+      "actual_sql": "SELECT COUNT(*) FROM \"hero_attribute\" \"ha\" JOIN \"attribute\" \"a\" ON \"ha\".\"attribute_id\" = \"a\".\"id\" WHERE \"a\".\"attribute_name\" = 'Strength' AND \"ha\".\"attribute_value\" = (SELECT MAX(\"ha2\".\"attribute_value\") FROM \"hero_attribute\" \"ha2\" JOIN \"attribute\" \"a2\" ON \"ha2\".\"attribute_id\" = \"a2\".\"id\" WHERE \"a2\".\"attribute_name\" = 'Strength')\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "How many percent of female heroes were published by Marvel Comics?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT CAST(COUNT(CASE WHEN T2.publisher_name = 'Marvel Comics' THEN 1 ELSE NULL END) AS REAL) * 100 / NULLIF(COUNT(T1.id), 0) FROM superhero AS T1 INNER JOIN publisher AS T2 ON T1.publisher_id = T2.id INNER JOIN gender AS T3 ON T1.gender_id = T3.id WHERE T3.gender = 'Female'",
+      "actual_sql": "SELECT CAST(SUM(CASE WHEN \"publisher_id\" = 13 THEN 1 ELSE 0 END) AS REAL) * 100 / COUNT(*) FROM \"superhero\" WHERE \"gender_id\" = 2\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Calculate the difference between Emil Blonsky's weight and Charles Chandler's weight.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT (SELECT weight_kg FROM superhero WHERE full_name LIKE 'Emil Blonsky') - (SELECT weight_kg FROM superhero WHERE full_name LIKE 'Charles Chandler') AS CALCULATE",
+      "actual_sql": "SELECT (SELECT \"weight_kg\" FROM \"superhero\" WHERE \"full_name\" = 'Emil Blonsky') - (SELECT \"weight_kg\" FROM \"superhero\" WHERE \"full_name\" = 'Charles Chandler') AS \"weight_difference\"\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Calculate the average height for all superhero.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT CAST(SUM(height_cm) AS REAL) / NULLIF(COUNT(id), 0) FROM superhero",
+      "actual_sql": "SELECT AVG(\"height_cm\") FROM \"superhero\"\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is Abomination's superpower?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T3.power_name FROM superhero AS T1 INNER JOIN hero_power AS T2 ON T1.id = T2.hero_id INNER JOIN superpower AS T3 ON T2.power_id = T3.id WHERE T1.superhero_name = 'Abomination'",
+      "actual_sql": "SELECT \"superpower\".\"power_name\" FROM \"hero_power\" JOIN \"superpower\" ON \"hero_power\".\"power_id\" = \"superpower\".\"id\" WHERE \"hero_power\".\"hero_id\" = 1 LIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 4,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.5,
+        "soft_f1_precision": 0.75,
+        "soft_f1_recall": 0.375,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Which hero was the fastest?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.superhero_name FROM superhero AS T1 INNER JOIN hero_attribute AS T2 ON T1.id = T2.hero_id INNER JOIN attribute AS T3 ON T2.attribute_id = T3.id WHERE T3.attribute_name = 'Speed' ORDER BY T2.attribute_value DESC NULLS LAST LIMIT 1",
+      "actual_sql": "SELECT s.\"superhero_name\" FROM \"superhero\" s JOIN \"hero_attribute\" ha ON s.\"id\" = ha.\"hero_id\" JOIN \"attribute\" a ON ha.\"attribute_id\" = a.\"id\" WHERE a.\"attribute_name\" = 'Speed' ORDER BY ha.\"attribute_value\" DESC LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "State all of 3-D Man's attributes along with their values.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T3.attribute_name, T2.attribute_value FROM superhero AS T1 INNER JOIN hero_attribute AS T2 ON T1.id = T2.hero_id INNER JOIN attribute AS T3 ON T2.attribute_id = T3.id WHERE T1.superhero_name = '3-D Man'",
+      "actual_sql": "SELECT \"a\".\"attribute_name\", \"ha\".\"attribute_value\" FROM \"superhero\" \"s\" JOIN \"hero_attribute\" \"ha\" ON \"s\".\"id\" = \"ha\".\"hero_id\" JOIN \"attribute\" \"a\" ON \"ha\".\"attribute_id\" = \"a\".\"id\" WHERE \"s\".\"superhero_name\" = '3-D Man'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 6,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Which superheroes have blue eyes with brown hair?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.superhero_name FROM superhero AS T1 INNER JOIN colour AS T2 ON T1.eye_colour_id = T2.id INNER JOIN colour AS T3 ON T1.hair_colour_id = T3.id WHERE T2.colour = 'Blue' AND T3.colour = 'Brown'",
+      "actual_sql": "SELECT \"s\".\"superhero_name\" FROM \"superhero\" \"s\" JOIN \"colour\" \"ec\" ON \"s\".\"eye_colour_id\" = \"ec\".\"id\" JOIN \"colour\" \"hc\" ON \"s\".\"hair_colour_id\" = \"hc\".\"id\" WHERE \"ec\".\"colour\" = 'Blue' AND \"hc\".\"colour\" = 'Brown' LIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 22,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "What is the publisher for Hawkman, Karate Kid and Speedy?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T2.publisher_name FROM superhero AS T1 INNER JOIN publisher AS T2 ON T1.publisher_id = T2.id WHERE T1.superhero_name IN ('Hawkman', 'Karate Kid', 'Speedy')",
+      "actual_sql": "SELECT \"s\".\"superhero_name\", \"p\".\"publisher_name\" FROM \"superhero\" \"s\" LEFT JOIN \"publisher\" \"p\" ON \"s\".\"publisher_id\" = \"p\".\"id\" WHERE \"s\".\"superhero_name\" IN ('Hawkman', 'Karate Kid', 'Speedy') LIMIT 10",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 3,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Calculate the percentage of superheroes with blue eyes.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(COUNT(CASE WHEN T2.colour = 'Blue' THEN 1 ELSE NULL END) AS REAL) * 100 / NULLIF(COUNT(T1.id), 0) FROM superhero AS T1 INNER JOIN colour AS T2 ON T1.eye_colour_id = T2.id",
+      "actual_sql": "SELECT CAST(SUM(CASE WHEN \"c\".\"colour\" = 'Blue' THEN 1 ELSE 0 END) AS REAL) * 100 / COUNT(*) AS \"percentage\" FROM \"superhero\" \"s\" JOIN \"colour\" \"c\" ON \"s\".\"eye_colour_id\" = \"c\".\"id\"\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Find the ratio between male superheroes and female superheroes.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(COUNT(CASE WHEN T2.gender = 'Male' THEN T1.id ELSE NULL END) AS REAL) / NULLIF(COUNT(CASE WHEN T2.gender = 'Female' THEN T1.id ELSE NULL END), 0) FROM superhero AS T1 INNER JOIN gender AS T2 ON T1.gender_id = T2.id",
+      "actual_sql": "SELECT CAST(SUM(CASE WHEN \"gender\".\"gender\" = 'Male' THEN 1 ELSE 0 END) AS REAL) / NULLIF(SUM(CASE WHEN \"gender\".\"gender\" = 'Female' THEN 1 ELSE 0 END), 0) AS \"ratio\" FROM \"superhero\" JOIN \"gender\" ON \"superhero\".\"gender_id\" = \"gender\".\"id\"\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Provide the eye colour of the superhero who has Karen Beecher-Duncan as their full name.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T2.colour FROM superhero AS T1 INNER JOIN colour AS T2 ON T1.eye_colour_id = T2.id WHERE T1.full_name = 'Karen Beecher-Duncan'",
+      "actual_sql": "SELECT \"c\".\"colour\" FROM \"superhero\" \"s\" JOIN \"colour\" \"c\" ON \"s\".\"eye_colour_id\" = \"c\".\"id\" WHERE \"s\".\"full_name\" = 'Karen Beecher-Duncan' LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "In superheroes with missing weight data, calculate the difference between the number of superheroes with blue eyes and no eye color.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT SUM(CASE WHEN T2.id = 7 THEN 1 ELSE 0 END) - SUM(CASE WHEN T2.id = 1 THEN 1 ELSE 0 END) FROM superhero AS T1 INNER JOIN colour AS T2 ON T1.eye_colour_id = T2.id WHERE T1.weight_kg = 0 OR T1.weight_kg IS NULL",
+      "actual_sql": "SELECT\n  SUM(CASE WHEN \"c\".\"colour\" = 'Blue' THEN 1 ELSE 0 END)\n  - SUM(CASE WHEN \"c\".\"colour\" = 'No Colour' THEN 1 ELSE 0 END) AS \"difference\"\nFROM \"superhero\" \"s\"\nJOIN \"colour\" \"c\" ON \"s\".\"eye_colour_id\" = \"c\".\"id\"\nWHERE \"s\".\"weight_kg\" = 0 OR \"s\".\"weight_kg\" IS NULL\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "How many green-skinned villains are there in the superhero universe?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T1.id) FROM superhero AS T1 INNER JOIN alignment AS T2 ON T1.alignment_id = T2.id INNER JOIN colour AS T3 ON T1.skin_colour_id = T3.id WHERE T2.alignment = 'Bad' AND T3.colour = 'Green'",
+      "actual_sql": "SELECT COUNT(*) FROM \"superhero\" s JOIN \"colour\" c ON s.\"skin_colour_id\" = c.\"id\" JOIN \"alignment\" a ON s.\"alignment_id\" = a.\"id\" WHERE c.\"colour\" = 'Green' AND a.\"alignment\" = 'Bad'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Identify superheroes who can control wind and list their names in alphabetical order.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.superhero_name FROM superhero AS T1 INNER JOIN hero_power AS T2 ON T1.id = T2.hero_id INNER JOIN superpower AS T3 ON T2.power_id = T3.id WHERE T3.power_name = 'Wind Control' ORDER BY T1.superhero_name NULLS FIRST",
+      "actual_sql": "SELECT \"s\".\"superhero_name\" FROM \"superhero\" \"s\" JOIN \"hero_power\" \"hp\" ON \"s\".\"id\" = \"hp\".\"hero_id\" JOIN \"superpower\" \"sp\" ON \"hp\".\"power_id\" = \"sp\".\"id\" WHERE \"sp\".\"power_name\" = 'Wind Control' ORDER BY \"s\".\"superhero_name\" LIMIT 100;\n\nNote: The provided schema doesn't include a superpower/power name table, so this query assumes one exists (\"superpower\" with \"power_name\"). Without it, filtering by the specific power \"wind control\" isn't possible from the given schema alone.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"Note\"\nLINE 3: Note: The provided schema doesn't include a superpower/power...\n        ^\n[SQL: SELECT \"s\".\"superhero_name\" FROM \"superhero\" \"s\" JOIN \"hero_power\" \"hp\" ON \"s\".\"id\" = \"hp\".\"hero_id\" JOIN \"superpower\" \"sp\" ON \"hp\".\"power_id\" = \"sp\".\"id\" WHERE \"sp\".\"power_name\" = 'Wind Control' ORDER BY \"s\".\"superhero_name\" LIMIT 100;\n\nNote: The provided schema doesn't include a superpower/power name table, so this query assumes one exists (\"superpower\" with \"power_name\"). Without it, filtering by the specific power \"wind control\" isn't possible from the given schema alone.]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Identify the gender of the superhero who has the ability of Phoenix Force.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T4.gender FROM superhero AS T1 INNER JOIN hero_power AS T2 ON T1.id = T2.hero_id INNER JOIN superpower AS T3 ON T2.power_id = T3.id INNER JOIN gender AS T4 ON T1.gender_id = T4.id WHERE T3.power_name = 'Phoenix Force'",
+      "actual_sql": "SELECT DISTINCT \"g\".\"gender\" FROM \"superhero\" \"s\" JOIN \"gender\" \"g\" ON \"s\".\"gender_id\" = \"g\".\"id\" JOIN \"hero_power\" \"hp\" ON \"hp\".\"hero_id\" = \"s\".\"id\" JOIN \"superpower\" \"sp\" ON \"sp\".\"id\" = \"hp\".\"power_id\" WHERE \"sp\".\"power_name\" = 'Phoenix Force' LIMIT 10;\n\nNote: The schema provided does not include a \"superpower\" table, but the \"hero_power\" table references a \"power_id\" that logically maps to one. I've assumed its existence with a \"power_name\" column. If it doesn't exist, this query won't run as-is.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"Note\"\nLINE 3: Note: The schema provided does not include a \"superpower\" ta...\n        ^\n[SQL: SELECT DISTINCT \"g\".\"gender\" FROM \"superhero\" \"s\" JOIN \"gender\" \"g\" ON \"s\".\"gender_id\" = \"g\".\"id\" JOIN \"hero_power\" \"hp\" ON \"hp\".\"hero_id\" = \"s\".\"id\" JOIN \"superpower\" \"sp\" ON \"sp\".\"id\" = \"hp\".\"power_id\" WHERE \"sp\".\"power_name\" = 'Phoenix Force' LIMIT 10;\n\nNote: The schema provided does not include a \"superpower\" table, but the \"hero_power\" table references a \"power_id\" that logically maps to one. I've assumed its existence with a \"power_name\" column. If it doesn't exist, this query won't run as-is.]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Which publisher created more superheroes: DC or Marvel Comics? Find the difference in the number of superheroes.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT SUM(CASE WHEN T2.publisher_name = 'DC Comics' THEN 1 ELSE 0 END) - SUM(CASE WHEN T2.publisher_name = 'Marvel Comics' THEN 1 ELSE 0 END) FROM superhero AS T1 INNER JOIN publisher AS T2 ON T1.publisher_id = T2.id",
+      "actual_sql": "SELECT ABS(SUM(CASE WHEN \"p\".\"publisher_name\" = 'DC Comics' THEN 1 ELSE 0 END) - SUM(CASE WHEN \"p\".\"publisher_name\" = 'Marvel Comics' THEN 1 ELSE 0 END)) AS \"difference\", CASE WHEN SUM(CASE WHEN \"p\".\"publisher_name\" = 'DC Comics' THEN 1 ELSE 0 END) > SUM(CASE WHEN \"p\".\"publisher_name\" = 'Marvel Comics' THEN 1 ELSE 0 END) THEN 'DC Comics' ELSE 'Marvel Comics' END AS \"more_publisher\" FROM \"superhero\" \"s\" JOIN \"publisher\" \"p\" ON \"s\".\"publisher_id\" = \"p\".\"id\" WHERE \"p\".\"publisher_name\" IN ('DC Comics', 'Marvel Comics')\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    }
+  ]
+}

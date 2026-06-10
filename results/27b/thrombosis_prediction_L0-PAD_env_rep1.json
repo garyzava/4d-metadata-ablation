@@ -1,0 +1,901 @@
+{
+  "run_id": "thrombosis_prediction_L0-PAD_env_rep1",
+  "dataset": "thrombosis_prediction",
+  "level": "L0-PAD",
+  "dimensions": [],
+  "model": {
+    "provider": "huggingface",
+    "model": "Qwen/Qwen3.5-27B",
+    "base_url": ""
+  },
+  "runtime_params": {
+    "max_tokens": 4096,
+    "effective_max_tokens": 4096,
+    "temperature": 0.6,
+    "seed": 42,
+    "top_p": 0.95,
+    "presence_penalty": 0.0,
+    "top_k": 20,
+    "reasoning_effort": "medium",
+    "num_ctx": null,
+    "bird_docs_dir": "/Users/gary/myapps/4d-metadata-ablation/bird-docs-revised"
+  },
+  "rep": 1,
+  "timestamp": "2026-05-31T07:44:48.713420+00:00",
+  "elapsed_seconds": 339.9,
+  "aggregate_metrics": {
+    "total_cases": 50,
+    "execution_rate_pct": 0.0,
+    "value_match_pct": 0.0,
+    "column_match_pct": 0.0,
+    "soft_f1_mean": 0.0,
+    "er_value_gap_pp": 0.0,
+    "error_count": 50,
+    "bird_ex_pct": 0.0,
+    "er_bex_gap_pp": 0.0,
+    "challenging_er_pct": 0.0,
+    "challenging_vm_pct": 0.0,
+    "challenging_soft_f1": 0.0,
+    "challenging_bird_ex_pct": 0.0,
+    "moderate_er_pct": 0.0,
+    "moderate_vm_pct": 0.0,
+    "moderate_soft_f1": 0.0,
+    "moderate_bird_ex_pct": 0.0,
+    "simple_er_pct": 0.0,
+    "simple_vm_pct": 0.0,
+    "simple_soft_f1": 0.0,
+    "simple_bird_ex_pct": 0.0
+  },
+  "per_case_results": [
+    {
+      "question": "Are there more in-patient or outpatient who were male? What is the deviation in percentage?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN Admission = '+' THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(SUM(CASE WHEN Admission = '-' THEN 1 ELSE 0 END), 0) FROM Patient WHERE SEX = 'M'",
+      "actual_sql": "The provided database schema does not contain any tables related to patient data (in-patient, outpatient, gender, etc.). The schema only includes tables for ad campaigns, concert seating, fleet routing, loyalty tiers, ticket auditing, and warehouse inventory.\n\nThis question cannot be answered with the available schema. If you have a different schema with patient/medical data, please provide it.\n\n```sql\n-- Unable to query: No patient-related tables exist in the provided schema\n-- Available tables: ad_campaign_pacing*, concert_seat_inventory*, \n-- fleet_dispatch_routing*, loyalty_tier_calculation*, \n-- ticket_audit_workflow*, warehouse_inventory_basics*",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"The\"\nLINE 1: The provided database schema does not contain any tables rel...\n        ^\n[SQL: The provided database schema does not contain any tables related to patient data (in-patient, outpatient, gender, etc.). The schema only includes tables for ad campaigns, concert seating, fleet routing, loyalty tiers, ticket auditing, and warehouse inventory.\n\nThis question cannot be answered with the available schema. If you have a different schema with patient/medical data, please provide it.\n\n```sql\n-- Unable to query: No patient-related tables exist in the provided schema\n-- Available tables: ad_campaign_pacing*, concert_seat_inventory*, \n-- fleet_dispatch_routing*, loyalty_tier_calculation*, \n-- ticket_audit_workflow*, warehouse_inventory_basics*\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the percentage of female patient were born after 1930?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN TO_CHAR(CAST(Birthday AS TIMESTAMP), 'YYYY') > '1930' THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(COUNT(*), 0) FROM Patient WHERE SEX = 'F'",
+      "actual_sql": "The provided database schema does not contain any tables related to patients, medical records, or demographic information. The available tables are for ad campaigns, concert seat inventory, fleet dispatch, loyalty programs, ticket audits, and warehouse inventory. There is no data to answer this question about female patients and birth years.\n\nIf you have a different schema with patient data, please provide it and I can generate the appropriate query.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"The\"\nLINE 1: The provided database schema does not contain any tables rel...\n        ^\n[SQL: The provided database schema does not contain any tables related to patients, medical records, or demographic information. The available tables are for ad campaigns, concert seat inventory, fleet dispatch, loyalty programs, ticket audits, and warehouse inventory. There is no data to answer this question about female patients and birth years.\n\nIf you have a different schema with patient data, please provide it and I can generate the appropriate query.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the ratio of outpatient to inpatient followed up treatment among all the 'SLE' diagnosed patient?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT SUM(CASE WHEN Admission = '+' THEN 1.0 ELSE 0 END) / NULLIF(SUM(CASE WHEN Admission = '-' THEN 1 ELSE 0 END), 0) FROM Patient WHERE Diagnosis = 'SLE'",
+      "actual_sql": "-- Note: The provided schema contains no medical/patient tables (ad_campaign_pacing, concert_seat_inventory, fleet_dispatch_routing, loyalty_tier_calculation, ticket_audit_workflow, warehouse_inventory_basics). \n-- This question cannot be answered with the available schema as there are no tables for patient diagnoses, treatment types, or follow-up records.\n-- A hypothetical query structure would require tables like: patients, diagnoses, treatments, follow_ups\nSELECT \n  COUNT(CASE WHEN treatment_type = 'outpatient' THEN 1 END)::float / \n  NULLIF(COUNT(CASE WHEN treatment_type = 'inpatient' THEN 1 END), 0) AS outpatient_inpatient_ratio\nFROM treatments t\nJOIN diagnoses d ON t.patient_id = d.patient_id\nWHERE d.diagnosis_code = 'SLE' \n  AND t.is_follow_up = true;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"treatments\" does not exist\nLINE 7: FROM treatments t\n             ^\n[SQL: -- Note: The provided schema contains no medical/patient tables (ad_campaign_pacing, concert_seat_inventory, fleet_dispatch_routing, loyalty_tier_calculation, ticket_audit_workflow, warehouse_inventory_basics). \n-- This question cannot be answered with the available schema as there are no tables for patient diagnoses, treatment types, or follow-up records.\n-- A hypothetical query structure would require tables like: patients, diagnoses, treatments, follow_ups\nSELECT \n  COUNT(CASE WHEN treatment_type = 'outpatient' THEN 1 END)::float / \n  NULLIF(COUNT(CASE WHEN treatment_type = 'inpatient' THEN 1 END), 0) AS outpatient_inpatient_ratio\nFROM treatments t\nJOIN diagnoses d ON t.patient_id = d.patient_id\nWHERE d.diagnosis_code = 'SLE' \n  AND t.is_follow_up = true\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the disease patient '30609' diagnosed with. List all the date of laboratory tests done for this patient.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T1.Diagnosis, T2.Date FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T1.ID = 30609",
+      "actual_sql": "SELECT \n    \"diagnosis\".\"disease_name\",\n    \"lab_tests\".\"test_date\"\nFROM \"patients\"\nJOIN \"diagnosis\" ON \"patients\".\"patient_id\" = \"diagnosis\".\"patient_id\"\nLEFT JOIN \"lab_tests\" ON \"patients\".\"patient_id\" = \"lab_tests\".\"patient_id\"\nWHERE \"patients\".\"patient_id\" = '30609'\nLIMIT 100;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"patients\" does not exist\nLINE 4: FROM \"patients\"\n             ^\n[SQL: SELECT \n    \"diagnosis\".\"disease_name\",\n    \"lab_tests\".\"test_date\"\nFROM \"patients\"\nJOIN \"diagnosis\" ON \"patients\".\"patient_id\" = \"diagnosis\".\"patient_id\"\nLEFT JOIN \"lab_tests\" ON \"patients\".\"patient_id\" = \"lab_tests\".\"patient_id\"\nWHERE \"patients\".\"patient_id\" = '30609'\nLIMIT 100]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List the patient ID, sex and birthday of patient with LDH beyond normal range.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT DISTINCT T1.ID, T1.SEX, T1.Birthday FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.LDH > 500",
+      "actual_sql": "This query cannot be answered with the provided database schema. The schema contains tables for ad campaigns, concert seats, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory - none of which include patient or medical data (LDH values, patient IDs, sex, or birthdays).\n\nIf you have a medical/patient database schema to share, I can generate the appropriate query.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"This\"\nLINE 1: This query cannot be answered with the provided database sch...\n        ^\n[SQL: This query cannot be answered with the provided database schema. The schema contains tables for ad campaigns, concert seats, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory - none of which include patient or medical data (LDH values, patient IDs, sex, or birthdays).\n\nIf you have a medical/patient database schema to share, I can generate the appropriate query.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "State the ID and age of patient with positive degree of coagulation.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT T1.ID, EXTRACT(YEAR FROM CURRENT_TIMESTAMP) - EXTRACT(YEAR FROM T1.Birthday) AS Age FROM Patient AS T1 INNER JOIN Examination AS T2 ON T1.ID = T2.ID WHERE T2.RVVT = '+'",
+      "actual_sql": "This question cannot be answered with the provided schema. The database contains tables for ad campaigns, concert seating, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory - none of which include patient medical data or coagulation information. There is no table with patient IDs, ages, or medical test results in the schema.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"This\"\nLINE 1: This question cannot be answered with the provided schema. T...\n        ^\n[SQL: This question cannot be answered with the provided schema. The database contains tables for ad campaigns, concert seating, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory - none of which include patient medical data or coagulation information. There is no table with patient IDs, ages, or medical test results in the schema.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For patients with severe degree of thrombosis, list their ID, sex and disease the patient is diagnosed with.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT DISTINCT T1.ID, T1.SEX, T1.Diagnosis FROM Patient AS T1 INNER JOIN Examination AS T2 ON T1.ID = T2.ID WHERE T2.Thrombosis = 2",
+      "actual_sql": "-- This question cannot be answered with the provided schema.\n-- The database contains tables for ad campaigns, concert seats, fleet routing,\n-- loyalty tiers, ticket audits, and warehouse inventory. There are no patient\n-- or medical-related tables available for thrombosis data.\n-- No valid SQL query can be generated for this question.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"LIMIT\"\nLINE 6: LIMIT 500\n        ^\n[SQL: -- This question cannot be answered with the provided schema.\n-- The database contains tables for ad campaigns, concert seats, fleet routing,\n-- loyalty tiers, ticket audits, and warehouse inventory. There are no patient\n-- or medical-related tables available for thrombosis data.\n-- No valid SQL query can be generated for this question.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many female patients who came at the hospital in 1997 was immediately followed at the outpatient clinic?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(*) FROM Patient WHERE TO_CHAR(CAST(Description AS TIMESTAMP), 'YYYY') = '1997' AND SEX = 'F' AND Admission = '-'",
+      "actual_sql": "The provided database schema does not contain any tables related to patients, hospitals, or outpatient clinics. The available tables are for:\n- Ad campaign pacing\n- Concert seat inventory\n- Fleet dispatch routing\n- Loyalty tier calculation\n- Ticket audit workflow\n- Warehouse inventory basics\n\nNone of these contain medical or patient data. This question cannot be answered with the given schema.\n\n```sql\n-- ERROR: No patient/hospital tables exist in the provided schema\n-- Available tables: ad_campaign_pacing*, concert_seat_inventory*, \n-- fleet_dispatch_routing*, loyalty_tier_calculation*, \n-- ticket_audit_workflow*, warehouse_inventory_basics*",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"The\"\nLINE 1: The provided database schema does not contain any tables rel...\n        ^\n[SQL: The provided database schema does not contain any tables related to patients, hospitals, or outpatient clinics. The available tables are for:\n- Ad campaign pacing\n- Concert seat inventory\n- Fleet dispatch routing\n- Loyalty tier calculation\n- Ticket audit workflow\n- Warehouse inventory basics\n\nNone of these contain medical or patient data. This question cannot be answered with the given schema.\n\n```sql\n-- ERROR: No patient/hospital tables exist in the provided schema\n-- Available tables: ad_campaign_pacing*, concert_seat_inventory*, \n-- fleet_dispatch_routing*, loyalty_tier_calculation*, \n-- ticket_audit_workflow*, warehouse_inventory_basics*\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many of the patients with the most serious thrombosis cases examined in 1997 are women?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(*) FROM Patient AS T1 INNER JOIN Examination AS T2 ON T1.ID = T2.ID WHERE T1.SEX = 'F' AND TO_CHAR(CAST(T2.\"Examination Date\" AS TIMESTAMP), 'YYYY') = '1997' AND T2.Thrombosis = 1",
+      "actual_sql": "SELECT COUNT(*) AS women_count\nFROM (SELECT 1) AS dummy\nWHERE FALSE;\n\n-- Note: The provided schema contains no patient, medical, or thrombosis-related tables.\n-- Available tables are: ad_campaign_pacing, concert_seat_inventory, fleet_dispatch_routing,\n-- loyalty_tier_calculation, ticket_audit_workflow, and warehouse_inventory_basics.\n-- This query cannot be answered with the given schema.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"LIMIT\"\nLINE 9: LIMIT 500\n        ^\n[SQL: SELECT COUNT(*) AS women_count\nFROM (SELECT 1) AS dummy\nWHERE FALSE;\n\n-- Note: The provided schema contains no patient, medical, or thrombosis-related tables.\n-- Available tables are: ad_campaign_pacing, concert_seat_inventory, fleet_dispatch_routing,\n-- loyalty_tier_calculation, ticket_audit_workflow, and warehouse_inventory_basics.\n-- This query cannot be answered with the given schema.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What are the symptoms observed by the youngest patient to ever did a medical examination? Identify their diagnosis.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T2.Symptoms, T1.Diagnosis FROM Patient AS T1 INNER JOIN Examination AS T2 ON T1.ID = T2.ID WHERE NOT T2.Symptoms IS NULL ORDER BY T1.Birthday DESC NULLS LAST LIMIT 1",
+      "actual_sql": "SELECT \"symptoms\", \"diagnosis\"\nFROM \"medical_examinations\"\nWHERE \"patient_id\" = (\n    SELECT \"patient_id\"\n    FROM \"patients\"\n    ORDER BY \"date_of_birth\" DESC\n    LIMIT 1\n)\nLIMIT 1;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"medical_examinations\" does not exist\nLINE 2: FROM \"medical_examinations\"\n             ^\n[SQL: SELECT \"symptoms\", \"diagnosis\"\nFROM \"medical_examinations\"\nWHERE \"patient_id\" = (\n    SELECT \"patient_id\"\n    FROM \"patients\"\n    ORDER BY \"date_of_birth\" DESC\n    LIMIT 1\n)\nLIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "The oldest SJS patient's medical laboratory work was completed on what date, and what age was the patient when they initially arrived at the hospital?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT T1.Date, EXTRACT(YEAR FROM T2.\"First Date\") - EXTRACT(YEAR FROM T2.Birthday) AS Age, T2.Birthday FROM Laboratory AS T1 INNER JOIN Patient AS T2 ON T1.ID = T2.ID WHERE T2.Diagnosis = 'SJS' AND T2.Birthday IS NOT NULL ORDER BY T2.Birthday ASC LIMIT 1",
+      "actual_sql": "This question cannot be answered with the provided database schema. The schema contains tables for:\n- ad_campaign_pacing\n- concert_seat_inventory\n- fleet_dispatch_routing\n- loyalty_tier_calculation\n- ticket_audit_workflow\n- warehouse_inventory_basics\n\nNone of these tables contain medical/patient data, laboratory work records, hospital admission information, or SJS (Stevens-Johnson Syndrome) patient records. The question requires a medical database schema that is not present in the provided schema.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"This\"\nLINE 1: This question cannot be answered with the provided database ...\n        ^\n[SQL: This question cannot be answered with the provided database schema. The schema contains tables for:\n- ad_campaign_pacing\n- concert_seat_inventory\n- fleet_dispatch_routing\n- loyalty_tier_calculation\n- ticket_audit_workflow\n- warehouse_inventory_basics\n\nNone of these tables contain medical/patient data, laboratory work records, hospital admission information, or SJS (Stevens-Johnson Syndrome) patient records. The question requires a medical database schema that is not present in the provided schema.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the ratio of male to female patients among all those with abnormal uric acid counts?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN T2.UA <= 8.0 AND T1.SEX = 'M' THEN 1 ELSE 0 END) AS REAL) / NULLIF(SUM(CASE WHEN T2.UA <= 6.5 AND T1.SEX = 'F' THEN 1 ELSE 0 END), 0) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID",
+      "actual_sql": "This question cannot be answered with the provided database schema. The schema contains tables for ad campaigns, concert seating, fleet dispatch, loyalty programs, ticket auditing, and warehouse inventory - none of which contain patient or medical data (uric acid counts, gender, etc.). There is no relevant table to query for this medical information.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"This\"\nLINE 1: This question cannot be answered with the provided database ...\n        ^\n[SQL: This question cannot be answered with the provided database schema. The schema contains tables for ad campaigns, concert seating, fleet dispatch, loyalty programs, ticket auditing, and warehouse inventory - none of which contain patient or medical data (uric acid counts, gender, etc.). There is no relevant table to query for this medical information.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many underage patients were examined during the course of the three-year period from 1990 to 1993?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT COUNT(T1.ID) FROM Patient AS T1 INNER JOIN Examination AS T2 ON T1.ID = T2.ID WHERE EXTRACT(YEAR FROM T2.\"Examination Date\") BETWEEN 1990 AND 1993 AND EXTRACT(YEAR FROM T2.\"Examination Date\") - EXTRACT(YEAR FROM T1.Birthday) < 18",
+      "actual_sql": "The provided database schema does not contain any tables related to patients, medical examinations, or healthcare data. The available tables are for ad campaigns, concert seating, fleet dispatch, loyalty programs, ticket auditing, and warehouse inventory. Therefore, this question cannot be answered with the given schema.\n\nIf you intended to query a different database with patient records, please provide the appropriate schema.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"The\"\nLINE 1: The provided database schema does not contain any tables rel...\n        ^\n[SQL: The provided database schema does not contain any tables related to patients, medical examinations, or healthcare data. The available tables are for ad campaigns, concert seating, fleet dispatch, loyalty programs, ticket auditing, and warehouse inventory. Therefore, this question cannot be answered with the given schema.\n\nIf you intended to query a different database with patient records, please provide the appropriate schema.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How old was the patient who had the highest hemoglobin count at the time of the examination, and what is the doctor's diagnosis?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT EXTRACT(YEAR FROM T2.Date) - EXTRACT(YEAR FROM T1.Birthday) AS age_difference, T1.Diagnosis FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.HGB IS NOT NULL ORDER BY T2.HGB DESC LIMIT 1",
+      "actual_sql": "I cannot answer this question because the provided database schema does not contain any tables related to patients, medical examinations, hemoglobin counts, or doctor diagnoses. The schema only includes tables for:\n\n- ad_campaign_pacing\n- concert_seat_inventory\n- fleet_dispatch_routing\n- loyalty_tier_calculation\n- ticket_audit_workflow\n- warehouse_inventory_basics\n\nNone of these domains contain medical/patient data. To answer this question, I would need access to tables such as patients, examinations, lab_results, or similar medical records.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"I\"\nLINE 1: I cannot answer this question because the provided database ...\n        ^\n[SQL: I cannot answer this question because the provided database schema does not contain any tables related to patients, medical examinations, hemoglobin counts, or doctor diagnoses. The schema only includes tables for:\n\n- ad_campaign_pacing\n- concert_seat_inventory\n- fleet_dispatch_routing\n- loyalty_tier_calculation\n- ticket_audit_workflow\n- warehouse_inventory_basics\n\nNone of these domains contain medical/patient data. To answer this question, I would need access to tables such as patients, examinations, lab_results, or similar medical records.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For the patient who was diagnosed with SLE on 1994/2/19, what was his/her anti-Cardiolipin antibody concentration status on 1993/11/12?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT \"aCL IgA\", \"aCL IgG\", \"aCL IgM\" FROM Examination WHERE ID IN (SELECT ID FROM Patient WHERE Diagnosis = 'SLE' AND Description = '1994-02-19') AND \"Examination Date\" = '1993-11-12'",
+      "actual_sql": "SELECT * FROM \"patients\" WHERE \"diagnosis\" = 'SLE' AND \"diagnosis_date\" = '1994-02-19';\n\n-- Note: This schema does not contain medical/patient data tables. The provided schema only includes tables for advertising campaigns, concert seating, fleet routing, loyalty programs, ticket auditing, and warehouse inventory. There are no tables for patients, diagnoses, or laboratory test results. This query cannot be answered with the given schema.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"LIMIT\"\nLINE 4: LIMIT 500\n        ^\n[SQL: SELECT * FROM \"patients\" WHERE \"diagnosis\" = 'SLE' AND \"diagnosis_date\" = '1994-02-19';\n\n-- Note: This schema does not contain medical/patient data tables. The provided schema only includes tables for advertising campaigns, concert seating, fleet routing, loyalty programs, ticket auditing, and warehouse inventory. There are no tables for patients, diagnoses, or laboratory test results. This query cannot be answered with the given schema.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For the patient who was born on 1959/2/18, what is the decrease rate for his/her total cholesterol from November to December in 1981?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT CAST((SUM(CASE WHEN T2.date::text LIKE '1981-11-%' THEN T2.\"T-CHO\" ELSE 0 END) - SUM(CASE WHEN T2.date::text LIKE '1981-12-%' THEN T2.\"T-CHO\" ELSE 0 END)) AS REAL) / NULLIF(SUM(CASE WHEN T2.date::text LIKE '1981-12-%' THEN T2.\"T-CHO\" ELSE 0 END), 0) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T1.Birthday = '1959-02-18'",
+      "actual_sql": "This question cannot be answered with the provided schema. The database contains tables for advertising campaigns, concert seat inventory, fleet dispatch, loyalty tiers, ticket auditing, and warehouse inventory - none of which contain patient records, birth dates, or cholesterol measurements.\n\nA query like this would require tables such as:\n- `patients` (with birth_date)\n- `cholesterol_readings` (with patient_id, measurement_date, total_cholesterol)\n\nPlease verify you've provided the correct database schema for this medical question.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"This\"\nLINE 1: This question cannot be answered with the provided schema. T...\n        ^\n[SQL: This question cannot be answered with the provided schema. The database contains tables for advertising campaigns, concert seat inventory, fleet dispatch, loyalty tiers, ticket auditing, and warehouse inventory - none of which contain patient records, birth dates, or cholesterol measurements.\n\nA query like this would require tables such as:\n- `patients` (with birth_date)\n- `cholesterol_readings` (with patient_id, measurement_date, total_cholesterol)\n\nPlease verify you've provided the correct database schema for this medical question.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many patients who were examined between 1987/7/6 and 1996/1/31 had a GPT level greater than 30 and an ALB level less than 4? List them by their ID.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT ID FROM Laboratory WHERE Date BETWEEN '1987-07-06' AND '1996-01-31' AND GPT > 30 AND ALB < 4",
+      "actual_sql": "This question cannot be answered with the provided database schema. The schema contains tables for ad campaigns, concert seats, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory - none of which contain patient medical examination data, GPT levels, or ALB levels.\n\nNo relevant tables exist for this query.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"This\"\nLINE 1: This question cannot be answered with the provided database ...\n        ^\n[SQL: This question cannot be answered with the provided database schema. The schema contains tables for ad campaigns, concert seats, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory - none of which contain patient medical examination data, GPT levels, or ALB levels.\n\nNo relevant tables exist for this query.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What number of patients with a degree of thrombosis level 2 and ANA pattern of only S, have a level of anti-Cardiolip in antibody (IgM) 20% higher than average?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT COUNT(*) FROM Examination WHERE Thrombosis = 2 AND \"ANA Pattern\" = 'S' AND \"aCL IgM\" > (SELECT AVG(\"aCL IgM\") * 1.2 FROM Examination WHERE Thrombosis = 2 AND \"ANA Pattern\" = 'S')",
+      "actual_sql": "This question cannot be answered with the provided database schema. The schema contains tables for ad campaigns, concert seat inventory, fleet dispatch, loyalty tiers, ticket audit workflows, and warehouse inventory - none of which contain patient medical data, thrombosis levels, ANA patterns, or anti-Cardiolipin antibody measurements.\n\nThere are no tables available that would contain information about:\n- Patients\n- Thrombosis levels\n- ANA (Antinuclear Antibody) patterns\n- Anti-Cardiolipin antibody (IgM) levels\n\nA valid SQL query cannot be generated without access to a medical/patient database schema.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"This\"\nLINE 1: This question cannot be answered with the provided database ...\n        ^\n[SQL: This question cannot be answered with the provided database schema. The schema contains tables for ad campaigns, concert seat inventory, fleet dispatch, loyalty tiers, ticket audit workflows, and warehouse inventory - none of which contain patient medical data, thrombosis levels, ANA patterns, or anti-Cardiolipin antibody measurements.\n\nThere are no tables available that would contain information about:\n- Patients\n- Thrombosis levels\n- ANA (Antinuclear Antibody) patterns\n- Anti-Cardiolipin antibody (IgM) levels\n\nA valid SQL query cannot be generated without access to a medical/patient database schema.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List all patients who were followed up at the outpatient clinic who underwent a laboratory test in October 1991 and had a total blood bilirubin level within the normal range.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT DISTINCT T1.ID FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T1.Admission = '-' AND T2.\"T-BIL\" < 2.0 AND T2.Date::text LIKE '1991-10-%'",
+      "actual_sql": "This question cannot be answered with the provided schema. The database schema contains domain knowledge for advertising campaigns, concert seat inventory, fleet dispatch routing, loyalty tier calculation, ticket audit workflow, and warehouse inventory systems. None of these domains include patient records, outpatient clinic data, laboratory tests, or blood bilirubin measurements.\n\nThe question appears to reference a healthcare/medical database that is not present in the provided schema. To answer this query, I would need access to tables such as:\n- patients\n- outpatient_visits\n- laboratory_tests\n- test_results\n\nWithout these tables and their column definitions, a valid SQL query cannot be generated.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"This\"\nLINE 1: This question cannot be answered with the provided schema. T...\n        ^\n[SQL: This question cannot be answered with the provided schema. The database schema contains domain knowledge for advertising campaigns, concert seat inventory, fleet dispatch routing, loyalty tier calculation, ticket audit workflow, and warehouse inventory systems. None of these domains include patient records, outpatient clinic data, laboratory tests, or blood bilirubin measurements.\n\nThe question appears to reference a healthcare/medical database that is not present in the provided schema. To answer this query, I would need access to tables such as:\n- patients\n- outpatient_visits\n- laboratory_tests\n- test_results\n\nWithout these tables and their column definitions, a valid SQL query cannot be generated.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the average blood albumin level for female patients with a PLT greater than 400 who have been diagnosed with SLE?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT AVG(T2.ALB) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.PLT > 400 AND T1.Diagnosis = 'SLE' AND T1.SEX = 'F'",
+      "actual_sql": "I cannot generate a SQL query for this question because the provided database schema does not contain any medical/patient-related tables. The schema only includes tables for:\n\n- ad_campaign_pacing (and versions 1-3)\n- concert_seat_inventory (and versions 1-4)\n- fleet_dispatch_routing (and versions 1-3)\n- loyalty_tier_calculation (and versions 1-3)\n- ticket_audit_workflow (and versions 1-3)\n- warehouse_inventory_basics (and versions 1-3)\n\nNone of these tables contain patient data, blood test results (albumin, PLT), gender information, or medical diagnoses (SLE). To answer this question, you would need access to a medical database with tables containing patient records and lab results.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"I\"\nLINE 1: I cannot generate a SQL query for this question because the ...\n        ^\n[SQL: I cannot generate a SQL query for this question because the provided database schema does not contain any medical/patient-related tables. The schema only includes tables for:\n\n- ad_campaign_pacing (and versions 1-3)\n- concert_seat_inventory (and versions 1-4)\n- fleet_dispatch_routing (and versions 1-3)\n- loyalty_tier_calculation (and versions 1-3)\n- ticket_audit_workflow (and versions 1-3)\n- warehouse_inventory_basics (and versions 1-3)\n\nNone of these tables contain patient data, blood test results (albumin, PLT), gender information, or medical diagnoses (SLE). To answer this question, you would need access to a medical database with tables containing patient records and lab results.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many female patients were given an APS diagnosis?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT COUNT(ID) FROM Patient WHERE SEX = 'F' AND Diagnosis = 'APS'",
+      "actual_sql": "This question cannot be answered with the provided schema. The database contains tables for ad campaigns, concert seating, fleet dispatch, loyalty tiers, ticket auditing, and warehouse inventory - none of which contain patient or medical diagnosis information. There is no table with patient records, gender, or APS diagnosis data.\n\nIf you have a different schema with patient/medical tables (e.g., patients, diagnoses, appointments), please provide that schema so I can generate the appropriate query.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"This\"\nLINE 1: This question cannot be answered with the provided schema. T...\n        ^\n[SQL: This question cannot be answered with the provided schema. The database contains tables for ad campaigns, concert seating, fleet dispatch, loyalty tiers, ticket auditing, and warehouse inventory - none of which contain patient or medical diagnosis information. There is no table with patient records, gender, or APS diagnosis data.\n\nIf you have a different schema with patient/medical tables (e.g., patients, diagnoses, appointments), please provide that schema so I can generate the appropriate query.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What percentage of patients who were born in 1980 and were diagnosed with RA are women?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN SEX = 'F' THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(COUNT(ID), 0) FROM Patient WHERE Diagnosis = 'RA' AND TO_CHAR(CAST(Birthday AS TIMESTAMP), 'YYYY') = '1980'",
+      "actual_sql": "The provided database schema does not contain any tables related to patients, medical diagnoses, birth years, or gender information. The available tables cover advertising campaigns, concert seating, fleet routing, loyalty programs, ticket auditing, and warehouse inventory. This question cannot be answered with the given schema.\n\nIf you have a medical/patient database schema available, please provide it and I can generate the appropriate query.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"The\"\nLINE 1: The provided database schema does not contain any tables rel...\n        ^\n[SQL: The provided database schema does not contain any tables related to patients, medical diagnoses, birth years, or gender information. The available tables cover advertising campaigns, concert seating, fleet routing, loyalty programs, ticket auditing, and warehouse inventory. This question cannot be answered with the given schema.\n\nIf you have a medical/patient database schema available, please provide it and I can generate the appropriate query.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Was the patient with the number 57266's uric acid within a normal range?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CASE WHEN (T1.SEX = 'F' AND T2.UA > 6.5) OR (T1.SEX = 'M' AND T2.UA > 8.0) THEN TRUE ELSE FALSE END FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T1.ID = 57266",
+      "actual_sql": "I cannot answer this question because the provided database schema does not contain any tables related to patients, medical records, or uric acid levels. The schema only includes tables for:\n\n- ad_campaign_pacing (advertising campaigns)\n- concert_seat_inventory (concert venue seating)\n- fleet_dispatch_routing (vehicle delivery routing)\n- loyalty_tier_calculation (customer loyalty programs)\n- ticket_audit_workflow (ticket auditing)\n- warehouse_inventory_basics (warehouse inventory)\n\nNone of these tables contain patient or medical data. Please provide a schema that includes patient medical records or laboratory results tables.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"I\"\nLINE 1: I cannot answer this question because the provided database ...\n        ^\n[SQL: I cannot answer this question because the provided database schema does not contain any tables related to patients, medical records, or uric acid levels. The schema only includes tables for:\n\n- ad_campaign_pacing (advertising campaigns)\n- concert_seat_inventory (concert venue seating)\n- fleet_dispatch_routing (vehicle delivery routing)\n- loyalty_tier_calculation (customer loyalty programs)\n- ticket_audit_workflow (ticket auditing)\n- warehouse_inventory_basics (warehouse inventory)\n\nNone of these tables contain patient or medical data. Please provide a schema that includes patient medical records or laboratory results tables.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Provide IDs for male patients with ALT glutamic pylvic transaminase (GPT) that have history of ALT glutamic pylvic transaminase (GPT) exceed the normal range.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT T1.ID FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T1.SEX = 'M' AND T2.GPT >= 60",
+      "actual_sql": "This question cannot be answered with the provided database schema. The schema contains tables related to:\n- Ad campaign pacing\n- Concert seat inventory\n- Fleet dispatch routing\n- Loyalty tier calculation\n- Ticket audit workflow\n- Warehouse inventory basics\n\nNone of these tables contain patient medical records, lab results, or ALT/GPT test data. A medical/patient database schema would be required to answer this question.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"This\"\nLINE 1: This question cannot be answered with the provided database ...\n        ^\n[SQL: This question cannot be answered with the provided database schema. The schema contains tables related to:\n- Ad campaign pacing\n- Concert seat inventory\n- Fleet dispatch routing\n- Loyalty tier calculation\n- Ticket audit workflow\n- Warehouse inventory basics\n\nNone of these tables contain patient medical records, lab results, or ALT/GPT test data. A medical/patient database schema would be required to answer this question.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Please provide the diagnosis of patients with ALT glutamic pylvic transaminase beyond the normal range by ascending order of their date of birth.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT ON (T1.Birthday) T1.Diagnosis FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.GPT > 60 ORDER BY T1.Birthday ASC",
+      "actual_sql": "The provided database schema does not contain any tables related to medical data, patients, or laboratory tests (such as ALT levels). The available tables are for:\n- Ad campaign pacing\n- Concert seat inventory\n- Fleet dispatch routing\n- Loyalty tier calculation\n- Ticket audit workflow\n- Warehouse inventory basics\n\nNone of these domains include patient information, lab results, or date of birth fields. I cannot generate a valid SQL query for this medical question against the given schema.\n\nIf you have a different schema with medical/patient tables, please provide it for an accurate query.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"The\"\nLINE 1: The provided database schema does not contain any tables rel...\n        ^\n[SQL: The provided database schema does not contain any tables related to medical data, patients, or laboratory tests (such as ALT levels). The available tables are for:\n- Ad campaign pacing\n- Concert seat inventory\n- Fleet dispatch routing\n- Loyalty tier calculation\n- Ticket audit workflow\n- Warehouse inventory basics\n\nNone of these domains include patient information, lab results, or date of birth fields. I cannot generate a valid SQL query for this medical question against the given schema.\n\nIf you have a different schema with medical/patient tables, please provide it for an accurate query.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Provide all ID, sex and birthday of patients whose urea nitrogen (UN) just within the borderline of passing?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT DISTINCT T1.ID, T1.SEX, T1.Birthday FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.UN = 29",
+      "actual_sql": "This question cannot be answered with the provided schema. The database schema contains domain knowledge for advertising campaigns, concert seat inventory, fleet dispatch, loyalty programs, ticket auditing, and warehouse inventory - but there are NO tables related to patients, medical records, or laboratory test results like urea nitrogen (UN).\n\nTo answer this question, I would need a medical/healthcare database schema with tables containing:\n- Patient information (ID, sex, birthday)\n- Laboratory test results (including urea nitrogen values)\n- Reference ranges for determining \"borderline passing\" values\n\nPlease provide the appropriate medical database schema to generate the correct query.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"This\"\nLINE 1: This question cannot be answered with the provided schema. T...\n        ^\n[SQL: This question cannot be answered with the provided schema. The database schema contains domain knowledge for advertising campaigns, concert seat inventory, fleet dispatch, loyalty programs, ticket auditing, and warehouse inventory - but there are NO tables related to patients, medical records, or laboratory test results like urea nitrogen (UN).\n\nTo answer this question, I would need a medical/healthcare database schema with tables containing:\n- Patient information (ID, sex, birthday)\n- Laboratory test results (including urea nitrogen values)\n- Reference ranges for determining \"borderline passing\" values\n\nPlease provide the appropriate medical database schema to generate the correct query.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List and group all patients by sex for total bilirubin (T-BIL) level not within the normal range.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.ID, T1.SEX FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.\"T-BIL\" >= 2.0 GROUP BY T1.SEX,T1.ID",
+      "actual_sql": "I cannot generate a valid SQL query for this question because the provided database schema does not contain any patient or medical data tables. The schema only includes tables for:\n\n- Ad campaign pacing\n- Concert seat inventory\n- Fleet dispatch routing\n- Loyalty tier calculation\n- Ticket audit workflow\n- Warehouse inventory basics\n\nNone of these tables contain patient information, bilirubin levels, or medical test results. To answer this question, I would need access to a medical/patient database with tables containing patient demographics (sex) and laboratory test results (T-BIL levels with normal range thresholds).",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"I\"\nLINE 1: I cannot generate a valid SQL query for this question becaus...\n        ^\n[SQL: I cannot generate a valid SQL query for this question because the provided database schema does not contain any patient or medical data tables. The schema only includes tables for:\n\n- Ad campaign pacing\n- Concert seat inventory\n- Fleet dispatch routing\n- Loyalty tier calculation\n- Ticket audit workflow\n- Warehouse inventory basics\n\nNone of these tables contain patient information, bilirubin levels, or medical test results. To answer this question, I would need access to a medical/patient database with tables containing patient demographics (sex) and laboratory test results (T-BIL levels with normal range thresholds).\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the average age of the male patient with high cholesterol?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT AVG(EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM T1.Birthday)) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.\"T-CHO\" >= 250 AND T1.SEX = 'M'",
+      "actual_sql": "This question cannot be answered with the provided database schema. The schema contains tables related to:\n- Ad campaign pacing\n- Concert seat inventory\n- Fleet dispatch routing\n- Loyalty tier calculation\n- Ticket audit workflow\n- Warehouse inventory basics\n\nNone of these tables contain patient, medical, cholesterol, or demographic data. There is no table with columns for age, gender, or health conditions like cholesterol levels.\n\nIf you have a different schema with patient/medical data, please provide it so I can generate the appropriate query.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"This\"\nLINE 1: This question cannot be answered with the provided database ...\n        ^\n[SQL: This question cannot be answered with the provided database schema. The schema contains tables related to:\n- Ad campaign pacing\n- Concert seat inventory\n- Fleet dispatch routing\n- Loyalty tier calculation\n- Ticket audit workflow\n- Warehouse inventory basics\n\nNone of these tables contain patient, medical, cholesterol, or demographic data. There is no table with columns for age, gender, or health conditions like cholesterol levels.\n\nIf you have a different schema with patient/medical data, please provide it so I can generate the appropriate query.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For all patients with triglyceride (TG) level beyond the normal range, how many are age more than 50 years?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(DISTINCT T1.ID) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.TG >= 200 AND EXTRACT(YEAR FROM CURRENT_TIMESTAMP) - EXTRACT(YEAR FROM T1.Birthday) > 50",
+      "actual_sql": "SELECT COUNT(*) \nFROM \"patients\" \nWHERE \"triglyceride_level\" NOT BETWEEN \"normal_min\" AND \"normal_max\" \n  AND \"age\" > 50",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"patients\" does not exist\nLINE 2: FROM \"patients\" \n             ^\n[SQL: SELECT COUNT(*) \nFROM \"patients\" \nWHERE \"triglyceride_level\" NOT BETWEEN \"normal_min\" AND \"normal_max\" \n  AND \"age\" > 50\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For patient born between 1936-1956, how many male patients have creatinine phosphokinase beyond the normal range?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT COUNT(DISTINCT T1.ID) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE TO_CHAR(CAST(T1.Birthday AS TIMESTAMP), 'YYYY') BETWEEN '1936' AND '1956' AND T1.SEX = 'M' AND T2.CPK >= 250",
+      "actual_sql": "I cannot answer this question because the provided database schema does not contain any tables related to patients, medical records, birth dates, gender, or creatinine phosphokinase levels. The schema only includes tables for:\n\n- ad_campaign_pacing\n- concert_seat_inventory\n- fleet_dispatch_routing\n- loyalty_tier_calculation\n- ticket_audit_workflow\n- warehouse_inventory_basics\n\nNone of these tables contain patient or medical information. Please provide the correct schema with patient/medical tables, or clarify which database should be queried.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"I\"\nLINE 1: I cannot answer this question because the provided database ...\n        ^\n[SQL: I cannot answer this question because the provided database schema does not contain any tables related to patients, medical records, birth dates, gender, or creatinine phosphokinase levels. The schema only includes tables for:\n\n- ad_campaign_pacing\n- concert_seat_inventory\n- fleet_dispatch_routing\n- loyalty_tier_calculation\n- ticket_audit_workflow\n- warehouse_inventory_basics\n\nNone of these tables contain patient or medical information. Please provide the correct schema with patient/medical tables, or clarify which database should be queried.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Provide ID, sex and age of patient who has blood glucose (GLU) not within normal range but with total cholesterol(T-CHO) within normal range.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT DISTINCT T1.ID, T1.SEX, EXTRACT(YEAR FROM CURRENT_TIMESTAMP) - EXTRACT(YEAR FROM T1.Birthday) AS Age FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.GLU >= 180 AND T2.\"T-CHO\" < 250",
+      "actual_sql": "SELECT \"p\".\"id\", \"p\".\"sex\", \"p\".\"age\"\nFROM \"patients\" \"p\"\nJOIN \"lab_results\" \"lr_glu\" ON \"p\".\"id\" = \"lr_glu\".\"patient_id\"\nJOIN \"lab_results\" \"lr_cho\" ON \"p\".\"id\" = \"lr_cho\".\"patient_id\"\nWHERE \"lr_glu\".\"test_type\" = 'GLU'\n  AND (\"lr_glu\".\"value\" < \"lr_glu\".\"normal_low\" OR \"lr_glu\".\"value\" > \"lr_glu\".\"normal_high\")\n  AND \"lr_cho\".\"test_type\" = 'T-CHO'\n  AND \"lr_cho\".\"value\" >= \"lr_cho\".\"normal_low\"\n  AND \"lr_cho\".\"value\" <= \"lr_cho\".\"normal_high\"\nLIMIT 100;\n\n-- Note: The provided schema contains no patient/medical tables (ad_campaign, concert_seat, fleet_dispatch, loyalty_tier, ticket_audit, warehouse_inventory). This query assumes hypothetical tables \"patients\" and \"lab_results\" with appropriate columns.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"patients\" does not exist\nLINE 2: FROM \"patients\" \"p\"\n             ^\n[SQL: SELECT \"p\".\"id\", \"p\".\"sex\", \"p\".\"age\"\nFROM \"patients\" \"p\"\nJOIN \"lab_results\" \"lr_glu\" ON \"p\".\"id\" = \"lr_glu\".\"patient_id\"\nJOIN \"lab_results\" \"lr_cho\" ON \"p\".\"id\" = \"lr_cho\".\"patient_id\"\nWHERE \"lr_glu\".\"test_type\" = 'GLU'\n  AND (\"lr_glu\".\"value\" < \"lr_glu\".\"normal_low\" OR \"lr_glu\".\"value\" > \"lr_glu\".\"normal_high\")\n  AND \"lr_cho\".\"test_type\" = 'T-CHO'\n  AND \"lr_cho\".\"value\" >= \"lr_cho\".\"normal_low\"\n  AND \"lr_cho\".\"value\" <= \"lr_cho\".\"normal_high\"\nLIMIT 100;\n\n-- Note: The provided schema contains no patient/medical tables (ad_campaign, concert_seat, fleet_dispatch, loyalty_tier, ticket_audit, warehouse_inventory). This query assumes hypothetical tables \"patients\" and \"lab_results\" with appropriate columns.]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What are the patient's diagnosis for those who has lower red blood blood cell? State their ID and age.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT T1.Diagnosis, T1.ID, EXTRACT(YEAR FROM CURRENT_TIMESTAMP) - EXTRACT(YEAR FROM T1.Birthday) AS Age FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.RBC < 3.5",
+      "actual_sql": "This question cannot be answered with the provided schema. The database contains no patient, medical, or health-related tables. The available domains are: ad campaigns, concert seating, fleet dispatch, loyalty programs, ticket auditing, and warehouse inventory - none of which contain patient diagnosis or red blood cell data.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"This\"\nLINE 1: This question cannot be answered with the provided schema. T...\n        ^\n[SQL: This question cannot be answered with the provided schema. The database contains no patient, medical, or health-related tables. The available domains are: ad campaigns, concert seating, fleet dispatch, loyalty programs, ticket auditing, and warehouse inventory - none of which contain patient diagnosis or red blood cell data.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the patients who were diagnosed with SLE, who is the oldest with normal hemoglobin level. Provide the ID and sex.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.ID, T1.SEX FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T1.Diagnosis = 'SLE' AND T2.HGB > 10 AND T2.HGB < 17 ORDER BY T1.Birthday ASC NULLS FIRST LIMIT 1",
+      "actual_sql": "The provided database schema does not contain any tables related to patients, medical diagnoses (SLE), or hemoglobin levels. The available schema covers advertising campaigns, concert seating, fleet routing, loyalty programs, ticket auditing, and warehouse inventory - none of which contain medical/patient data.\n\nThis query cannot be answered with the provided schema. Please provide the correct medical/patient database schema.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"The\"\nLINE 1: The provided database schema does not contain any tables rel...\n        ^\n[SQL: The provided database schema does not contain any tables related to patients, medical diagnoses (SLE), or hemoglobin levels. The available schema covers advertising campaigns, concert seating, fleet routing, loyalty programs, ticket auditing, and warehouse inventory - none of which contain medical/patient data.\n\nThis query cannot be answered with the provided schema. Please provide the correct medical/patient database schema.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Name the ID and age of patient with two or more laboratory examinations which show their hematoclit level exceeded the normal range.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT DISTINCT T1.ID, EXTRACT(YEAR FROM CURRENT_TIMESTAMP) - EXTRACT(YEAR FROM T1.Birthday) AS Age FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T1.ID IN (SELECT ID FROM Laboratory WHERE HCT >= 52 GROUP BY ID HAVING COUNT(ID) >= 2)",
+      "actual_sql": "This question cannot be answered with the provided database schema. The schema contains tables for advertising campaigns, concert seats, fleet routing, loyalty programs, ticket auditing, and warehouse inventory - none of which contain patient or laboratory examination data.\n\nThe question requires tables with:\n- Patient information (ID, age)\n- Laboratory examinations (test results, hematocrit levels)\n- Normal range definitions for hematocrit\n\nThese tables are not present in the provided schema. Please provide the correct schema for medical/patient data to generate an appropriate query.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"This\"\nLINE 1: This question cannot be answered with the provided database ...\n        ^\n[SQL: This question cannot be answered with the provided database schema. The schema contains tables for advertising campaigns, concert seats, fleet routing, loyalty programs, ticket auditing, and warehouse inventory - none of which contain patient or laboratory examination data.\n\nThe question requires tables with:\n- Patient information (ID, age)\n- Laboratory examinations (test results, hematocrit levels)\n- Normal range definitions for hematocrit\n\nThese tables are not present in the provided schema. Please provide the correct schema for medical/patient data to generate an appropriate query.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For patients with abnormal platelet level, state the number of patients with lower than normal range. How is it compare to the number of patients with higher than normal range?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT SUM(CASE WHEN T2.PLT <= 100 THEN 1 ELSE 0 END) - SUM(CASE WHEN T2.PLT >= 400 THEN 1 ELSE 0 END) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID",
+      "actual_sql": "The provided database schema does not contain any tables related to patients, medical records, or platelet levels. The schema only includes tables for:\n\n- ad_campaign_pacing (and versions v1-v3)\n- concert_seat_inventory (and versions v1-v4)\n- fleet_dispatch_routing (and versions v1-v3)\n- loyalty_tier_calculation (and versions v1-v3)\n- ticket_audit_workflow (and versions v1-v3)\n- warehouse_inventory_basics (and versions v1-v3)\n\nNone of these tables contain patient or medical data. To answer your question about platelet levels, you would need access to a medical/patient database with tables containing patient records and lab test results including platelet counts and normal range thresholds.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"The\"\nLINE 1: The provided database schema does not contain any tables rel...\n        ^\n[SQL: The provided database schema does not contain any tables related to patients, medical records, or platelet levels. The schema only includes tables for:\n\n- ad_campaign_pacing (and versions v1-v3)\n- concert_seat_inventory (and versions v1-v4)\n- fleet_dispatch_routing (and versions v1-v3)\n- loyalty_tier_calculation (and versions v1-v3)\n- ticket_audit_workflow (and versions v1-v3)\n- warehouse_inventory_basics (and versions v1-v3)\n\nNone of these tables contain patient or medical data. To answer your question about platelet levels, you would need access to a medical/patient database with tables containing patient records and lab test results including platelet counts and normal range thresholds.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For laboratory examinations take in 1984, list all patients below 50 years old with normal platelet level.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT DISTINCT T1.ID FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.PLT BETWEEN 100 AND 400 AND EXTRACT(YEAR FROM T2.Date) - EXTRACT(YEAR FROM T1.Birthday) < 50 AND EXTRACT(YEAR FROM T2.Date) = 1984",
+      "actual_sql": "The provided database schema does not contain tables related to laboratory examinations, patients, or platelet levels. The schema only includes tables for:\n\n- Ad campaign pacing\n- Concert seat inventory\n- Fleet dispatch routing\n- Loyalty tier calculation\n- Ticket audit workflow\n- Warehouse inventory basics\n\nNone of these domains contain medical or healthcare data. This question cannot be answered with the available schema.\n\nIf you have a different schema with patient/medical tables, please provide it and I can generate the appropriate query.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"The\"\nLINE 1: The provided database schema does not contain tables related...\n        ^\n[SQL: The provided database schema does not contain tables related to laboratory examinations, patients, or platelet levels. The schema only includes tables for:\n\n- Ad campaign pacing\n- Concert seat inventory\n- Fleet dispatch routing\n- Loyalty tier calculation\n- Ticket audit workflow\n- Warehouse inventory basics\n\nNone of these domains contain medical or healthcare data. This question cannot be answered with the available schema.\n\nIf you have a different schema with patient/medical tables, please provide it and I can generate the appropriate query.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For all patients who are older than 55 years old, what is the percentage of female who has abnormal prothrombin time (PT)?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN T2.PT >= 14 AND T1.SEX = 'F' THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(COUNT(CASE WHEN T2.PT >= 14 THEN 1 ELSE 0 END), 0) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE EXTRACT(YEAR FROM CURRENT_TIMESTAMP) - EXTRACT(YEAR FROM T1.Birthday) > 55",
+      "actual_sql": "The provided database schema does not contain any tables related to patients, medical data, age, gender, or prothrombin time (PT). The schema only includes tables for:\n\n- ad_campaign_pacing\n- concert_seat_inventory\n- fleet_dispatch_routing\n- loyalty_tier_calculation\n- ticket_audit_workflow\n- warehouse_inventory_basics\n\nNone of these tables can answer a question about patients and their prothrombin time values. Please provide a schema that includes patient/medical data tables to answer this question.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"The\"\nLINE 1: The provided database schema does not contain any tables rel...\n        ^\n[SQL: The provided database schema does not contain any tables related to patients, medical data, age, gender, or prothrombin time (PT). The schema only includes tables for:\n\n- ad_campaign_pacing\n- concert_seat_inventory\n- fleet_dispatch_routing\n- loyalty_tier_calculation\n- ticket_audit_workflow\n- warehouse_inventory_basics\n\nNone of these tables can answer a question about patients and their prothrombin time values. Please provide a schema that includes patient/medical data tables to answer this question.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the male patients who have a normal level of white blood cells, how many of them have an abnormal fibrinogen level?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT COUNT(DISTINCT T1.ID) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.FG <= 150 OR T2.FG >= 450 AND T2.WBC > 3.5 AND T2.WBC < 9.0 AND T1.SEX = 'M'",
+      "actual_sql": "SELECT COUNT(*) \nFROM \"patients\"\nWHERE \"gender\" = 'male'\n  AND \"white_blood_cells\" = 'normal'\n  AND \"fibrinogen\" = 'abnormal';",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"patients\" does not exist\nLINE 2: FROM \"patients\"\n             ^\n[SQL: SELECT COUNT(*) \nFROM \"patients\"\nWHERE \"gender\" = 'male'\n  AND \"white_blood_cells\" = 'normal'\n  AND \"fibrinogen\" = 'abnormal'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many patients with an Ig G higher than normal?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT COUNT(DISTINCT T1.ID) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID INNER JOIN Examination AS T3 ON T3.ID = T2.ID WHERE T2.IGG >= 2000",
+      "actual_sql": "-- This query cannot be answered with the provided schema. The database contains tables for ad campaigns, concert seats, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory. There are no tables containing patient or medical data (Ig G levels). Please verify the correct database schema for medical/patient records.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"LIMIT\"\nLINE 2: LIMIT 500\n        ^\n[SQL: -- This query cannot be answered with the provided schema. The database contains tables for ad campaigns, concert seats, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory. There are no tables containing patient or medical data (Ig G levels). Please verify the correct database schema for medical/patient records.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the patients with a normal Ig G level, how many of them have symptoms?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T1.ID) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID INNER JOIN Examination AS T3 ON T3.ID = T2.ID WHERE T2.IGG BETWEEN 900 AND 2000 AND NOT T3.Symptoms IS NULL",
+      "actual_sql": "The provided database schema does not contain any tables related to patients, Ig G levels, or symptoms. The available tables are related to ad campaigns, concert seat inventory, fleet dispatch, loyalty tiers, ticket audit workflows, and warehouse inventory. There is no medical or patient data in this schema to answer this question.\n\nIf you have a different schema with patient/medical data, please provide it so I can generate the appropriate query.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"The\"\nLINE 1: The provided database schema does not contain any tables rel...\n        ^\n[SQL: The provided database schema does not contain any tables related to patients, Ig G levels, or symptoms. The available tables are related to ad campaigns, concert seat inventory, fleet dispatch, loyalty tiers, ticket audit workflows, and warehouse inventory. There is no medical or patient data in this schema to answer this question.\n\nIf you have a different schema with patient/medical data, please provide it so I can generate the appropriate query.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many patients with a normal Ig A level came to the hospital after 1990/1/1?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T1.ID) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.IGA BETWEEN 80 AND 500 AND TO_CHAR(CAST(T1.\"First Date\" AS TIMESTAMP), 'YYYY') > '1990'",
+      "actual_sql": "The provided database schema does not contain any tables related to patients, hospitals, or medical data (such as Ig A levels). The available tables are for:\n\n- ad_campaign_pacing\n- concert_seat_inventory\n- fleet_dispatch_routing\n- loyalty_tier_calculation\n- ticket_audit_workflow\n- warehouse_inventory_basics\n\nNone of these can answer a question about patient medical records. Please provide the correct schema containing patient/hospital tables.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"The\"\nLINE 1: The provided database schema does not contain any tables rel...\n        ^\n[SQL: The provided database schema does not contain any tables related to patients, hospitals, or medical data (such as Ig A levels). The available tables are for:\n\n- ad_campaign_pacing\n- concert_seat_inventory\n- fleet_dispatch_routing\n- loyalty_tier_calculation\n- ticket_audit_workflow\n- warehouse_inventory_basics\n\nNone of these can answer a question about patient medical records. Please provide the correct schema containing patient/hospital tables.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For the patients with an abnormal Ig M level, what is the most common disease they are diagnosed with?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.Diagnosis FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE NOT T2.IGM BETWEEN 40 AND 400 GROUP BY T1.Diagnosis ORDER BY COUNT(T1.Diagnosis) DESC NULLS LAST LIMIT 1",
+      "actual_sql": "I cannot generate a valid SQL query for this question because the provided database schema does not contain any tables related to medical data, patients, Ig M levels, or disease diagnoses. The schema only includes domains for:\n\n- Ad campaign pacing\n- Concert seat inventory\n- Fleet dispatch routing\n- Loyalty tier calculation\n- Ticket audit workflow\n- Warehouse inventory basics\n\nNone of these domains contain patient health information. Please provide the appropriate medical/patient database schema to answer this question.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"I\"\nLINE 1: I cannot generate a valid SQL query for this question becaus...\n        ^\n[SQL: I cannot generate a valid SQL query for this question because the provided database schema does not contain any tables related to medical data, patients, Ig M levels, or disease diagnoses. The schema only includes domains for:\n\n- Ad campaign pacing\n- Concert seat inventory\n- Fleet dispatch routing\n- Loyalty tier calculation\n- Ticket audit workflow\n- Warehouse inventory basics\n\nNone of these domains contain patient health information. Please provide the appropriate medical/patient database schema to answer this question.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many patients with a abnormal C-reactive protein don't have their data recorded?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T1.ID) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE (T2.CRP = '+') AND T1.Description IS NULL",
+      "actual_sql": "This question cannot be answered from the provided database schema. The schema contains tables for ad campaigns, concert seats, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory - none of which contain patient or medical data (such as C-reactive protein records). There is no table that tracks patients, medical tests, or health-related information in this database.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"This\"\nLINE 1: This question cannot be answered from the provided database ...\n        ^\n[SQL: This question cannot be answered from the provided database schema. The schema contains tables for ad campaigns, concert seats, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory - none of which contain patient or medical data (such as C-reactive protein records). There is no table that tracks patients, medical tests, or health-related information in this database.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the patients whose creatinine level is abnormal, how many of them aren't 70 yet?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT COUNT(DISTINCT T1.ID) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.CRE >= 1.5 AND EXTRACT(YEAR FROM AGE(CURRENT_DATE, T1.Birthday)) < 70",
+      "actual_sql": "SELECT COUNT(*) \nFROM \"patients\" \nWHERE \"creatinine_level\" != 'normal' \n  AND \"age\" < 70",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"patients\" does not exist\nLINE 2: FROM \"patients\" \n             ^\n[SQL: SELECT COUNT(*) \nFROM \"patients\" \nWHERE \"creatinine_level\" != 'normal' \n  AND \"age\" < 70\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many patients have a normal level of anti-ribonuclear protein and have been admitted to the hospital?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(DISTINCT T1.ID) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.RNP = 'negative' OR T2.RNP = '0' AND T1.Admission = '+'",
+      "actual_sql": "I cannot answer this question because the provided database schema does not contain any tables related to patients, anti-ribonuclear protein levels, or hospital admissions. The schema only includes tables for:\n\n- ad_campaign_pacing (advertising campaigns)\n- concert_seat_inventory (concert venue seating)\n- fleet_dispatch_routing (delivery logistics)\n- loyalty_tier_calculation (customer loyalty programs)\n- ticket_audit_workflow (ticket auditing)\n- warehouse_inventory_basics (warehouse inventory)\n\nNone of these domains contain medical or healthcare data. To answer your question, I would need access to a healthcare/patient database with tables containing patient records, lab results (anti-ribonuclear protein levels), and hospital admission data.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"I\"\nLINE 1: I cannot answer this question because the provided database ...\n        ^\n[SQL: I cannot answer this question because the provided database schema does not contain any tables related to patients, anti-ribonuclear protein levels, or hospital admissions. The schema only includes tables for:\n\n- ad_campaign_pacing (advertising campaigns)\n- concert_seat_inventory (concert venue seating)\n- fleet_dispatch_routing (delivery logistics)\n- loyalty_tier_calculation (customer loyalty programs)\n- ticket_audit_workflow (ticket auditing)\n- warehouse_inventory_basics (warehouse inventory)\n\nNone of these domains contain medical or healthcare data. To answer your question, I would need access to a healthcare/patient database with tables containing patient records, lab results (anti-ribonuclear protein levels), and hospital admission data.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the patients with normal anti-SM, how many of them does not have thrombosis?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T1.ID) FROM Examination AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.SM IN ('negative', '0') AND T1.Thrombosis = 0",
+      "actual_sql": "SELECT COUNT(*) \nFROM \"patients\" \nWHERE \"anti_SM\" = 'normal' \n  AND \"thrombosis\" = 'no'\nLIMIT 100;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"patients\" does not exist\nLINE 2: FROM \"patients\" \n             ^\n[SQL: SELECT COUNT(*) \nFROM \"patients\" \nWHERE \"anti_SM\" = 'normal' \n  AND \"thrombosis\" = 'no'\nLIMIT 100]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the patients who has a normal anti-scl70, how many of them are female and does not have any symptom?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT COUNT(DISTINCT T1.ID) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID INNER JOIN Examination AS T3 ON T3.ID = T2.ID WHERE (T2.SC170 = 'negative' OR T2.SC170 = '0') AND T1.SEX = 'F' AND T3.Symptoms IS NULL",
+      "actual_sql": "SELECT COUNT(*) AS patient_count\nFROM patients\nWHERE anti_scl70_status = 'normal'\n  AND gender = 'female'\n  AND symptom_count = 0;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"patients\" does not exist\nLINE 2: FROM patients\n             ^\n[SQL: SELECT COUNT(*) AS patient_count\nFROM patients\nWHERE anti_scl70_status = 'normal'\n  AND gender = 'female'\n  AND symptom_count = 0\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the patients who has a normal level of anti-centromere and a normal level of anti-SSB, how many of them are male?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(DISTINCT T1.ID) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.CENTROMEA IN ('negative', '0') AND T2.SSB IN ('negative', '0') AND T1.SEX = 'M'",
+      "actual_sql": "This question cannot be answered with the provided schema. The database contains tables for advertising campaigns, concert seating, fleet routing, loyalty programs, ticket auditing, and warehouse inventory - none of which contain patient medical data or antibody test results (anti-centromere, anti-SSB).\n\nThere are no tables related to patients, medical records, or laboratory test results in this schema. To answer this question, you would need a medical/patient database with tables containing patient demographics (gender) and laboratory test results (antibody levels).",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"This\"\nLINE 1: This question cannot be answered with the provided schema. T...\n        ^\n[SQL: This question cannot be answered with the provided schema. The database contains tables for advertising campaigns, concert seating, fleet routing, loyalty programs, ticket auditing, and warehouse inventory - none of which contain patient medical data or antibody test results (anti-centromere, anti-SSB).\n\nThere are no tables related to patients, medical records, or laboratory test results in this schema. To answer this question, you would need a medical/patient database with tables containing patient demographics (gender) and laboratory test results (antibody levels).\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the patients who have an abnormal level of glutamic oxaloacetic transaminase, when was the youngest of them born?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.Birthday FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.GOT >= 60 ORDER BY T1.Birthday DESC NULLS LAST LIMIT 1",
+      "actual_sql": "This question cannot be answered with the provided database schema. The schema contains tables related to ad campaigns, concert seat inventory, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory - none of which contain patient medical data or laboratory test results like glutamic oxaloacetic transaminase (GOT) levels.\n\nThere is no table in this schema that tracks patients, medical tests, or birth dates.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"This\"\nLINE 1: This question cannot be answered with the provided database ...\n        ^\n[SQL: This question cannot be answered with the provided database schema. The schema contains tables related to ad campaigns, concert seat inventory, fleet dispatch, loyalty tiers, ticket audits, and warehouse inventory - none of which contain patient medical data or laboratory test results like glutamic oxaloacetic transaminase (GOT) levels.\n\nThere is no table in this schema that tracks patients, medical tests, or birth dates.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For the patients with a normal range of creatinine phosphokinase, how many of them have a positive measure of degree of coagulation?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT COUNT(T1.ID) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID INNER JOIN Examination AS T3 ON T1.ID = T3.ID WHERE T2.CPK < 250 AND (T3.KCT = '+' OR T3.RVVT = '+' OR T3.LAC = '+')",
+      "actual_sql": "I cannot generate a valid SQL query for this question because the provided database schema does not contain any tables related to patients, medical data, creatinine phosphokinase levels, or coagulation measures.\n\nThe schema only includes tables for:\n- ad_campaign_pacing (advertising campaigns)\n- concert_seat_inventory (venue seating)\n- fleet_dispatch_routing (delivery logistics)\n- loyalty_tier_calculation (customer loyalty)\n- ticket_audit_workflow (ticket auditing)\n- warehouse_inventory_basics (warehouse inventory)\n\nNone of these domains contain medical/patient information. To answer your question, I would need access to a medical database with tables containing patient records, lab results (including creatinine phosphokinase), and coagulation test data.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"I\"\nLINE 1: I cannot generate a valid SQL query for this question becaus...\n        ^\n[SQL: I cannot generate a valid SQL query for this question because the provided database schema does not contain any tables related to patients, medical data, creatinine phosphokinase levels, or coagulation measures.\n\nThe schema only includes tables for:\n- ad_campaign_pacing (advertising campaigns)\n- concert_seat_inventory (venue seating)\n- fleet_dispatch_routing (delivery logistics)\n- loyalty_tier_calculation (customer loyalty)\n- ticket_audit_workflow (ticket auditing)\n- warehouse_inventory_basics (warehouse inventory)\n\nNone of these domains contain medical/patient information. To answer your question, I would need access to a medical database with tables containing patient records, lab results (including creatinine phosphokinase), and coagulation test data.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    }
+  ]
+}

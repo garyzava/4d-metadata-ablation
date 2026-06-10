@@ -1,0 +1,585 @@
+{
+  "run_id": "california_schools_L4_env_rep1",
+  "dataset": "california_schools",
+  "level": "L4",
+  "dimensions": [
+    "data_dictionary",
+    "query_patterns",
+    "business_context",
+    "domain_knowledge"
+  ],
+  "model": {
+    "provider": "huggingface",
+    "model": "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+    "base_url": ""
+  },
+  "runtime_params": {
+    "max_tokens": 4096,
+    "effective_max_tokens": 4096,
+    "temperature": 0.0,
+    "seed": 42,
+    "top_p": 1.0,
+    "presence_penalty": 0.0,
+    "top_k": null,
+    "reasoning_effort": null,
+    "num_ctx": null,
+    "bird_docs_dir": "/Users/gary/myapps/4d-metadata-ablation/bird-docs-revised"
+  },
+  "rep": 1,
+  "timestamp": "2026-06-02T02:27:34.435277+00:00",
+  "elapsed_seconds": 45.6,
+  "aggregate_metrics": {
+    "total_cases": 30,
+    "execution_rate_pct": 73.3,
+    "value_match_pct": 23.3,
+    "column_match_pct": 0.0,
+    "soft_f1_mean": 0.1588,
+    "er_value_gap_pp": 50.0,
+    "error_count": 8,
+    "bird_ex_pct": 23.3,
+    "er_bex_gap_pp": 50.0,
+    "challenging_er_pct": 80.0,
+    "challenging_vm_pct": 40.0,
+    "challenging_soft_f1": 0.4,
+    "challenging_bird_ex_pct": 20.0,
+    "moderate_er_pct": 70.6,
+    "moderate_vm_pct": 23.5,
+    "moderate_soft_f1": 0.0588,
+    "moderate_bird_ex_pct": 23.5,
+    "simple_er_pct": 75.0,
+    "simple_vm_pct": 12.5,
+    "simple_soft_f1": 0.2206,
+    "simple_bird_ex_pct": 25.0
+  },
+  "per_case_results": [
+    {
+      "question": "How many schools with an average score in Math greater than 400 in the SAT test are exclusively virtual?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT COUNT(DISTINCT T2.School) FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T2.Virtual = 'F' AND T1.AvgScrMath > 400",
+      "actual_sql": "SELECT COUNT(*) \nFROM satscores \nWHERE \"avgscrmath\" > 400 \nAND \"rtype\" = 'Virtual'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Please list the codes of the schools with a total enrollment of over 500.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T2.CDSCode FROM schools AS T1 INNER JOIN frpm AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.\"Enrollment (K-12)\" + T2.\"Enrollment (Ages 5-17)\" > 500",
+      "actual_sql": "SELECT \"cdscode\"\nFROM \"schools\"\nWHERE \"enroll12\" > 500;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column \"enroll12\" does not exist\nLINE 3: WHERE \"enroll12\" > 500\n              ^\n[SQL: SELECT \"cdscode\"\nFROM \"schools\"\nWHERE \"enroll12\" > 500\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the schools with an SAT excellence rate of over 0.3, what is the highest eligible free rate for students aged 5-17?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT MAX(CAST(T1.\"Free Meal Count (Ages 5-17)\" AS REAL) / NULLIF(T1.\"Enrollment (Ages 5-17)\", 0)) FROM frpm AS T1 INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds WHERE CAST(T2.NumGE1500 AS REAL) / NULLIF(T2.NumTstTakr, 0) > 0.3",
+      "actual_sql": "SELECT MAX(f.\"Free Meal Count (Ages 5-17)\" / f.\"Enrollment (Ages 5-17)\") AS highest_eligible_free_rate\nFROM \"frpm\" f\nJOIN \"satscores\" s ON f.\"cdscode\" = s.\"cds\"\nWHERE (s.\"numge1500\"::FLOAT / s.\"numtsttakr\"::FLOAT) > 0.3\nAND f.\"Enrollment (Ages 5-17)\" > 0\nAND s.\"numtsttakr\" > 0\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Rank schools by their average score in Writing where the score is greater than 499, showing their charter numbers.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT CharterNum, AvgScrWrite, RANK() OVER (ORDER BY AvgScrWrite DESC NULLS LAST) AS WritingScoreRank FROM schools AS T1 INNER JOIN satscores AS T2 ON T1.CDSCode = T2.cds WHERE T2.AvgScrWrite > 499 AND NOT CharterNum IS NULL",
+      "actual_sql": "SELECT \"satscores\".\"sname\", \"satscores\".\"avgscrwrite\", \"schools\".\"charternum\"\nFROM \"satscores\"\nJOIN \"schools\" ON \"satscores\".\"cds\" = \"schools\".\"cdscode\"\nWHERE \"satscores\".\"avgscrwrite\" > 499\nORDER BY \"satscores\".\"avgscrwrite\" DESC\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 500,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.207885,
+        "soft_f1_precision": 0.116,
+        "soft_f1_recall": 1.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List the names of schools with more than 30 difference in enrollements between K-12 and ages 5-17? Please also give the full street adress of the schools.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.School, T1.Street FROM schools AS T1 INNER JOIN frpm AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.\"Enrollment (K-12)\" - T2.\"Enrollment (Ages 5-17)\" > 30",
+      "actual_sql": "SELECT \n    \"s\".\"school\" AS \"school_name\",\n    \"s\".\"street\" || ' ' || \"s\".\"streetabr\" AS \"full_street_address\"\nFROM \n    \"frpm\" \nJOIN \n    \"schools\" AS \"s\" \nON \n    \"frpm\".\"cdscode\" = \"s\".\"cdscode\"\nWHERE \n    (\"frpm\".\"Enrollment (K-12)\" - \"frpm\".\"Enrollment (Ages 5-17)\") > 30\nLIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 100,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Give the names of the schools with the percent eligible for free meals in K-12 is more than 0.1 and test takers whose test score is greater than or equal to 1500?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T2.\"School Name\" FROM satscores AS T1 INNER JOIN frpm AS T2 ON T1.cds = T2.CDSCode WHERE CAST(T2.\"Free Meal Count (K-12)\" AS REAL) / NULLIF(T2.\"Enrollment (K-12)\", 0) > 0.1 AND T1.NumGE1500 > 0",
+      "actual_sql": "SELECT DISTINCT \"s\".\"school\"\nFROM \"schools\" \"s\"\nJOIN \"frpm\" \"f\" ON \"s\".\"cdscode\" = \"f\".\"cdscode\"\nJOIN \"satscores\" \"sa\" ON \"s\".\"cdscode\" = \"sa\".\"cds\"\nWHERE (\"f\".\"Free Meal Count (K-12)\" / \"f\".\"Enrollment (K-12)\") > 0.1\nAND \"sa\".\"numge1500\" > 0\nLIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 100,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Name schools in Riverside which the average of average math score for SAT is grater than 400, what is the funding type of these schools?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.sname, T2.\"Charter Funding Type\" FROM satscores AS T1 INNER JOIN frpm AS T2 ON T1.cds = T2.CDSCode WHERE T2.\"District Name\" LIKE 'Riverside%' GROUP BY T1.sname, T2.\"Charter Funding Type\" HAVING CAST(SUM(T1.AvgScrMath) AS REAL) / NULLIF(COUNT(T1.cds), 0) > 400",
+      "actual_sql": "SELECT DISTINCT s.\"school\", s.\"fundingtype\"\nFROM \"schools\" s\nJOIN \"satscores\" ss ON s.\"cdscode\" = ss.\"cds\"\nWHERE s.\"county\" = 'Riverside'\nAND ss.\"avgscrmath\" > 400\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 60,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "State the names and full communication address of high schools in Monterey which has more than 800 free or reduced price meals for ages 15-17?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.\"School Name\", T2.Street, T2.City, T2.State, T2.Zip FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.County = 'Monterey' AND T1.\"Free Meal Count (Ages 5-17)\" > 800 AND T1.\"School Type\" = 'High Schools (Public)'",
+      "actual_sql": "SELECT \n    \"s\".\"school\" AS \"name\",\n    \"s\".\"street\" || ' ' || \"s\".\"city\" || ', ' || \"s\".\"state\" || ' ' || \"s\".\"zip\" AS \"full_communication_address\"\nFROM \n    \"frpm\" AS \"f\"\nJOIN \n    \"schools\" AS \"s\" \n    ON \"f\".\"cdscode\" = \"s\".\"cdscode\"\nWHERE \n    \"s\".\"county\" = 'Monterey' \n    AND \"s\".\"school\" LIKE '%High%'\n    AND \"f\".\"FRPM Count (Ages 5-17)\" > 800\nLIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 6,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the average score in writing for the schools that were opened after 1991 or closed before 2000? List the school names along with the score. Also, list the communication number of the schools if there is any.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T2.School, T1.AvgScrWrite, T2.Phone FROM schools AS T2 LEFT JOIN satscores AS T1 ON T2.CDSCode = T1.cds WHERE TO_CHAR(CAST(T2.OpenDate AS TIMESTAMP), 'YYYY') > '1991' OR TO_CHAR(CAST(T2.ClosedDate AS TIMESTAMP), 'YYYY') < '2000'",
+      "actual_sql": "SELECT \n    \"s\".\"sname\",\n    \"s\".\"avgscrwrite\",\n    \"s\".\"phone\"\nFROM \n    \"satscores\" AS \"s\"\nWHERE \n    \"s\".\"sname\" IN (\n        SELECT \n            \"sch\".\"school\"\n        FROM \n            \"schools\" AS \"sch\"\n        WHERE \n            (\"sch\".\"opendate\" > '1991-12-31' OR \"sch\".\"closeddate\" < '2000-01-01')\n    )\nLIMIT 100;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column s.phone does not exist\nLINE 4:     \"s\".\"phone\"\n            ^\n[SQL: SELECT \n    \"s\".\"sname\",\n    \"s\".\"avgscrwrite\",\n    \"s\".\"phone\"\nFROM \n    \"satscores\" AS \"s\"\nWHERE \n    \"s\".\"sname\" IN (\n        SELECT \n            \"sch\".\"school\"\n        FROM \n            \"schools\" AS \"sch\"\n        WHERE \n            (\"sch\".\"opendate\" > '1991-12-31' OR \"sch\".\"closeddate\" < '2000-01-01')\n    )\nLIMIT 100]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Consider the average difference between K-12 enrollment and 15-17 enrollment of schools that are locally funded, list the names and DOC type of schools which has a difference above this average.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT T2.School, T2.DOC FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.FundingType = 'Locally funded' AND (T1.\"Enrollment (K-12)\" - T1.\"Enrollment (Ages 5-17)\") > (SELECT AVG(T3.\"Enrollment (K-12)\" - T3.\"Enrollment (Ages 5-17)\") FROM frpm AS T3 INNER JOIN schools AS T4 ON T3.CDSCode = T4.CDSCode WHERE T4.FundingType = 'Locally funded')",
+      "actual_sql": "SELECT \"s\".\"school\", \"s\".\"doc\"\nFROM \"frpm\" AS \"f\"\nJOIN \"schools\" AS \"s\" ON \"f\".\"cdscode\" = \"s\".\"cdscode\"\nWHERE \"f\".\"Enrollment (K-12)\" IS NOT NULL \n  AND \"f\".\"Enrollment (Ages 5-17)\" IS NOT NULL\n  AND \"s\".\"fundingtype\" = 'Locally Funded'\n  AND (\"f\".\"Enrollment (K-12)\" - \"f\".\"Enrollment (Ages 5-17)\") > (\n    SELECT AVG(\"f2\".\"Enrollment (K-12)\" - \"f2\".\"Enrollment (Ages 5-17)\")\n    FROM \"frpm\" AS \"f2\"\n    JOIN \"schools\" AS \"s2\" ON \"f2\".\"cdscode\" = \"s2\".\"cdscode\"\n    WHERE \"f2\".\"Enrollment (K-12)\" IS NOT NULL \n      AND \"f2\".\"Enrollment (Ages 5-17)\" IS NOT NULL\n      AND \"s2\".\"fundingtype\" = 'Locally Funded'\n  )\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the eligible free rate of the 10th and 11th schools with the highest enrolment for students in grades 1 through 12?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(\"Free Meal Count (K-12)\" AS REAL) / NULLIF(\"Enrollment (K-12)\", 0) FROM frpm ORDER BY \"Enrollment (K-12)\" DESC NULLS LAST LIMIT 2 OFFSET 9",
+      "actual_sql": "SELECT \"Percent (%) Eligible Free (K-12)\" \nFROM \"frpm\" \nORDER BY \"Enrollment (K-12)\" DESC \nLIMIT 2 \nOFFSET 9",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 2,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "What is the eligible free or reduced price meal rate for the top 5 schools in grades 1-12 with the highest free or reduced price meal count of the schools with the ownership code 66?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(T1.\"FRPM Count (K-12)\" AS REAL) / NULLIF(T1.\"Enrollment (K-12)\", 0) FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.SOC::integer = 66 ORDER BY T1.\"FRPM Count (K-12)\" DESC NULLS LAST LIMIT 5",
+      "actual_sql": "SELECT \n    \"frpm\".\"Percent (%) Eligible FRPM (K-12)\" AS \"eligible_free_or_reduced_price_meal_rate\"\nFROM \n    \"frpm\"\nJOIN \n    \"schools\" ON \"frpm\".\"cdscode\" = \"schools\".\"cdscode\"\nWHERE \n    \"schools\".\"soc\" = 66\nORDER BY \n    \"frpm\".\"FRPM Count (K-12)\" DESC\nLIMIT 5;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedFunction) operator does not exist: text = integer\nLINE 8:     \"schools\".\"soc\" = 66\n                            ^\nHINT:  No operator matches the given name and argument types. You might need to add explicit type casts.\n[SQL: SELECT \n    \"frpm\".\"Percent (%%) Eligible FRPM (K-12)\" AS \"eligible_free_or_reduced_price_meal_rate\"\nFROM \n    \"frpm\"\nJOIN \n    \"schools\" ON \"frpm\".\"cdscode\" = \"schools\".\"cdscode\"\nWHERE \n    \"schools\".\"soc\" = 66\nORDER BY \n    \"frpm\".\"FRPM Count (K-12)\" DESC\nLIMIT 5]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the complete address of the school with the lowest excellence rate? Indicate the Street, City, Zip and State.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T2.Street, T2.City, T2.State, T2.Zip FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode ORDER BY CAST(T1.NumGE1500 AS REAL) / NULLIF(T1.NumTstTakr, 0) ASC NULLS FIRST LIMIT 1",
+      "actual_sql": "SELECT \n    \"streetabr\" AS \"Street\",\n    \"city\" AS \"City\", \n    \"zip\" AS \"Zip\",\n    \"state\" AS \"State\"\nFROM \"schools\" s\nJOIN \"satscores\" ss ON s.\"cdscode\" = ss.\"cds\"\nWHERE ss.\"numtsttakr\" > 0\nORDER BY CAST(ss.\"numge1500\" AS FLOAT) / ss.\"numtsttakr\" ASC\nLIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Under whose administration is the school with the highest number of students scoring 1500 or more on the SAT? Indicate their full names.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT T2.AdmFName1, T2.AdmLName1, T2.AdmFName2, T2.AdmLName2, T2.AdmFName3, T2.AdmLName3 FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode ORDER BY T1.NumGE1500 DESC NULLS LAST LIMIT 1",
+      "actual_sql": "SELECT \n    \"admfname1\", \n    \"admfname2\", \n    \"admfname3\", \n    \"admlname1\", \n    \"admlname2\", \n    \"admlname3\"\nFROM \"schools\" s\nJOIN \"satscores\" ss ON s.\"cdscode\" = ss.\"cds\"\nWHERE ss.\"numge1500\" = (\n    SELECT MAX(\"numge1500\") \n    FROM \"satscores\"\n)\nLIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the average number of test takers from Fresno schools that opened between 1/1/1980 and 12/31/1980?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT AVG(T1.NumTstTakr) FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE TO_CHAR(CAST(T2.OpenDate AS TIMESTAMP), 'YYYY') = '1980' AND T2.County = 'Fresno'",
+      "actual_sql": "SELECT AVG(\"numtsttakr\") AS average_test_takers\nFROM \"satscores\" AS s\nJOIN \"schools\" AS sc ON s.\"cds\" = sc.\"cdscode\"\nWHERE sc.\"county\" = 'Fresno'\nAND sc.\"opendate\" BETWEEN '1980-01-01' AND '1980-12-31'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "What is the telephone number for the school with the lowest average score in reading in Fresno Unified?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T2.Phone FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T2.District = 'Fresno Unified' AND NOT T1.AvgScrRead IS NULL ORDER BY T1.AvgScrRead ASC NULLS FIRST LIMIT 1",
+      "actual_sql": "SELECT \"phone\"\nFROM \"schools\"\nWHERE \"district\" = 'Fresno Unified'\nORDER BY (\n    SELECT AVG(\"avgscrread\")\n    FROM \"satscores\"\n    WHERE \"satscores\".\"cds\" = \"schools\".\"cdscode\"\n)\nLIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "List the names of virtual schools that are among the top 5 in their respective counties based on average reading scores.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT School FROM (SELECT T2.School, T1.AvgScrRead, RANK() OVER (PARTITION BY T2.County ORDER BY T1.AvgScrRead DESC NULLS LAST) AS rnk FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T2.Virtual = 'F') AS ranked_schools WHERE rnk <= 5",
+      "actual_sql": "SELECT \"s\".\"school\"\nFROM \"schools\" \"s\"\nJOIN \"satscores\" \"sa\" ON \"s\".\"cdscode\" = \"sa\".\"cds\"\nWHERE \"s\".\"virtual\" = 'F'\n  AND \"sa\".\"avgscrread\" IS NOT NULL\n  AND (\n    SELECT COUNT(DISTINCT \"sa2\".\"cds\")\n    FROM \"schools\" \"s2\"\n    JOIN \"satscores\" \"sa2\" ON \"s2\".\"cdscode\" = \"sa2\".\"cds\"\n    WHERE \"s2\".\"county\" = \"s\".\"county\"\n      AND \"sa2\".\"avgscrread\" >= \"sa\".\"avgscrread\"\n  ) <= 5\nORDER BY \"s\".\"county\", \"sa\".\"avgscrread\" DESC\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.057143,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 0.029412,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the average writing score of each of the schools managed by Ricci Ulrich? List the schools and the corresponding average writing scores.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T2.School, T1.AvgScrWrite FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode WHERE T2.AdmFName1 = 'Ricci' AND T2.AdmLName1 = 'Ulrich'",
+      "actual_sql": "SELECT \n    \"schools\".\"school\" AS \"school_name\",\n    \"satscores\".\"avgscrwrite\" AS \"average_writing_score\"\nFROM \n    \"schools\"\nINNER JOIN \n    \"satscores\" \nON \n    \"schools\".\"cdscode\" = \"satscores\".\"cds\"\nWHERE \n    \"schools\".\"admfname1\" = 'Ricci' \n    AND \"schools\".\"admlname1\" = 'Ulrich'\nORDER BY \n    \"schools\".\"school\"\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Which state special schools have the highest number of enrollees from grades 1 through 12?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T2.School FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.DOC = '31' ORDER BY T1.\"Enrollment (K-12)\" DESC LIMIT 1",
+      "actual_sql": "SELECT \"schools\".\"school\", \"frpm\".\"Enrollment (K-12)\"\nFROM \"frpm\"\nJOIN \"schools\" ON \"frpm\".\"cdscode\" = \"schools\".\"cdscode\"\nWHERE \"schools\".\"edopscode\" = 'SSS'\nORDER BY \"frpm\".\"Enrollment (K-12)\" DESC\nLIMIT 10",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 3,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.5,
+        "soft_f1_precision": 0.333333,
+        "soft_f1_recall": 1.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the monthly average number of schools that opened in Alameda County under the jurisdiction of the Elementary School District in 1980?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(COUNT(School) AS REAL) / NULLIF(12, 0) FROM schools WHERE DOC = '52' AND County = 'Alameda' AND EXTRACT(YEAR FROM OpenDate) = 1980",
+      "actual_sql": "SELECT COUNT(*) / 12.0 AS monthly_average\nFROM \"schools\"\nWHERE \"county\" = 'Alameda' \n  AND \"doc\" = 52 \n  AND EXTRACT(YEAR FROM \"opendate\") = 1980;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedFunction) operator does not exist: text = integer\nLINE 4:   AND \"doc\" = 52 \n                    ^\nHINT:  No operator matches the given name and argument types. You might need to add explicit type casts.\n[SQL: SELECT COUNT(*) / 12.0 AS monthly_average\nFROM \"schools\"\nWHERE \"county\" = 'Alameda' \n  AND \"doc\" = 52 \n  AND EXTRACT(YEAR FROM \"opendate\") = 1980\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the ratio of merged Unified School District schools in Orange County to merged Elementary School District schools?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN DOC::integer = 54 THEN 1 ELSE 0 END) AS REAL) / NULLIF(SUM(CASE WHEN DOC::integer = 52 THEN 1 ELSE 0 END), 0) FROM schools WHERE StatusType = 'Merged' AND County = 'Orange'",
+      "actual_sql": "SELECT \n    CAST(SUM(CASE WHEN \"DOC\" = 54 THEN 1 ELSE 0 END) AS REAL) / \n    CAST(SUM(CASE WHEN \"DOC\" = 52 THEN 1 ELSE 0 END) AS REAL) AS ratio\nFROM \"schools\"\nWHERE \"county\" = 'Orange County' \n    AND \"statustype\" = 'Merged';",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column \"DOC\" does not exist\nLINE 2:     CAST(SUM(CASE WHEN \"DOC\" = 54 THEN 1 ELSE 0 END) AS REAL...\n                               ^\n[SQL: SELECT \n    CAST(SUM(CASE WHEN \"DOC\" = 54 THEN 1 ELSE 0 END) AS REAL) / \n    CAST(SUM(CASE WHEN \"DOC\" = 52 THEN 1 ELSE 0 END) AS REAL) AS ratio\nFROM \"schools\"\nWHERE \"county\" = 'Orange County' \n    AND \"statustype\" = 'Merged'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the postal street address for the school with the 7th highest Math average? Indicate the school's name.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T2.MailStreet, T2.School FROM satscores AS T1 INNER JOIN schools AS T2 ON T1.cds = T2.CDSCode ORDER BY T1.AvgScrMath DESC NULLS LAST LIMIT 1 OFFSET 6",
+      "actual_sql": "SELECT \"streetabr\", \"sname\"\nFROM \"satscores\"\nORDER BY \"avgscrmath\" DESC\nLIMIT 1 OFFSET 6;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column \"streetabr\" does not exist\nLINE 1: SELECT \"streetabr\", \"sname\"\n               ^\n[SQL: SELECT \"streetabr\", \"sname\"\nFROM \"satscores\"\nORDER BY \"avgscrmath\" DESC\nLIMIT 1 OFFSET 6]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the total number of non-chartered schools in the county of Los Angeles with a percent (%) of eligible free meals for grades 1 through 12 that is less than 0.18%?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT COUNT(T2.School) FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.County = 'Los Angeles' AND T2.Charter = 0 AND CAST(T1.\"Free Meal Count (K-12)\" AS REAL) * 100 / NULLIF(T1.\"Enrollment (K-12)\", 0) < 0.18",
+      "actual_sql": "SELECT COUNT(*) \nFROM \"frpm\" \nJOIN \"schools\" ON \"frpm\".\"cdscode\" = \"schools\".\"cdscode\" \nWHERE \"schools\".\"county\" = 'Los Angeles' \nAND \"schools\".\"charter\" = 0 \nAND (\"frpm\".\"Free Meal Count (K-12)\" / \"frpm\".\"Enrollment (K-12)\") < 0.0018\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "How many students from the ages of 5 to 17 are enrolled at the State Special School school in Fremont for the 2014-2015 academic year?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.\"Enrollment (Ages 5-17)\" FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.EdOpsCode = 'SSS' AND T2.City = 'Fremont' AND T1.\"Academic Year\" = '2014-2015'",
+      "actual_sql": "SELECT \"Enrollment (Ages 5-17)\"\nFROM \"frpm\"\nWHERE \"Academic Year\" = '2014-2015'\nAND \"School Name\" = 'State Special School'\nAND \"City\" = 'Fremont'",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column \"City\" does not exist\nLINE 5: AND \"City\" = 'Fremont'\n            ^\n[SQL: SELECT \"Enrollment (Ages 5-17)\"\nFROM \"frpm\"\nWHERE \"Academic Year\" = '2014-2015'\nAND \"School Name\" = 'State Special School'\nAND \"City\" = 'Fremont'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Which schools served a grade span of Kindergarten to 9th grade in the county of Los Angeles and what is its Percent (%) Eligible FRPM (Ages 5-17)?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T2.School, T1.\"FRPM Count (Ages 5-17)\" * 100 / NULLIF(T1.\"Enrollment (Ages 5-17)\", 0) FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.County = 'Los Angeles' AND T2.GSserved = 'K-9'",
+      "actual_sql": "SELECT \n    \"s\".\"school\" AS \"school_name\",\n    \"f\".\"Percent (%) Eligible FRPM (Ages 5-17)\"\nFROM \n    \"frpm\" \"f\"\nJOIN \n    \"schools\" \"s\" \n    ON \"f\".\"cdscode\" = \"s\".\"cdscode\"\nWHERE \n    \"s\".\"county\" = 'Los Angeles'\n    AND \"s\".\"gsserved\" = 'K-9'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 2,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Between San Diego and Santa Barbara, which county offers the most number of schools that does not offer physical building? Indicate the amount.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT County, COUNT(Virtual) FROM schools WHERE (County = 'San Diego' OR County = 'Santa Barbara') AND Virtual = 'F' GROUP BY County ORDER BY COUNT(Virtual) DESC NULLS LAST LIMIT 1",
+      "actual_sql": "SELECT \"County Name\", COUNT(*) AS school_count\nFROM \"frpm\"\nWHERE \"County Name\" IN ('San Diego', 'Santa Barbara')\n  AND \"School Type\" = 'Virtual'\nGROUP BY \"County Name\"\nORDER BY school_count DESC\nLIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the grade span offered in the school with the highest longitude?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT GSoffered FROM schools ORDER BY ABS(longitude) DESC NULLS LAST LIMIT 1",
+      "actual_sql": "SELECT \"gsoffered\"\nFROM \"schools\"\nWHERE ABS(\"longitude\") = (\n    SELECT MAX(ABS(\"longitude\"))\n    FROM \"schools\"\n)\nLIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Of the schools that offers a magnet program serving a grade span of Kindergarten to 8th grade, how many offers Multiple Provision Types? List the number of cities that offers a Kindergarten to 8th grade span and indicate how many schools are there serving such grade span for each city.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT T2.City, COUNT(T2.CDSCode) FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.Magnet = 1 AND T2.GSoffered = 'K-8' AND T1.\"NSLP Provision Status\" = 'Multiple Provision Types' GROUP BY T2.City",
+      "actual_sql": "SELECT \n    COUNT(CASE WHEN \"NSLP Provision Status\" = 'Multiple Provision Types' THEN 1 END) AS multiple_provision_types_count,\n    COUNT(DISTINCT \"City\") AS distinct_cities,\n    \"City\",\n    COUNT(*) AS schools_per_city\nFROM \"schools\"\nWHERE \"Magnet\" = 1 \n    AND \"Gsoffered\" = 'K-8'\nGROUP BY \"City\"\nORDER BY \"City\";",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column \"NSLP Provision Status\" does not exist\nLINE 2:     COUNT(CASE WHEN \"NSLP Provision Status\" = 'Multiple Prov...\n                            ^\n[SQL: SELECT \n    COUNT(CASE WHEN \"NSLP Provision Status\" = 'Multiple Provision Types' THEN 1 END) AS multiple_provision_types_count,\n    COUNT(DISTINCT \"City\") AS distinct_cities,\n    \"City\",\n    COUNT(*) AS schools_per_city\nFROM \"schools\"\nWHERE \"Magnet\" = 1 \n    AND \"Gsoffered\" = 'K-8'\nGROUP BY \"City\"\nORDER BY \"City\"\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the Percent (%) Eligible Free (K-12) in the school administered by an administrator whose first name is Alusine. List the district code of the school.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.\"Free Meal Count (K-12)\" * 100 / NULLIF(T1.\"Enrollment (K-12)\", 0), T1.\"District Code\" FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.AdmFName1 = 'Alusine'",
+      "actual_sql": "SELECT \n    f.\"Percent (%) Eligible Free (K-12)\",\n    s.\"district\"\nFROM \n    frpm f\nJOIN \n    schools s ON f.\"cdscode\" = s.\"cdscode\"\nWHERE \n    s.\"admfname1\" = 'Alusine' \n    OR s.\"admfname2\" = 'Alusine' \n    OR s.\"admfname3\" = 'Alusine'\nLIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What are the valid e-mail addresses of the administrator of the school located in the San Bernardino county, City of San Bernardino City Unified that opened between 1/1/2009 to 12/31/2010 whose school types are public Intermediate/Middle Schools and Unified Schools?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT T2.AdmEmail1, T2.AdmEmail2 FROM frpm AS T1 INNER JOIN schools AS T2 ON T1.CDSCode = T2.CDSCode WHERE T2.County = 'San Bernardino' AND T2.City = 'San Bernardino' AND T2.DOC::integer = 54 AND EXTRACT(YEAR FROM T2.OpenDate) BETWEEN 2009 AND 2010 AND T2.SOC::integer = 62",
+      "actual_sql": "SELECT DISTINCT \"admemail1\", \"admemail2\", \"admemail3\"\nFROM \"schools\"\nWHERE \"county\" = 'San Bernardino'\n  AND \"city\" = 'San Bernardino City Unified'\n  AND \"opendate\" BETWEEN '2009-01-01' AND '2010-12-31'\n  AND (\"soc\" = '62' OR \"doc\" = '54')\n  AND (\"admemail1\" IS NOT NULL AND \"admemail1\" != '')\n  AND (\"admemail2\" IS NOT NULL AND \"admemail2\" != '')\n  AND (\"admemail3\" IS NOT NULL AND \"admemail3\" != '')\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    }
+  ]
+}

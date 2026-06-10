@@ -1,0 +1,966 @@
+{
+  "run_id": "card_games_L0_env_rep1",
+  "dataset": "card_games",
+  "level": "L0",
+  "dimensions": [],
+  "model": {
+    "provider": "gemini",
+    "model": "gemma-4-26b-a4b-it",
+    "base_url": ""
+  },
+  "runtime_params": {
+    "max_tokens": 4096,
+    "effective_max_tokens": 4096,
+    "temperature": 0.6,
+    "seed": 42,
+    "top_p": 0.95,
+    "presence_penalty": 0.0,
+    "top_k": 20,
+    "reasoning_effort": "medium",
+    "num_ctx": null,
+    "bird_docs_dir": "/Users/gary/myapps/4d-metadata-ablation/bird-docs-revised"
+  },
+  "rep": 1,
+  "timestamp": "2026-06-02T03:21:09.341475+00:00",
+  "elapsed_seconds": 1271.2,
+  "aggregate_metrics": {
+    "total_cases": 52,
+    "execution_rate_pct": 76.9,
+    "value_match_pct": 13.5,
+    "column_match_pct": 0.0,
+    "soft_f1_mean": 0.1583,
+    "er_value_gap_pp": 63.5,
+    "error_count": 12,
+    "bird_ex_pct": 15.4,
+    "er_bex_gap_pp": 61.5,
+    "challenging_er_pct": 33.3,
+    "challenging_vm_pct": 16.7,
+    "challenging_soft_f1": 0.1669,
+    "challenging_bird_ex_pct": 16.7,
+    "moderate_er_pct": 81.8,
+    "moderate_vm_pct": 6.1,
+    "moderate_soft_f1": 0.0924,
+    "moderate_bird_ex_pct": 9.1,
+    "simple_er_pct": 84.6,
+    "simple_vm_pct": 30.8,
+    "simple_soft_f1": 0.3217,
+    "simple_bird_ex_pct": 30.8
+  },
+  "per_case_results": [
+    {
+      "question": "Which are the cards that have incredibly powerful foils.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT id FROM cards WHERE NOT cardKingdomFoilId IS NULL AND NOT cardKingdomId IS NULL",
+      "actual_sql": "",
+      "execution_success": false,
+      "error": "text2sql failed: LLM returned empty response (token budget exhausted in reasoning?)",
+      "status": "empty_response_token_exhaustion",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What are the borderless cards available without powerful foils?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT id FROM cards WHERE borderColor = 'borderless' AND (cardKingdomId IS NULL OR cardKingdomId IS NULL)",
+      "actual_sql": "SELECT \"name\" FROM \"cards\" WHERE \"bordercolor\" = 'Borderless' AND \"hasfoil\" = 0 LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List all the mythic rarity print cards banned in gladiator format.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT T1.id FROM cards AS T1 INNER JOIN legalities AS T2 ON T1.uuid = T2.uuid WHERE T2.format = 'gladiator' AND T2.status = 'Banned' AND T1.rarity = 'mythic'",
+      "actual_sql": "SELECT \"cards\".\"name\" FROM \"cards\" JOIN \"legalities\" ON \"cards\".\"id\" = \"legalities\".\"id\" WHERE \"cards\".\"rarity\" = 'mythic' AND \"legalities\".\"format\" = 'gladiator' AND \"legalities\".\"status\" = 'banned' LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For artifact type of cards that do not have multiple faces on the same card, state its legalities status for vintage play format.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT T2.status FROM cards AS T1 INNER JOIN legalities AS T2 ON T1.uuid = T2.uuid WHERE T1.type = 'Artifact' AND T2.format = 'vintage' AND T1.side IS NULL",
+      "actual_sql": "SELECT\n  T2.\"status\"\nFROM \"cards\" AS T1\nJOIN \"legalities\" AS T2\n  ON T1.\"id\" = T2.\"id\"\nWHERE\n  T1.\"type\" = 'Artifact'\n  AND T1.\"otherfaceids\" IS NULL\n  AND T2.\"format\" = 'vintage'\nLIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.5,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 0.333333,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List all the card id and artist with unknown power which are legal for commander play format.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.id, T1.artist FROM cards AS T1 INNER JOIN legalities AS T2 ON T1.uuid = T2.uuid WHERE T2.status = 'Legal' AND T2.format = 'commander' AND (T1.power IS NULL OR T1.power = '*')",
+      "actual_sql": "SELECT \"T1\".\"id\", \"T1\".\"artist\" FROM \"cards\" AS \"T1\" JOIN \"legalities\" AS \"T2\" ON \"T1\".\"id\" = \"T2\".\"id\" WHERE \"T1\".\"power\" IS NULL OR \"T1\".\"power\" = '' OR \"T1\".\"power\" = 'unknown' AND \"T2\".\"format\" = 'commander' AND \"T2\".\"status\" = 'legal' LIMIT;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"LIMIT\"\nLINE 2: LIMIT 500\n        ^\n[SQL: SELECT \"T1\".\"id\", \"T1\".\"artist\" FROM \"cards\" AS \"T1\" JOIN \"legalities\" AS \"T2\" ON \"T1\".\"id\" = \"T2\".\"id\" WHERE \"T1\".\"power\" IS NULL OR \"T1\".\"power\" = '' OR \"T1\".\"power\" = 'unknown' AND \"T2\".\"format\" = 'commander' AND \"T2\".\"status\" = 'legal' LIMIT\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Find all cards illustrated by Stephen Daniel and describe the text of the ruling of these cards. State if these cards have missing or degraded properties and values.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.id, T2.text, T1.hasContentWarning FROM cards AS T1 INNER JOIN rulings AS T2 ON T1.uuid = T2.uuid WHERE T1.artist = 'Stephen Daniele'",
+      "actual_sql": "SELECT \"name\", \"text\", CASE WHEN \"text\" IS NULL OR \"type\" IS NULL THEN 'Yes' ELSE 'No' END AS \"missing_or_degraded_properties\" FROM \"cards\" WHERE \"artist\" = 'Stephen Daniel' LIMIT;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"LIMIT\"\nLINE 2: LIMIT 500\n        ^\n[SQL: SELECT \"name\", \"text\", CASE WHEN \"text\" IS NULL OR \"type\" IS NULL THEN 'Yes' ELSE 'No' END AS \"missing_or_degraded_properties\" FROM \"cards\" WHERE \"artist\" = 'Stephen Daniel' LIMIT\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Name the card and artist with the most ruling information. Also state if the card is a promotional printing.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.name, T1.artist, T1.isPromo FROM cards AS T1 INNER JOIN rulings AS T2 ON T1.uuid = T2.uuid WHERE T1.isPromo = 1 AND T1.artist = (SELECT artist FROM cards WHERE isPromo = 1 GROUP BY artist HAVING COUNT(DISTINCT uuid) = (SELECT MAX(count_uuid) FROM (SELECT COUNT(DISTINCT uuid) AS count_uuid FROM cards WHERE isPromo = 1 GROUP BY artist) AS subquery)) LIMIT 1",
+      "actual_sql": "SELECT \"name\", \"artist\", \"ispromo\" FROM \"cards\" ORDER BY \"keywords\" DESC LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Calculate the percentage of the cards availabe in Chinese Simplified.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN T2.language = 'Chinese Simplified' THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(COUNT(T1.id), 0) FROM cards AS T1 INNER JOIN foreign_data AS T2 ON T1.uuid = T2.uuid",
+      "actual_sql": "SELECT 100.0 * COUNT(*) FILTER (WHERE \"availability\" = 'Chinese Simplified') / COUNT(*) FROM \"cards\"\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many cards have infinite power?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT COUNT(*) FROM cards WHERE power = '*'",
+      "actual_sql": "SELECT COUNT(*) FROM \"cards\" WHERE \"power\" = 'infinite'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the border color of card \"Ancestor's Chosen\"?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT DISTINCT borderColor FROM cards WHERE name = 'Ancestor''s Chosen'",
+      "actual_sql": "SELECT \"bordercolor\" FROM \"cards\" WHERE \"name\" = 'Ancestor''s Chosen' LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "What is the rule of playing card \"Benalish Knight\"?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T2.format FROM cards AS T1 INNER JOIN legalities AS T2 ON T1.uuid = T2.uuid WHERE T1.name = 'Benalish Knight'",
+      "actual_sql": "SELECT \"text\" FROM \"cards\" WHERE \"name\" = 'Benalish Knight' LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the percentage of borderless cards?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN borderColor = 'borderless' THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(COUNT(id), 0) FROM cards",
+      "actual_sql": "SELECT\n  COUNT(CASE WHEN \"frameeffects\" LIKE '%borderless%' THEN 1 END) * 100.0 / COUNT(*)\nFROM \"cards\"\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the percentage of cards whose language is French among the Story Spotlight cards?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN T2.language = 'French' THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(COUNT(T1.id), 0) FROM cards AS T1 INNER JOIN foreign_data AS T2 ON T1.uuid = T2.uuid WHERE T1.isStorySpotlight = 1",
+      "actual_sql": "SELECT\n  CAST(COUNT(CASE WHEN \"f\".\"language\" = 'French' THEN 1 END) AS REAL) * 100 / COUNT(*)\nFROM \"cards\" AS \"c\"\nJOIN \"foreign_data\" AS \"f\"\n  ON \"c\".\"uuid\" = \"f\".\"uuid\"\nWHERE\n  \"c\".\"isstoryspotlight\" = 1\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "How many cards with original type of \"Summon - Angel\" have subtype other than \"Angel\"?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT COUNT(id) FROM cards WHERE originalType = 'Summon - Angel' AND subtypes <> 'Angel'",
+      "actual_sql": "SELECT COUNT(*) FROM \"cards\" WHERE \"originaltype\" = 'Summon - Angel' AND \"subtypes\" <> 'Angel' LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "What are the cards belong to duel deck a? List the ID.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT id FROM cards WHERE duelDeck = 'a'",
+      "actual_sql": "SELECT \"id\" FROM \"cards\" WHERE \"dueldeck\" = 'a' LIMIT;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"LIMIT\"\nLINE 2: LIMIT 500\n        ^\n[SQL: SELECT \"id\" FROM \"cards\" WHERE \"dueldeck\" = 'a' LIMIT\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many of the banned cards are white border?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT COUNT(T1.id) FROM cards AS T1 INNER JOIN legalities AS T2 ON T1.uuid = T2.uuid WHERE T2.status = 'Banned' AND T1.borderColor = 'white'",
+      "actual_sql": "SELECT COUNT(*) FROM \"cards\" WHERE \"bordercolor\" = 'white' AND \"isreserved\" = 1\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the Artifact cards, which are black color and comes with foreign languague translation?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT T1.name FROM cards AS T1 INNER JOIN foreign_data AS T2 ON T1.uuid = T2.uuid WHERE T1.originalType = 'Artifact' AND T1.colors = 'B'",
+      "actual_sql": "SELECT\n  \"cards\".\"name\"\nFROM \"cards\"\nJOIN \"sets\"\n  ON \"cards\".\"setcode\" = \"sets\".\"code\"\nJOIN \"set_translations\"\n  ON \"sets\".\"code\" = \"set_translations\".\"setcode\"\nWHERE\n  \"cards\".\"type\" LIKE '%Artifact%'\n  AND \"cards\".\"colors\" = 'B'\nLIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.222222,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 0.125,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the mana cost of cards with a normal layout, a 2003 frame version, with a black border color, and available in paper and mtgo?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT manaCost FROM cards WHERE availability = 'mtgo,paper' AND borderColor = 'black' AND frameVersion = '2003' AND layout = 'normal'",
+      "actual_sql": "SELECT \"manacost\" FROM \"cards\" WHERE \"layout\" = 'normal' AND \"frameversion\" = '2003' AND \"bordercolor\" = 'black' AND \"availability\" LIKE '%paper%' AND \"availability\" LIKE '%mtgo%' LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.000175,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 8.7e-05,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the percentage of Story Spotlight cards that do not have a text box? List them by their ID.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN isTextless = 0 AND isStorySpotlight = 1 THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(COUNT(id), 0) FROM cards",
+      "actual_sql": "SELECT \"id\" FROM \"cards\" WHERE \"isstoryspotlight\" = 1 AND \"istextless\" = 1\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many Brazilian Portuguese translated sets are inside the Commander block?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T1.id) FROM sets AS T1 INNER JOIN set_translations AS T2 ON T1.code = T2.setCode WHERE T2.language = 'Portuguese (Brazil)' AND T1.block = 'Commander'",
+      "actual_sql": "SELECT COUNT(*)\nFROM \"set_translations\" AS T1\nJOIN \"sets\" AS T2 ON T1.\"setcode\" = T2.\"code\"\nWHERE T1.\"language\" = 'Brazilian Portuguese' AND T2.\"block\" = 'Commander'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Lists all types of cards in German.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.subtypes, T1.supertypes FROM cards AS T1 INNER JOIN foreign_data AS T2 ON T1.uuid = T2.uuid WHERE T2.language = 'German' AND NOT T1.subtypes IS NULL AND NOT T1.supertypes IS NULL",
+      "actual_sql": "SELECT DISTINCT \"type\" FROM \"cards\" LIMIT;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"LIMIT\"\nLINE 2: LIMIT 500\n        ^\n[SQL: SELECT DISTINCT \"type\" FROM \"cards\" LIMIT\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many unknown power cards contain info about the triggered ability",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT Count(DISTINCT T1.id) FROM cards AS T1 INNER JOIN rulings AS T2 ON T1.uuid = T2.uuid WHERE (T1.power IS NULL OR T1.power = '*') AND T2.text LIKE '%triggered ability%'",
+      "actual_sql": "SELECT COUNT(*) FROM \"cards\" WHERE \"power\" = 'unknown' AND \"text\" LIKE '%triggered ability%'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Indicates the number of cards with pre-modern format, ruling text \"This is a triggered mana ability.\" that do not have multiple faces.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T1.id) FROM cards AS T1 INNER JOIN legalities AS T2 ON T1.uuid = T2.uuid INNER JOIN rulings AS T3 ON T1.uuid = T3.uuid WHERE T2.format = 'premodern' AND T3.text = 'This is a triggered mana ability.' AND T1.Side IS NULL",
+      "actual_sql": "SELECT COUNT(*)\nFROM \"cards\"\nJOIN \"legalities\" ON \"cards\".\"id\" = \"legalities\".\"id\"\nWHERE \"legalities\".\"format\" = 'premodern'\n  AND \"cards\".\"text\" = 'This is a triggered mana ability.'\n  AND \"cards\".\"otherfaceids\" IS NULL\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the foreign name of the card in French of type Creature, normal layout and black border color, by artist Matthew D. Wilson?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT name FROM foreign_data WHERE uuid IN (SELECT uuid FROM cards WHERE types = 'Creature' AND layout = 'normal' AND borderColor = 'black' AND artist = 'Matthew D. Wilson') AND language = 'French'",
+      "actual_sql": "SELECT \"t2\".\"translation\" FROM \"cards\" AS \"t1\" JOIN \"set_translations\" AS \"t2\" ON \"t1\".\"setcode\" = \"t2\".\"setcode\" WHERE \"t1\".\"type\" = 'Creature' AND \"t1\".\"layout\" = 'normal' AND \"t1\".\"bordercolor\" = 'black' AND \"t1\".\"artist\" = 'Matthew D. Wilson' AND \"t2\".\"language\" = 'French' LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What language is the set of 180 cards that belongs to the Ravnica block translated into?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T2.language FROM sets AS T1 INNER JOIN set_translations AS T2 ON T1.code = T2.setCode WHERE T1.block = 'Ravnica' AND T1.baseSetSize = 180",
+      "actual_sql": "SELECT\n  T2.\"language\"\nFROM \"sets\" AS T1\nJOIN \"set_translations\" AS T2\n  ON T1.\"code\" = T2.\"setcode\"\nWHERE\n  T1.\"block\" = 'Ravnica'\nLIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.181818,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 0.1,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What percentage of cards with format commander and legal status do not have a content warning?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN T1.hasContentWarning = 0 THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(COUNT(T1.id), 0) FROM cards AS T1 INNER JOIN legalities AS T2 ON T1.uuid = T2.uuid WHERE T2.format = 'commander' AND T2.status = 'Legal'",
+      "actual_sql": "SELECT 100.0 * COUNT(CASE WHEN \"c\".\"hascontentwarning\" = 0 THEN 1 END) / COUNT(*)\nFROM \"cards\" AS \"c\"\nJOIN \"legalities\" AS \"l\" ON \"c\".\"id\" = \"l\".\"id\"\nWHERE \"l\".\"format\" = 'commander' AND \"l\".\"status\" = 'legal'",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.DivisionByZero) division by zero\n[SQL: SELECT 100.0 * COUNT(CASE WHEN \"c\".\"hascontentwarning\" = 0 THEN 1 END) / COUNT(*)\nFROM \"cards\" AS \"c\"\nJOIN \"legalities\" AS \"l\" ON \"c\".\"id\" = \"l\".\"id\"\nWHERE \"l\".\"format\" = 'commander' AND \"l\".\"status\" = 'legal'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/9h9h)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What percentage of cards without power are in French?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN T2.language = 'French' THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(COUNT(T1.id), 0) FROM cards AS T1 INNER JOIN foreign_data AS T2 ON T1.uuid = T2.uuid WHERE T1.power IS NULL OR T1.power = '*'",
+      "actual_sql": "",
+      "execution_success": false,
+      "error": "text2sql failed: LLM returned empty response (token budget exhausted in reasoning?)",
+      "status": "empty_response_token_exhaustion",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the language of the card with the multiverse number 149934?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT language FROM foreign_data WHERE multiverseid = 149934",
+      "actual_sql": "SELECT \"language\" FROM \"foreign_data\" WHERE \"multiverseid\" = 149934 LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "What proportion of cards do not have a text box with a normal layout?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN isTextless = 1 AND layout = 'normal' THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(COUNT(*), 0) FROM cards",
+      "actual_sql": "SELECT CAST(COUNT(*) FILTER (WHERE \"layout\" != 'normal') AS REAL) / COUNT(*) FROM \"cards\"\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What languages are available in the set known as Archenemy on the magic card market and having the code ARC?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T2.language FROM sets AS T1 INNER JOIN set_translations AS T2 ON T1.code = T2.setCode WHERE T1.mcmName = 'Archenemy' AND T2.setCode = 'ARC'",
+      "actual_sql": "SELECT DISTINCT \"language\" FROM \"set_translations\" JOIN \"sets\" ON \"set_translations\".\"setcode\" = \"sets\".\"code\" WHERE \"sets\".\"name\" = 'Archenemy' AND \"sets\".\"code\" = 'ARC' LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.181818,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 0.1,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Which foreign language used by \"A Pedra Fellwar\"?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT DISTINCT language FROM foreign_data WHERE name = 'A Pedra Fellwar'",
+      "actual_sql": "SELECT \"language\" FROM \"foreign_data\" WHERE \"name\" = 'A Pedra Fellwar' LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Which card costs more converted mana, \"Serra Angel\" or \"Shrine Keeper\"?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT name FROM cards WHERE name IN ('Serra Angel', 'Shrine Keeper') ORDER BY convertedManaCost DESC NULLS LAST LIMIT 1",
+      "actual_sql": "SELECT \"name\" FROM \"cards\" WHERE \"name\" IN ('Serra Angel', 'Shrine Keeper') ORDER BY \"convertedmanacost\" DESC LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "What's the Italian name of the set of cards with \"Ancestor's Chosen\" is in?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT translation FROM set_translations WHERE setCode IN (SELECT setCode FROM cards WHERE name = 'Ancestor''s Chosen') AND language = 'Italian'",
+      "actual_sql": "SELECT \"T1\".\"translation\" FROM \"set_translations\" AS \"T1\" JOIN \"sets\" AS \"T2\" ON \"T1\".\"setcode\" = \"T2\".\"code\" JOIN \"cards\" AS \"T3\" ON \"T3\".\"setcode\" = \"T2\".\"code\" WHERE \"T3\".\"name\" = 'Ancestor''s Chosen' AND \"T1\".\"language\" = 'it' LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For the set of cards with \"Ancestor's Chosen\" in it, is there a Korean version of it?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CASE WHEN SUM(CASE WHEN T2.language = 'Korean' AND NOT T2.translation IS NULL THEN 1 ELSE 0 END) > 0 THEN 'YES' ELSE 'NO' END FROM cards AS T1 INNER JOIN set_translations AS T2 ON T2.setCode = T1.setCode WHERE T1.name = 'Ancestor''s Chosen'",
+      "actual_sql": "SELECT EXISTS (\n  SELECT 1\n  FROM \"cards\" AS \"c\"\n  JOIN \"set_translations\" AS \"st\" ON \"c\".\"setcode\" = \"st\".\"setcode\"\n  WHERE \"c\".\"name\" = 'Ancestor''s Chosen' AND \"st\".\"language\" = 'Korean'\n)\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the cards in the set \"Hauptset Zehnte Edition\", how many of them are designed by Adam Rex?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T1.id) FROM cards AS T1 INNER JOIN set_translations AS T2 ON T2.setCode = T1.setCode WHERE T2.translation = 'Hauptset Zehnte Edition' AND T1.artist = 'Adam Rex'",
+      "actual_sql": "SELECT COUNT(*) FROM \"cards\" JOIN \"sets\" ON \"cards\".\"setcode\" = \"sets\".\"code\" WHERE \"sets\".\"name\" = 'Hauptset Zehnte Edition' AND \"cards\".\"artist\" = 'Adam Rex' LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the Simplified Chinese translation of the name of the set \"Eighth Edition\"?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T2.translation FROM sets AS T1 INNER JOIN set_translations AS T2 ON T2.setCode = T1.code WHERE T1.name = 'Eighth Edition' AND T2.language = 'Chinese Simplified'",
+      "actual_sql": "SELECT \"T1\".\"translation\" FROM \"set_translations\" AS \"T1\" JOIN \"sets\" AS \"T2\" ON \"T1\".\"setcode\" = \"T2\".\"code\" WHERE \"T2\".\"name\" = 'Eighth Edition' AND \"T1\".\"language\" = 'Simplified Chinese' LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Did the set of cards with \"Angel of Mercy\" appear on Magic: The Gathering Online?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CASE WHEN NOT T2.mtgoCode IS NULL THEN 'YES' ELSE 'NO' END FROM cards AS T1 INNER JOIN sets AS T2 ON T2.code = T1.setCode WHERE T1.name = 'Angel of Mercy'",
+      "actual_sql": "SELECT \"isonlineonly\" FROM \"cards\" WHERE \"name\" = 'Angel of Mercy' LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the sets in the block \"Ice Age\", how many of them have an Italian translation?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(DISTINCT T1.id) FROM sets AS T1 INNER JOIN set_translations AS T2 ON T2.setCode = T1.code WHERE T1.block = 'Ice Age' AND T2.language = 'Italian' AND NOT T2.translation IS NULL",
+      "actual_sql": "SELECT COUNT(DISTINCT \"sets\".\"id\") FROM \"sets\" JOIN \"set_translations\" ON \"sets\".\"code\" = \"set_translations\".\"setcode\" WHERE \"sets\".\"block\" = 'Ice Age' AND \"set_translations\".\"language\" = 'Italian'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Is the set of cards with Adarkar Valkyrie only available outside the United States?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CASE WHEN isForeignOnly = 1 THEN 'YES' ELSE 'NO' END FROM cards AS T1 INNER JOIN sets AS T2 ON T2.code = T1.setCode WHERE T1.name = 'Adarkar Valkyrie'",
+      "actual_sql": "SELECT \"availability\" FROM \"cards\" WHERE \"name\" = 'Adarkar Valkyrie' LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the sets of cards that have an Italian translation, how many of them have a base set number of under 100?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T1.id) FROM sets AS T1 INNER JOIN set_translations AS T2 ON T2.setCode = T1.code WHERE NOT T2.translation IS NULL AND T1.baseSetSize < 100 AND T2.language = 'Italian'",
+      "actual_sql": "SELECT\n  COUNT(*)\nFROM \"sets\"\nJOIN \"set_translations\"\n  ON \"sets\".\"code\" = \"set_translations\".\"setcode\"\nWHERE\n  \"set_translations\".\"language\" = 'Italian' AND \"sets\".\"basesetsize\" < 100\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Which of these artists have designed a card in the set Coldsnap, Jeremy Jarvis, Aaron Miller or Chippy?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT T1.artist FROM cards AS T1 INNER JOIN sets AS T2 ON T2.code = T1.setCode WHERE (T2.name = 'Coldsnap' AND T1.artist = 'Chippy') OR (T2.name = 'Coldsnap' AND T1.artist = 'Aaron Miller') OR (T2.name = 'Coldsnap' AND T1.artist = 'Jeremy Jarvis') GROUP BY T1.artist",
+      "actual_sql": "SELECT DISTINCT \"artist\"\nFROM \"cards\"\nJOIN \"sets\" ON \"cards\".\"setcode\" = \"sets\".\"code\"\nWHERE \"sets\".\"name\" = 'Coldsnap' AND \"artist\" IN ('Jeremy Jarvis', 'Aaron Miller', 'Chippy')\nLIMIT;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"LIMIT\"\nLINE 6: LIMIT 500\n        ^\n[SQL: SELECT DISTINCT \"artist\"\nFROM \"cards\"\nJOIN \"sets\" ON \"cards\".\"setcode\" = \"sets\".\"code\"\nWHERE \"sets\".\"name\" = 'Coldsnap' AND \"artist\" IN ('Jeremy Jarvis', 'Aaron Miller', 'Chippy')\nLIMIT\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the cards with converted mana cost higher than 5 in the set Coldsnap, how many of them have unknown power?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT SUM(CASE WHEN T1.power = '*' OR T1.power IS NULL THEN 1 ELSE 0 END) FROM cards AS T1 INNER JOIN sets AS T2 ON T2.code = T1.setCode WHERE T2.name = 'Coldsnap' AND T1.convertedManaCost > 5",
+      "actual_sql": "SELECT\n  COUNT(*)\nFROM \"cards\"\nJOIN \"sets\"\n  ON \"cards\".\"setcode\" = \"sets\".\"code\"\nWHERE\n  \"cards\".\"convertedmanacost\" > 5\n  AND \"sets\".\"code\" = 'Coldsnap'\n  AND (\"cards\".\"power\" IS NULL OR \"cards\".\"power\" = '')\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the Italian flavor text of the card \"Ancestor's Chosen\"?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T2.flavorText FROM cards AS T1 INNER JOIN foreign_data AS T2 ON T2.uuid = T1.uuid WHERE T1.name = 'Ancestor''s Chosen' AND T2.language = 'Italian'",
+      "actual_sql": "SELECT \"flavortext\" FROM \"foreign_data\" WHERE \"name\" = 'Ancestor''s Chosen' AND \"language\" = 'Italian' LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Please list the Italian text ruling of all the cards in the set Coldsnap.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT T1.text FROM foreign_data AS T1 INNER JOIN cards AS T2 ON T2.uuid = T1.uuid INNER JOIN sets AS T3 ON T3.code = T2.setCode WHERE T3.name = 'Coldsnap' AND T1.language = 'Italian'",
+      "actual_sql": "SELECT \"translation\" FROM \"set_translations\" JOIN \"sets\" ON \"set_translations\".\"setcode\" = \"sets\".\"code\" WHERE \"sets\".\"code\" = 'Coldsnap' AND \"set_translations\".\"language\" = 'Italian' LIMIT;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"LIMIT\"\nLINE 2: LIMIT 500\n        ^\n[SQL: SELECT \"translation\" FROM \"set_translations\" JOIN \"sets\" ON \"set_translations\".\"setcode\" = \"sets\".\"code\" WHERE \"sets\".\"code\" = 'Coldsnap' AND \"set_translations\".\"language\" = 'Italian' LIMIT\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Please list the Italian names of the cards in the set Coldsnap with the highest converted mana cost.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T2.name FROM foreign_data AS T1 INNER JOIN cards AS T2 ON T2.uuid = T1.uuid INNER JOIN sets AS T3 ON T3.code = T2.setCode WHERE T3.name = 'Coldsnap' AND T1.language = 'Italian' ORDER BY T2.convertedManaCost DESC NULLS LAST",
+      "actual_sql": "SELECT \"T1\".\"name\" FROM \"cards\" AS \"T1\" JOIN \"sets\" AS \"T2\" ON \"T1\".\"setcode\" = \"T2\".\"code\" WHERE \"T2\".\"name\" = 'Coldsnap' AND \"T1\".\"convertedmanacost\" = (SELECT MAX(\"T3\".\"convertedmanacost\") FROM \"cards\" AS \"T3\" JOIN \"sets\" AS \"T4\" ON \"T3\".\"setcode\" = \"T4\".\"code\" WHERE \"T4\".\"name\" = 'Coldsnap')\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 12,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.143713,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 0.077419,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the percentage of the cards with a converted mana cost of 7 in the set Coldsnap?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN T1.convertedManaCost = 7 THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(COUNT(T1.id), 0) FROM cards AS T1 INNER JOIN sets AS T2 ON T2.code = T1.setCode WHERE T2.name = 'Coldsnap'",
+      "actual_sql": "SELECT COUNT(*) FILTER (WHERE \"cards\".\"convertedmanacost\" = 7) * 100.0 / COUNT(*) FROM \"cards\" JOIN \"sets\" ON \"cards\".\"setcode\" = \"sets\".\"code\" WHERE \"sets\".\"name\" = 'Coldsnap'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "What is the percentage of incredibly powerful cards in the set Coldsnap?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN NOT T1.cardKingdomFoilId IS NULL AND NOT T1.cardKingdomId IS NULL THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(COUNT(T1.id), 0) FROM cards AS T1 INNER JOIN sets AS T2 ON T2.code = T1.setCode WHERE T2.name = 'Coldsnap'",
+      "actual_sql": "",
+      "execution_success": false,
+      "error": "text2sql failed: LLM returned empty response (token budget exhausted in reasoning?)",
+      "status": "empty_response_token_exhaustion",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Which of the play format has the highest number of banned status? Indicate the play format and the names of all the card meet the condition.",
+      "difficulty": "moderate",
+      "expected_sql": "WITH MaxBanned AS (SELECT format FROM legalities WHERE status = 'Banned' GROUP BY format ORDER BY COUNT(*) DESC LIMIT 1)SELECT T2.format, T1.name FROM cards AS T1 INNER JOIN legalities AS T2 ON T2.uuid = T1.uuid INNER JOIN MaxBanned MB ON MB.format = T2.format WHERE T2.status = 'Banned'",
+      "actual_sql": "SELECT \"T2\".\"format\", \"T1\".\"name\"\nFROM \"cards\" AS \"T1\"\nJOIN \"legalities\" AS \"T2\" ON \"T1\".\"id\" = \"T2\".\"id\"\nWHERE \"T2\".\"status\" = 'banned' AND \"T2\".\"format\" = (\n    SELECT \"format\"\n    FROM \"legalities\"\n    WHERE \"status\" = 'banned'\n    GROUP BY \"format\"\n    ORDER BY COUNT(*) DESC\n    LIMIT 1\n)\nLIMIT 1000",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Which cards are ranked 1st on EDHRec? List all of the cards name and its banned play format.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.name, T2.format FROM cards AS T1 INNER JOIN legalities AS T2 ON T2.uuid = T1.uuid WHERE T1.edhrecRank = 1 AND T2.status = 'Banned' GROUP BY T1.name, T2.format",
+      "actual_sql": "SELECT \"t1\".\"name\", \"t2\".\"format\" FROM \"cards\" AS \"t1\" JOIN \"legalities\" AS \"t2\" ON \"t1\".\"id\" = \"t2\".\"id\" WHERE \"t1\".\"edhrecrank\" = 1 AND \"t2\".\"status\" = 'banned' LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List the names of all the cards in the set Hour of Devastation and find the formats in which these cards are legal.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT DISTINCT T2.name, CASE WHEN T1.status = 'Legal' THEN T1.format ELSE NULL END FROM legalities AS T1 INNER JOIN cards AS T2 ON T2.uuid = T1.uuid WHERE T2.setCode IN (SELECT code FROM sets WHERE name = 'Hour of Devastation')",
+      "actual_sql": "SELECT \"T1\".\"name\", \"T2\".\"format\" FROM \"cards\" AS \"T1\" JOIN \"legalities\" AS \"T2\" ON \"T1\".\"id\" = \"T2\".\"id\" JOIN \"sets\" AS \"T3\" ON \"T1\".\"setcode\" = \"T3\".\"code\" WHERE \"T3\".\"name\" = 'Hour of Devastation' LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.001201,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 0.000601,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Find and list the names of sets which doesn't have Japanese translation but have Korean translation.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT name FROM sets WHERE code IN (SELECT setCode FROM set_translations WHERE language = 'Korean' AND NOT language LIKE '%Japanese%')",
+      "actual_sql": "SELECT DISTINCT \"s\".\"name\"\nFROM \"sets\" AS \"s\"\nJOIN \"set_translations\" AS \"st\" ON \"s\".\"code\" = \"st\".\"setcode\"\nWHERE \"st\".\"language\" = 'Korean'\nAND NOT EXISTS (\n    SELECT 1\n    FROM \"set_translations\" AS \"st2\"\n    WHERE \"st2\".\"setcode\" = \"s\".\"code\" AND \"st2\".\"language\" = 'Japanese'\n)\nLIMIT;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"LIMIT\"\nLINE 11: LIMIT 500\n         ^\n[SQL: SELECT DISTINCT \"s\".\"name\"\nFROM \"sets\" AS \"s\"\nJOIN \"set_translations\" AS \"st\" ON \"s\".\"code\" = \"st\".\"setcode\"\nWHERE \"st\".\"language\" = 'Korean'\nAND NOT EXISTS (\n    SELECT 1\n    FROM \"set_translations\" AS \"st2\"\n    WHERE \"st2\".\"setcode\" = \"s\".\"code\" AND \"st2\".\"language\" = 'Japanese'\n)\nLIMIT\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List all the frame styles and cards Allen Williams worked on and find any banned cards if there are any.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT T1.frameVersion, T1.name, CASE WHEN T2.status = 'Banned' THEN T1.name ELSE 'NO' END FROM cards AS T1 INNER JOIN legalities AS T2 ON T1.uuid = T2.uuid WHERE T1.artist = 'Allen Williams'",
+      "actual_sql": "SELECT \"frameversion\", \"name\" FROM \"cards\" WHERE \"artist\" = 'Allen Williams' LIMIT;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"LIMIT\"\nLINE 2: LIMIT 500\n        ^\n[SQL: SELECT \"frameversion\", \"name\" FROM \"cards\" WHERE \"artist\" = 'Allen Williams' LIMIT\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    }
+  ]
+}

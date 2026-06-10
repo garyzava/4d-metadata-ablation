@@ -1,0 +1,102 @@
+# Experiment parameters for the metadata ablation run.
+#
+# The per-provider thinking and serving settings below were checked against the
+# live chat-completions / messages APIs (see thinking_rules). Re-check before a
+# run, since provider availability changes over time.
+#
+# Metrics: ER = execution rate (the query runs); BEX = BIRD strict result-set equality
+# (what the BIRD leaderboard reports as "EX"). Code/columns use ER, never EX.
+
+meta:
+  hf_router: "https://router.huggingface.co/v1/chat/completions (OpenAI-compatible)"
+
+# ── Parameter profiles ───────────────────────────────────────────────────────
+profiles:
+  medium_thinking:
+    max_tokens: 4096
+    temperature: 0.6
+    top_p: 0.95
+    top_k: 20
+    presence_penalty: 0.0
+    reasoning_effort: medium
+  qwen36_thinking:        # = medium_thinking but max_tokens 8192 (avoids token-exhaustion on the 35B MoE)
+    max_tokens: 8192
+    temperature: 0.6
+    top_p: 0.95
+    top_k: 20
+    presence_penalty: 0.0
+    reasoning_effort: medium
+  no_thinking:
+    max_tokens: 4096
+    temperature: 0
+    top_p: 1.0
+    # presence_penalty / top_k / reasoning_effort unset
+
+# ── Thinking control (per provider; probe-derived) ───────────────────────────
+thinking_rules:
+  huggingface_qwen: >
+    Thinking is not reliably disableable via API on the HF router (enable_thinking /
+    reasoning_effort / "/no_think" all still produce reasoning). Budget it: max_tokens >= 4096
+    (8192 for the 35B MoE). Qwen-Coder is the only non-thinking Qwen.
+  gemini_gemma4: >
+    Controllable via thinkingConfig.thinkingLevel (MINIMAL or HIGH only; thinkingBudget and
+    LOW/MEDIUM -> 400). Requires the google-genai SDK (legacy google-generativeai cannot set it).
+    HIGH here (~25-30s/call, ~1200 thinking tok) to mirror the Qwen thinking lanes; MINIMAL would
+    be ~3.6x faster but reasons ~0.
+  anthropic_opus: >
+    Legacy thinking {type:enabled} -> 400; {type:adaptive}+effort works but we run thinking-OFF.
+    Sampling params (temperature/top_p/top_k) are deprecated for Opus 4.7+ (vendor strips them).
+
+# ── Models ───────────────────────────────────────────────────────────────────
+models:
+  - key: "9B"
+    provider: huggingface
+    model_id: Qwen/Qwen3.5-9B
+    profile: medium_thinking
+    keep_thinking: true
+    lane: dimensional        # leave_one_out + cumulative levels, plus the EVIDENCE baseline
+  - key: "27B"
+    provider: huggingface
+    model_id: Qwen/Qwen3.5-27B
+    profile: medium_thinking
+    keep_thinking: true
+    lane: dimensional
+  - key: "30B"
+    provider: huggingface
+    model_id: Qwen/Qwen3-Coder-30B-A3B-Instruct
+    profile: no_thinking
+    keep_thinking: false
+    lane: dimensional
+  - key: "QWEN36"
+    provider: huggingface
+    model_id: Qwen/Qwen3.6-35B-A3B
+    profile: qwen36_thinking
+    keep_thinking: true
+    lane: scoped             # scoped conditions only (no EVIDENCE baseline)
+  - key: "GEMMA4"
+    provider: gemini                 # via the google-genai SDK
+    model_id: gemma-4-26b-a4b-it
+    profile: medium_thinking          # reasoning_effort=medium -> adapter maps to thinkingLevel=HIGH (gemma-4 has no MEDIUM)
+    keep_thinking: true
+    lane: scoped
+    thinking: {control: "thinkingConfig.thinkingLevel=HIGH"}
+  - key: "OPUS47"
+    provider: anthropic
+    model_id: claude-opus-4-7
+    profile: medium_thinking          # vendor strips sampling + legacy thinking for opus-4-7 -> effectively thinking-OFF
+    keep_thinking: true
+    lane: scoped
+    thinking: {mode: off, note: "sampling + legacy thinking stripped by the vendor"}
+
+# ── Conditions / lanes ───────────────────────────────────────────────────────
+conditions:
+  cumulative: [L0, L1, L2, L3, L4]
+  leave_one_out: [L0-PAD, L4-DD, L4-QP, L4-BC, L4-DK]
+  scoped: [L0, L0-PAD, L4]
+# Lane assignment is per model (see `lane:` on each model above):
+#   dimensional -> leave_one_out + cumulative levels (deduped), plus the EVIDENCE baseline
+#   scoped      -> scoped levels only (no EVIDENCE baseline)
+# scripts/run_experiment.py turns this into the per-model run_ablation invocations.
+# Cells = model x condition x 11 databases. Dimensional LOO (3 Qwen x 5 x 11 = 165) +
+# scoped cross-vendor (3 models x 3 x 11 = 99) + cumulative monolithic (3 Qwen x 5 x 11 = 165)
+# = 429, plus a 33-cell EVIDENCE baseline (3 Qwen x 11).

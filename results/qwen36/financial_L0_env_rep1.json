@@ -1,0 +1,619 @@
+{
+  "run_id": "financial_L0_env_rep1",
+  "dataset": "financial",
+  "level": "L0",
+  "dimensions": [],
+  "model": {
+    "provider": "huggingface",
+    "model": "Qwen/Qwen3.6-35B-A3B",
+    "base_url": ""
+  },
+  "runtime_params": {
+    "max_tokens": 8192,
+    "effective_max_tokens": 8192,
+    "temperature": 0.6,
+    "seed": 42,
+    "top_p": 0.95,
+    "presence_penalty": 0.0,
+    "top_k": 20,
+    "reasoning_effort": "medium",
+    "num_ctx": null,
+    "bird_docs_dir": "/Users/gary/myapps/4d-metadata-ablation/bird-docs-revised"
+  },
+  "rep": 1,
+  "timestamp": "2026-06-02T11:53:46.295730+00:00",
+  "elapsed_seconds": 2464.6,
+  "aggregate_metrics": {
+    "total_cases": 32,
+    "execution_rate_pct": 90.6,
+    "value_match_pct": 9.4,
+    "column_match_pct": 0.0,
+    "soft_f1_mean": 0.1198,
+    "er_value_gap_pp": 81.2,
+    "error_count": 3,
+    "bird_ex_pct": 9.4,
+    "er_bex_gap_pp": 81.2,
+    "challenging_er_pct": 71.4,
+    "challenging_vm_pct": 0.0,
+    "challenging_soft_f1": 0.0224,
+    "challenging_bird_ex_pct": 0.0,
+    "moderate_er_pct": 95.5,
+    "moderate_vm_pct": 13.6,
+    "moderate_soft_f1": 0.1671,
+    "moderate_bird_ex_pct": 13.6,
+    "simple_er_pct": 100.0,
+    "simple_vm_pct": 0.0,
+    "simple_soft_f1": 0.0,
+    "simple_bird_ex_pct": 0.0
+  },
+  "per_case_results": [
+    {
+      "question": "How many accounts who choose issuance after transaction are staying in East Bohemia region?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T2.account_id) FROM district AS T1 INNER JOIN account AS T2 ON T1.district_id = T2.district_id WHERE T1.A3 = 'east Bohemia' AND T2.frequency = 'POPLATEK PO OBRATU'",
+      "actual_sql": "SELECT count(\"account\".\"account_id\")\nFROM \"account\"\nJOIN \"district\" ON \"account\".\"district_id\" = \"district\".\"district_id\"\nWHERE \"district\".\"a2\" = 'East Bohemia' AND \"account\".\"frequency\" = 'AFTER MONTH'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List out the no. of districts that have female average salary is more than 6000 but less than 10000?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT COUNT(DISTINCT T2.district_id) FROM client AS T1 INNER JOIN district AS T2 ON T1.district_id = T2.district_id WHERE T1.gender = 'F' AND T2.A11 BETWEEN 6000 AND 10000",
+      "actual_sql": "SELECT count(DISTINCT d.\"district_id\")\nFROM \"district\" d\nJOIN \"account\" a ON d.\"district_id\" = a.\"district_id\"\nJOIN \"disp\" ds ON a.\"account_id\" = ds.\"account_id\"\nJOIN \"client\" c ON ds.\"client_id\" = c.\"client_id\"\nJOIN \"loan\" l ON a.\"account_id\" = l.\"account_id\"\nWHERE c.\"gender\" = 'F'\nGROUP BY d.\"district_id\"\nHAVING avg(l.\"amount\") > 6000 AND avg(l.\"amount\") < 10000\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many male customers who are living in North Bohemia have average salary greater than 8000?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T1.client_id) FROM client AS T1 INNER JOIN district AS T2 ON T1.district_id = T2.district_id WHERE T1.gender = 'M' AND T2.A3 = 'north Bohemia' AND T2.A11 > 8000",
+      "actual_sql": "SELECT COUNT(c.\"client_id\")\nFROM \"client\" c\nJOIN \"district\" d ON c.\"district_id\" = d.\"district_id\"\nWHERE c.\"gender\" = 'M' AND d.\"a2\" = 'North Bohemia' AND d.\"a11\" > 8000\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List out the account numbers of female clients who are oldest and has lowest average salary, calculate the gap between this lowest average salary with the highest average salary?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT T1.account_id, (SELECT MAX(A11) - MIN(A11) FROM district) FROM account AS T1 INNER JOIN district AS T2 ON T1.district_id = T2.district_id INNER JOIN disp AS T3 ON T1.account_id = T3.account_id INNER JOIN client AS T4 ON T3.client_id = T4.client_id WHERE T2.district_id = (SELECT district_id FROM client WHERE gender = 'F' ORDER BY birth_date ASC NULLS FIRST LIMIT 1) ORDER BY T2.A11 DESC NULLS LAST LIMIT 1",
+      "actual_sql": "SELECT d.\"account_id\", g.\"salary_gap\"\nFROM target t\nJOIN \"disp\" d ON t.\"client_id\" = d.\"client_id\"\nCROSS JOIN gap g\nLIMIT 100;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"target\" does not exist\nLINE 2: FROM target t\n             ^\n[SQL: SELECT d.\"account_id\", g.\"salary_gap\"\nFROM target t\nJOIN \"disp\" d ON t.\"client_id\" = d.\"client_id\"\nCROSS JOIN gap g\nLIMIT 100]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List out the account numbers of clients who are youngest and have highest average salary?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.account_id FROM account AS T1 INNER JOIN disp AS T2 ON T1.account_id = T2.account_id INNER JOIN client AS T3 ON T2.client_id = T3.client_id INNER JOIN district AS T4 ON T4.district_id = T1.district_id WHERE T2.client_id = (SELECT client_id FROM client ORDER BY birth_date DESC NULLS LAST LIMIT 1) GROUP BY T4.A11, T1.account_id",
+      "actual_sql": "SELECT \"a\".\"account_id\"\nFROM \"account\" \"a\"\nJOIN \"disp\" \"d\" ON \"a\".\"account_id\" = \"d\".\"account_id\"\nJOIN \"client\" \"c\" ON \"d\".\"client_id\" = \"c\".\"client_id\"\nJOIN \"trans\" \"t\" ON \"a\".\"account_id\" = \"t\".\"account_id\"\nGROUP BY \"a\".\"account_id\", \"c\".\"birth_date\"\nORDER BY \"c\".\"birth_date\" ASC, AVG(\"t\".\"amount\") DESC\nLIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the accounts who have approved loan date in 1997, list out the accounts that have the lowest approved amount and choose weekly issuance statement.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T2.account_id FROM loan AS T1 INNER JOIN account AS T2 ON T1.account_id = T2.account_id WHERE TO_CHAR(CAST(T1.date AS TIMESTAMP), 'YYYY') = '1997' AND T2.frequency = 'POPLATEK TYDNE' ORDER BY T1.amount NULLS FIRST LIMIT 1",
+      "actual_sql": "SELECT \"account\".\"account_id\"\nFROM \"account\"\nJOIN \"loan\" ON \"account\".\"account_id\" = \"loan\".\"account_id\"\nWHERE \"loan\".\"status\" = 'APPROVED'\n  AND EXTRACT(YEAR FROM \"loan\".\"date\") = 1997\n  AND \"account\".\"frequency\" = 'WEEKLY'\n  AND \"loan\".\"amount\" = (\n    SELECT MIN(\"loan2\".\"amount\")\n    FROM \"loan\" \"loan2\"\n    JOIN \"account\" \"account2\" ON \"loan2\".\"account_id\" = \"account2\".\"account_id\"\n    WHERE \"loan2\".\"status\" = 'APPROVED'\n      AND EXTRACT(YEAR FROM \"loan2\".\"date\") = 1997\n      AND \"account2\".\"frequency\" = 'WEEKLY'\n  )\nLIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the accounts who have loan validity more than 12 months, list out the accounts that have the highest approved amount and have account opening date in 1993.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.account_id FROM loan AS T1 INNER JOIN account AS T2 ON T1.account_id = T2.account_id WHERE TO_CHAR(CAST(T2.date AS TIMESTAMP), 'YYYY') = '1993' AND T1.duration > 12 ORDER BY T1.amount DESC NULLS LAST LIMIT 1",
+      "actual_sql": "SELECT \"a\".\"account_id\"\nFROM \"loan\" \"l\"\nJOIN \"account\" \"a\" ON \"l\".\"account_id\" = \"a\".\"account_id\"\nWHERE \"l\".\"duration\" > 12\n  AND EXTRACT(YEAR FROM \"a\".\"date\") = 1993\nORDER BY \"l\".\"amount\" DESC\nLIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Among the account opened, how many female customers who were born before 1950 and stayed in Sokolov?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T2.client_id) FROM district AS T1 INNER JOIN client AS T2 ON T1.district_id = T2.district_id WHERE T2.gender = 'F' AND TO_CHAR(CAST(T2.birth_date AS TIMESTAMP), 'YYYY') < '1950' AND T1.A2 = 'Sokolov'",
+      "actual_sql": "SELECT count(\"client\".\"client_id\") FROM \"client\" JOIN \"district\" ON \"client\".\"district_id\" = \"district\".\"district_id\" WHERE \"client\".\"gender\" = 'F' AND \"client\".\"birth_date\" < '1950-01-01' AND \"district\".\"a2\" = 'Sokolov'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "For the female client who was born in 1976/1/29, which district did she opened her account?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T1.A2 FROM district AS T1 INNER JOIN client AS T2 ON T1.district_id = T2.district_id WHERE T2.birth_date = '1976-01-29' AND T2.gender = 'F'",
+      "actual_sql": "SELECT \"account\".\"district_id\"\nFROM \"account\"\nJOIN \"disp\" ON \"account\".\"account_id\" = \"disp\".\"account_id\"\nJOIN \"client\" ON \"disp\".\"client_id\" = \"client\".\"client_id\"\nWHERE \"client\".\"gender\" = 'F' AND \"client\".\"birth_date\" = '1976-01-29'\nLIMIT 10",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For the branch which located in the south Bohemia with biggest number of inhabitants, what is the percentage of the male clients?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN T1.gender = 'M' THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(COUNT(T1.client_id), 0) FROM client AS T1 INNER JOIN district AS T2 ON T1.district_id = T2.district_id WHERE T2.A3 = 'south Bohemia' GROUP BY T2.A4 ORDER BY T2.A4 DESC LIMIT 1",
+      "actual_sql": "",
+      "execution_success": false,
+      "error": "text2sql failed: <!DOCTYPE html>\n<html class=\"\" lang=\"en\">\n<head>\n    <meta charset=\"utf-8\" />\n    <meta\n            name=\"viewport\"\n            content=\"width=device-width, initial-scale=1.0, user-scalable=no\"\n    />\n    <meta\n            name=\"description\"\n            content=\"We're on a journey to advance and democratize artificial intelligence through open source and open science.\"\n    />\n    <meta property=\"fb:app_id\" content=\"1321688464574422\" />\n    <meta name=\"twitter:card\" content=\"summary_large_image\" />\n    <meta name=\"twitter:site\" content=\"@huggingface\" />\n    <meta\n            property=\"og:title\"\n            content=\"Hugging Face - The AI community building the future.\"\n    />\n    <meta property=\"og:type\" content=\"website\" />\n\n    <title>Hugging Face - The AI community building the future.</title>\n    <style>\n        body {\n            margin: 0;\n        }\n\n        main {\n            background-color: white;\n            min-height: 100vh;\n            padding: 7rem 1rem 8rem 1rem;\n            text-align: center;\n            font-family: Source Sans Pro, ui-sans-serif, system-ui, -apple-system,\n            BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans,\n            sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol,\n            Noto Color Emoji;\n        }\n\n        img {\n            width: 6rem;\n            height: 6rem;\n            margin: 0 auto 1rem;\n        }\n\n        h1 {\n            font-size: 3.75rem;\n            line-height: 1;\n            color: rgba(31, 41, 55, 1);\n            font-weight: 700;\n            box-sizing: border-box;\n            margin: 0 auto;\n        }\n\n        p, a {\n            color: rgba(107, 114, 128, 1);\n            font-size: 1.125rem;\n            line-height: 1.75rem;\n            max-width: 28rem;\n            box-sizing: border-box;\n            margin: 0 auto;\n        }\n\n        .dark main {\n            background-color: rgb(11, 15, 25);\n        }\n        .dark h1 {\n            color: rgb(209, 213, 219);\n        }\n        .dark p, .dark a {\n            color: rgb(156, 163, 175);\n        }\n    </style>\n    <script>\n        // On page load or when changing themes, best to add inline in `head` to avoid FOUC\n        const key = \"_tb_global_settings\";\n        let theme = window.matchMedia(\"(prefers-color-scheme: dark)\").matches\n            ? \"dark\"\n            : \"light\";\n        try {\n            const storageTheme = JSON.parse(window.localStorage.getItem(key)).theme;\n            if (storageTheme) {\n                theme = storageTheme === \"dark\" ? \"dark\" : \"light\";\n            }\n        } catch (e) {}\n        if (theme === \"dark\") {\n            document.documentElement.classList.add(\"dark\");\n        } else {\n            document.documentElement.classList.remove(\"dark\");\n        }\n    </script>\n</head>\n\n<body>\n<main>\n    <img\n            src=\"https://cdn-media.huggingface.co/assets/huggingface_logo.svg\"\n            alt=\"\"\n    />\n    <div>\n        <h1>504</h1>\n        <p>Gateway Timeout</p>\n    </div>\n</main>\n</body>\n</html>",
+      "status": "empty_response",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For the client whose loan was approved first in 1993/7/5, what is the increase rate of his/her account balance from 1993/3/22 to 1998/12/27?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT CAST((SUM(CASE WHEN T3.date = '1998-12-27' THEN T3.balance ELSE 0 END) - SUM(CASE WHEN T3.date = '1993-03-22' THEN T3.balance ELSE 0 END)) AS REAL) * 100 / NULLIF(SUM(CASE WHEN T3.date = '1993-03-22' THEN T3.balance ELSE 0 END), 0) FROM loan AS T1 INNER JOIN account AS T2 ON T1.account_id = T2.account_id INNER JOIN trans AS T3 ON T3.account_id = T2.account_id WHERE T1.date = '1993-07-05'",
+      "actual_sql": "SELECT (t2.\"balance\" - t1.\"balance\")::NUMERIC / t1.\"balance\"\nFROM \"trans\" t1\nJOIN \"trans\" t2 ON t1.\"account_id\" = t2.\"account_id\"\nJOIN \"loan\" l ON t1.\"account_id\" = l.\"account_id\"\nWHERE l.\"date\" = '1993-07-05'\n  AND t1.\"date\" = '1993-03-22'\n  AND t2.\"date\" = '1998-12-27'\nLIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the percentage of loan amount that has been fully paid with no issue.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT (CAST(SUM(CASE WHEN status = 'A' THEN amount ELSE 0 END) AS REAL) * 100) / NULLIF(SUM(amount), 0) FROM loan",
+      "actual_sql": "SELECT SUM(CASE WHEN \"status\" = '0' THEN \"amount\" ELSE 0 END) * 100.0 / SUM(\"amount\") AS \"percentage\" FROM \"loan\"\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For loan amount less than USD100,000, what is the percentage of accounts that is still running with no issue.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN status = 'C' THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(COUNT(account_id), 0) FROM loan WHERE amount < 100000",
+      "actual_sql": "SELECT COUNT(CASE WHEN \"status\" = 'A' THEN \"account_id\" END) * 100.0 / COUNT(\"account_id\") AS percentage FROM \"loan\" WHERE \"amount\" < 100000\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For loans contracts which are still running where client are in debt, list the district of the and the state the percentage unemployment rate increment from year 1995 to 1996.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT CAST((T3.A13 - T3.A12) AS REAL) * 100 / NULLIF(T3.A12, 0) FROM loan AS T1 INNER JOIN account AS T2 ON T1.account_id = T2.account_id INNER JOIN district AS T3 ON T2.district_id = T3.district_id WHERE T1.status = 'D'",
+      "actual_sql": "SELECT \"d\".\"a2\", \"d\".\"a12\" - \"d\".\"a11\" FROM \"loan\" \"l\" JOIN \"account\" \"a\" ON \"l\".\"account_id\" = \"a\".\"account_id\" JOIN \"district\" \"d\" ON \"a\".\"district_id\" = \"d\".\"district_id\" WHERE \"l\".\"status\" = 'A' LIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 100,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.013793,
+        "soft_f1_precision": 0.01,
+        "soft_f1_recall": 0.022222,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List the top nine districts, by descending order, from the highest to the lowest, the number of female account holders.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T2.A2, COUNT(T1.client_id) FROM client AS T1 INNER JOIN district AS T2 ON T1.district_id = T2.district_id WHERE T1.gender = 'F' GROUP BY T2.district_id, T2.A2 ORDER BY COUNT(T1.client_id) DESC NULLS LAST LIMIT 9",
+      "actual_sql": "SELECT\n  \"d\".\"a2\",\n  COUNT(\"a\".\"account_id\")\nFROM \"district\" \"d\"\nJOIN \"account\" \"a\" ON \"d\".\"district_id\" = \"a\".\"district_id\"\nJOIN \"disp\" \"dp\" ON \"a\".\"account_id\" = \"dp\".\"account_id\"\nJOIN \"client\" \"c\" ON \"dp\".\"client_id\" = \"c\".\"client_id\"\nWHERE \"c\".\"gender\" = 'F'\nGROUP BY \"d\".\"district_id\", \"d\".\"a2\"\nORDER BY COUNT(\"a\".\"account_id\") DESC\nLIMIT 9",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 9,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.111111,
+        "soft_f1_precision": 0.111111,
+        "soft_f1_recall": 0.111111,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Between 1/1/1995 and 12/31/1997, how many loans in the amount of at least 250,000 per account that chose monthly statement issuance were approved?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T1.account_id) FROM account AS T1 INNER JOIN loan AS T2 ON T1.account_id = T2.account_id WHERE T2.date BETWEEN '1995-01-01' AND '1997-12-31' AND T1.frequency = 'POPLATEK MESICNE' AND T2.amount >= 250000",
+      "actual_sql": "SELECT COUNT(\"loan_id\")\nFROM \"loan\"\nJOIN \"account\" ON \"loan\".\"account_id\" = \"account\".\"account_id\"\nWHERE \"loan\".\"date\" BETWEEN '1995-01-01' AND '1997-12-31'\n  AND \"loan\".\"amount\" >= 250000\n  AND \"account\".\"frequency\" = 'MONTHLY'\n  AND \"loan\".\"status\" = 'approved'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many accounts have running contracts in Branch location 1?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T1.account_id) FROM account AS T1 INNER JOIN district AS T2 ON T1.district_id = T2.district_id INNER JOIN loan AS T3 ON T1.account_id = T3.account_id WHERE T1.district_id = 1 AND (T3.status = 'C' OR T3.status = 'D')",
+      "actual_sql": "SELECT count(T1.\"account_id\") FROM \"loan\" AS T1 JOIN \"account\" AS T2 ON T1.\"account_id\"  =  T2.\"account_id\" WHERE T2.\"district_id\" = 1 AND T1.\"status\" = 'V'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "In the branch where the second-highest number of crimes were committed in 1995 occurred, how many male clients are there?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T1.client_id) FROM client AS T1 INNER JOIN district AS T2 ON T1.district_id = T2.district_id WHERE T1.gender = 'M' AND T2.A15 = (SELECT T3.A15 FROM district AS T3 ORDER BY T3.A15 DESC NULLS LAST LIMIT 1 OFFSET 1)",
+      "actual_sql": "SELECT COUNT(*) FROM \"client\" WHERE \"district_id\" = (SELECT \"district_id\" FROM \"district\" ORDER BY \"a8\" DESC LIMIT 1 OFFSET 1) AND \"gender\" = 'M'",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Which are the top ten withdrawals (non-credit card) by district names for the month of January 1996?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT T1.A2 FROM district AS T1 INNER JOIN account AS T2 ON T1.district_id = T2.district_id INNER JOIN trans AS T3 ON T2.account_id = T3.account_id WHERE T3.type = 'VYDAJ' AND CAST(T3.date AS TEXT) LIKE '1996-01%' ORDER BY T1.A2 ASC LIMIT 10",
+      "actual_sql": "SELECT d.\"a2\", SUM(t.\"amount\")\nFROM \"trans\" t\nJOIN \"account\" a ON t.\"account_id\" = a.\"account_id\"\nJOIN \"district\" d ON a.\"district_id\" = d.\"district_id\"\nWHERE t.\"type\" = 'VYBER'\n  AND t.\"date\" >= '1996-01-01'\n  AND t.\"date\" < '1996-02-01'\nGROUP BY d.\"a2\"\nORDER BY SUM(t.\"amount\") DESC\nLIMIT 10",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 10,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.1,
+        "soft_f1_precision": 0.1,
+        "soft_f1_recall": 0.1,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Who are the account holder identification numbers whose who have transactions on the credit card with the amount is less than the average, in 1998?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.account_id FROM trans AS T1 INNER JOIN account AS T2 ON T1.account_id = T2.account_id WHERE TO_CHAR(CAST(T1.date AS TIMESTAMP), 'YYYY') = '1998' AND T1.operation = 'VYBER KARTOU' AND T1.amount < (SELECT AVG(amount) FROM trans WHERE TO_CHAR(CAST(date AS TIMESTAMP), 'YYYY') = '1998')",
+      "actual_sql": "SELECT DISTINCT \"client\".\"client_id\"\nFROM \"trans\"\nJOIN \"account\" ON \"trans\".\"account_id\" = \"account\".\"account_id\"\nJOIN \"disp\" ON \"account\".\"account_id\" = \"disp\".\"account_id\"\nJOIN \"card\" ON \"disp\".\"disp_id\" = \"card\".\"disp_id\"\nJOIN \"client\" ON \"disp\".\"client_id\" = \"client\".\"client_id\"\nWHERE \"card\".\"type\" = 'I'\n  AND EXTRACT(YEAR FROM \"trans\".\"date\") = 1998\n  AND \"trans\".\"amount\" < (SELECT AVG(\"amount\") FROM \"trans\" WHERE EXTRACT(YEAR FROM \"date\") = 1998)\nLIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Please list the account types that are not eligible for loans, and the average income of residents in the district where the account is located exceeds $8000 but is no more than $9000.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT T3.type FROM district AS T1 INNER JOIN account AS T2 ON T1.district_id = T2.district_id INNER JOIN disp AS T3 ON T2.account_id = T3.account_id WHERE T3.type <> 'OWNER' AND T1.A11 BETWEEN 8000 AND 9000",
+      "actual_sql": "SELECT DISTINCT \"account\".\"frequency\", \"district\".\"a12\"\nFROM \"account\"\nJOIN \"district\" ON \"account\".\"district_id\" = \"district\".\"district_id\"\nWHERE \"account\".\"account_id\" NOT IN (SELECT \"account_id\" FROM \"loan\")\nAND \"district\".\"a12\" > 8000\nAND \"district\".\"a12\" <= 9000\nLIMIT 10",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the average number of crimes committed in 1995 in regions where the number exceeds 4000 and the region has accounts that are opened starting from the year 1997?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT AVG(T1.A15) FROM district AS T1 INNER JOIN account AS T2 ON T1.district_id = T2.district_id WHERE TO_CHAR(CAST(T2.date AS TIMESTAMP), 'YYYY') >= '1997' AND T1.A15 > 4000",
+      "actual_sql": "SELECT AVG(\"a13\")\nFROM \"district\"\nWHERE \"a13\" > 4000\n  AND \"district_id\" IN (\n    SELECT \"district_id\"\n    FROM \"account\"\n    WHERE \"date\" >= '1997-01-01'\n  )\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List all the withdrawals in cash transactions that the client with the id 3356 makes.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T4.trans_id FROM client AS T1 INNER JOIN disp AS T2 ON T1.client_id = T2.client_id INNER JOIN account AS T3 ON T2.account_id = T3.account_id INNER JOIN trans AS T4 ON T3.account_id = T4.account_id WHERE T1.client_id = 3356 AND T4.operation = 'VYBER'",
+      "actual_sql": "SELECT \"trans\".*\nFROM \"trans\"\nJOIN \"disp\" ON \"trans\".\"account_id\" = \"disp\".\"account_id\"\nJOIN \"client\" ON \"disp\".\"client_id\" = \"client\".\"client_id\"\nWHERE \"client\".\"client_id\" = 3356 AND \"trans\".\"type\" = 'V\u00fdb\u011br'\nLIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What percentage of clients who opened their accounts in the district with an average salary of over 10000 are women?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN T2.gender = 'F' THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(COUNT(T2.client_id), 0) FROM district AS T1 INNER JOIN client AS T2 ON T1.district_id = T2.district_id WHERE T1.A11 > 10000",
+      "actual_sql": "SELECT\n  SUM(CASE WHEN \"c\".\"gender\" = 'F' THEN 1 ELSE 0 END) * 100.0 / COUNT(\"c\".\"client_id\")\nFROM \"client\" \"c\"\nJOIN \"district\" \"d\" ON \"c\".\"district_id\" = \"d\".\"district_id\"\nWHERE \"d\".\"a12\" > 10000\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What was the growth rate of the total amount of loans across all accounts for a male client between 1996 and 1997?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT CAST((SUM(CASE WHEN TO_CHAR(CAST(T1.date AS TIMESTAMP), 'YYYY') = '1997' THEN T1.amount ELSE 0 END) - SUM(CASE WHEN TO_CHAR(CAST(T1.date AS TIMESTAMP), 'YYYY') = '1996' THEN T1.amount ELSE 0 END)) AS REAL) * 100 / NULLIF(SUM(CASE WHEN TO_CHAR(CAST(T1.date AS TIMESTAMP), 'YYYY') = '1996' THEN T1.amount ELSE 0 END), 0) FROM loan AS T1 INNER JOIN account AS T2 ON T1.account_id = T2.account_id INNER JOIN disp AS T3 ON T3.account_id = T2.account_id INNER JOIN client AS T4 ON T4.client_id = T3.client_id WHERE T4.gender = 'M' AND T3.type = 'OWNER'",
+      "actual_sql": "SELECT\n  (SUM(CASE WHEN EXTRACT(YEAR FROM \"l\".\"date\") = 1997 THEN \"l\".\"amount\" ELSE 0 END) -\n   SUM(CASE WHEN EXTRACT(YEAR FROM \"l\".\"date\") = 1996 THEN \"l\".\"amount\" ELSE 0 END)) * 1.0 /\n  NULLIF(SUM(CASE WHEN EXTRACT(YEAR FROM \"l\".\"date\") = 1996 THEN \"l\".\"amount\" ELSE 0 END), 0)\nFROM \"loan\" \"l\"\nJOIN \"account\" \"a\" ON \"l\".\"account_id\" = \"a\".\"account_id\"\nJOIN \"disp\" \"d\" ON \"a\".\"account_id\" = \"d\".\"account_id\"\nJOIN \"client\" \"c\" ON \"d\".\"client_id\" = \"c\".\"client_id\"\nWHERE \"c\".\"gender\" = 'M'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How often does account number 3 request an account statement to be released? What was the aim of debiting 3539 in total?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT T1.frequency, T2.k_symbol FROM account AS T1 INNER JOIN (SELECT account_id, k_symbol, SUM(amount) AS total_amount FROM \"order\" GROUP BY account_id, k_symbol) AS T2 ON T1.account_id = T2.account_id WHERE T1.account_id = 3 AND T2.total_amount = 3539",
+      "actual_sql": "SELECT \"k_symbol\" FROM \"trans\" WHERE \"account_id\" = 3 AND \"amount\" = 3539\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 13,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.142857,
+        "soft_f1_precision": 0.076923,
+        "soft_f1_recall": 1.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What percentage of male clients request for weekly statements to be issued?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN T1.gender = 'M' THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(COUNT(T1.client_id), 0) FROM client AS T1 INNER JOIN district AS T3 ON T1.district_id = T3.district_id INNER JOIN account AS T2 ON T2.district_id = T3.district_id INNER JOIN disp AS T4 ON T1.client_id = T4.client_id AND T2.account_id = T4.account_id WHERE T2.frequency = 'POPLATEK TYDNE'",
+      "actual_sql": "SELECT\n  (SELECT COUNT(DISTINCT \"c\".\"client_id\")\n   FROM \"client\" \"c\"\n   JOIN \"disp\" \"d\" ON \"c\".\"client_id\" = \"d\".\"client_id\"\n   JOIN \"account\" \"a\" ON \"d\".\"account_id\" = \"a\".\"account_id\"\n   WHERE \"c\".\"gender\" = 'M' AND \"a\".\"frequency\" = 'PO_TYDNU') * 100.0 /\n  (SELECT COUNT(DISTINCT \"client_id\")\n   FROM \"client\"\n   WHERE \"gender\" = 'M')\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Name the account numbers of female clients who are oldest and have lowest average salary?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T3.account_id FROM client AS T1 INNER JOIN district AS T2 ON T1.district_id = T2.district_id INNER JOIN account AS T3 ON T2.district_id = T3.district_id INNER JOIN disp AS T4 ON T1.client_id = T4.client_id AND T4.account_id = T3.account_id WHERE T1.gender = 'F' ORDER BY T1.birth_date ASC NULLS FIRST, T2.A11 ASC NULLS FIRST LIMIT 1",
+      "actual_sql": "SELECT \"account\".\"account_id\"\nFROM \"client\"\nJOIN \"disp\" ON \"client\".\"client_id\" = \"disp\".\"client_id\"\nJOIN \"account\" ON \"disp\".\"account_id\" = \"account\".\"account_id\"\nJOIN \"district\" ON \"client\".\"district_id\" = \"district\".\"district_id\"\nWHERE \"client\".\"gender\" = 'F'\nORDER BY \"client\".\"birth_date\" ASC, \"district\".\"a12\" ASC\nLIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "What is the average amount of loan which are still on running contract with statement issuance after each transaction?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT AVG(T2.amount) FROM account AS T1 INNER JOIN loan AS T2 ON T1.account_id = T2.account_id WHERE T2.status IN ('C', 'D') AND T1.frequency = 'POPLATEK PO OBRATU'",
+      "actual_sql": "SELECT avg(\"amount\") FROM \"loan\" WHERE \"status\" = 'A'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Provide the IDs and age of the client with high level credit card, which is eligible for loans.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.client_id, EXTRACT(YEAR FROM CURRENT_TIMESTAMP) - EXTRACT(YEAR FROM T3.birth_date) AS age FROM disp AS T1 INNER JOIN card AS T2 ON T2.disp_id = T1.disp_id INNER JOIN client AS T3 ON T1.client_id = T3.client_id WHERE T2.type = 'gold' AND T1.type = 'OWNER'",
+      "actual_sql": "SELECT DISTINCT c.\"client_id\", AGE(c.\"birth_date\")\nFROM \"client\" c\nJOIN \"disp\" d ON c.\"client_id\" = d.\"client_id\"\nJOIN \"account\" a ON d.\"account_id\" = a.\"account_id\"\nJOIN \"card\" ca ON a.\"disp_id\" = ca.\"disp_id\"\nJOIN \"loan\" l ON a.\"account_id\" = l.\"account_id\"\nWHERE ca.\"type\" = 'A' AND l.\"status\" = 'V'\nLIMIT 100",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column a.disp_id does not exist\nLINE 5: JOIN \"card\" ca ON a.\"disp_id\" = ca.\"disp_id\"\n                          ^\nHINT:  Perhaps you meant to reference the column \"d.disp_id\" or the column \"ca.disp_id\".\n[SQL: SELECT DISTINCT c.\"client_id\", AGE(c.\"birth_date\")\nFROM \"client\" c\nJOIN \"disp\" d ON c.\"client_id\" = d.\"client_id\"\nJOIN \"account\" a ON d.\"account_id\" = a.\"account_id\"\nJOIN \"card\" ca ON a.\"disp_id\" = ca.\"disp_id\"\nJOIN \"loan\" l ON a.\"account_id\" = l.\"account_id\"\nWHERE ca.\"type\" = 'A' AND l.\"status\" = 'V'\nLIMIT 100]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For accounts in 1993 with statement issued after transaction, list the account ID, district name and district region.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.account_id, T2.A2, T2.A3 FROM account AS T1 INNER JOIN district AS T2 ON T1.district_id = T2.district_id WHERE T1.frequency = 'POPLATEK PO OBRATU' AND EXTRACT(YEAR FROM T1.date) = 1993",
+      "actual_sql": "SELECT DISTINCT\n  \"a\".\"account_id\",\n  \"d\".\"a2\",\n  \"d\".\"a3\"\nFROM \"account\" \"a\"\nJOIN \"district\" \"d\" ON \"a\".\"district_id\" = \"d\".\"district_id\"\nJOIN \"disp\" \"dis\" ON \"a\".\"account_id\" = \"dis\".\"account_id\"\nJOIN \"card\" \"c\" ON \"dis\".\"disp_id\" = \"c\".\"disp_id\"\nJOIN \"trans\" \"t\" ON \"a\".\"account_id\" = \"t\".\"account_id\"\nWHERE EXTRACT(YEAR FROM \"a\".\"date\") = 1993\n  AND \"c\".\"issued\" > \"t\".\"date\"\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 216,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.033755,
+        "soft_f1_precision": 0.018519,
+        "soft_f1_recall": 0.190476,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "From Year 1995 to 2000, who are the accounts holders from 'east Bohemia'. State the account ID the frequency of statement issuance.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.account_id, T1.frequency FROM account AS T1 INNER JOIN district AS T2 ON T1.district_id = T2.district_id WHERE T2.A3 = 'east Bohemia' AND EXTRACT(YEAR FROM T1.date) BETWEEN 1995 AND 2000",
+      "actual_sql": "SELECT \"account\".\"account_id\", \"account\".\"frequency\"\nFROM \"account\"\nJOIN \"district\" ON \"account\".\"district_id\" = \"district\".\"district_id\"\nWHERE \"district\".\"a3\" = 'east Bohemia'\n  AND \"account\".\"date\" BETWEEN '1995-01-01' AND '2000-12-31'\nLIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 100,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.431034,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 0.274725,
+        "bird_ex": false
+      }
+    }
+  ]
+}

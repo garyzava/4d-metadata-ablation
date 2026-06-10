@@ -1,0 +1,901 @@
+{
+  "run_id": "thrombosis_prediction_L0-PAD_env_rep1",
+  "dataset": "thrombosis_prediction",
+  "level": "L0-PAD",
+  "dimensions": [],
+  "model": {
+    "provider": "huggingface",
+    "model": "Qwen/Qwen3.6-35B-A3B",
+    "base_url": ""
+  },
+  "runtime_params": {
+    "max_tokens": 8192,
+    "effective_max_tokens": 8192,
+    "temperature": 0.6,
+    "seed": 42,
+    "top_p": 0.95,
+    "presence_penalty": 0.0,
+    "top_k": 20,
+    "reasoning_effort": "medium",
+    "num_ctx": null,
+    "bird_docs_dir": "/Users/gary/myapps/4d-metadata-ablation/bird-docs-revised"
+  },
+  "rep": 1,
+  "timestamp": "2026-06-02T19:08:39.522928+00:00",
+  "elapsed_seconds": 973.2,
+  "aggregate_metrics": {
+    "total_cases": 50,
+    "execution_rate_pct": 0.0,
+    "value_match_pct": 0.0,
+    "column_match_pct": 0.0,
+    "soft_f1_mean": 0.0,
+    "er_value_gap_pp": 0.0,
+    "error_count": 50,
+    "bird_ex_pct": 0.0,
+    "er_bex_gap_pp": 0.0,
+    "challenging_er_pct": 0.0,
+    "challenging_vm_pct": 0.0,
+    "challenging_soft_f1": 0.0,
+    "challenging_bird_ex_pct": 0.0,
+    "moderate_er_pct": 0.0,
+    "moderate_vm_pct": 0.0,
+    "moderate_soft_f1": 0.0,
+    "moderate_bird_ex_pct": 0.0,
+    "simple_er_pct": 0.0,
+    "simple_vm_pct": 0.0,
+    "simple_soft_f1": 0.0,
+    "simple_bird_ex_pct": 0.0
+  },
+  "per_case_results": [
+    {
+      "question": "Are there more in-patient or outpatient who were male? What is the deviation in percentage?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN Admission = '+' THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(SUM(CASE WHEN Admission = '-' THEN 1 ELSE 0 END), 0) FROM Patient WHERE SEX = 'M'",
+      "actual_sql": "SELECT\n  CASE WHEN in_male > out_male THEN 'in-patient' ELSE 'out-patient' END AS \"more_common_type\",\n  ABS(in_male - out_male) * 100.0 / NULLIF(total_male, 0) AS \"deviation_percentage\"\nFROM (\n  SELECT\n    SUM(CASE WHEN \"type\" = 'in-patient' AND \"gender\" = 'male' THEN 1 ELSE 0 END) AS in_male,\n    SUM(CASE WHEN \"type\" = 'out-patient' AND \"gender\" = 'male' THEN 1 ELSE 0 END) AS out_male,\n    SUM(CASE WHEN \"gender\" = 'male' THEN 1 ELSE 0 END) AS total_male\n  FROM \"patient\"\n) sub\nLIMIT 1;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column \"type\" does not exist\nLINE 6:     SUM(CASE WHEN \"type\" = 'in-patient' AND \"gender\" = 'male...\n                          ^\n[SQL: SELECT\n  CASE WHEN in_male > out_male THEN 'in-patient' ELSE 'out-patient' END AS \"more_common_type\",\n  ABS(in_male - out_male) * 100.0 / NULLIF(total_male, 0) AS \"deviation_percentage\"\nFROM (\n  SELECT\n    SUM(CASE WHEN \"type\" = 'in-patient' AND \"gender\" = 'male' THEN 1 ELSE 0 END) AS in_male,\n    SUM(CASE WHEN \"type\" = 'out-patient' AND \"gender\" = 'male' THEN 1 ELSE 0 END) AS out_male,\n    SUM(CASE WHEN \"gender\" = 'male' THEN 1 ELSE 0 END) AS total_male\n  FROM \"patient\"\n) sub\nLIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the percentage of female patient were born after 1930?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN TO_CHAR(CAST(Birthday AS TIMESTAMP), 'YYYY') > '1930' THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(COUNT(*), 0) FROM Patient WHERE SEX = 'F'",
+      "actual_sql": "SELECT COUNT(CASE WHEN \"Gender\" = 'Female' AND \"BirthDate\" > '1930-12-31' THEN 1 END) * 100.0 / COUNT(*) FROM \"patient\"",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column \"Gender\" does not exist\nLINE 1: SELECT COUNT(CASE WHEN \"Gender\" = 'Female' AND \"BirthDate\" >...\n                               ^\n[SQL: SELECT COUNT(CASE WHEN \"Gender\" = 'Female' AND \"BirthDate\" > '1930-12-31' THEN 1 END) * 100.0 / COUNT(*) FROM \"patient\"\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the ratio of outpatient to inpatient followed up treatment among all the 'SLE' diagnosed patient?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT SUM(CASE WHEN Admission = '+' THEN 1.0 ELSE 0 END) / NULLIF(SUM(CASE WHEN Admission = '-' THEN 1 ELSE 0 END), 0) FROM Patient WHERE Diagnosis = 'SLE'",
+      "actual_sql": "SELECT \n  COUNT(CASE WHEN \"treatment_type\" = 'outpatient' THEN 1 END) * 1.0 / NULLIF(COUNT(CASE WHEN \"treatment_type\" = 'inpatient' THEN 1 END), 0) AS ratio\nFROM \"treatments\" t\nJOIN \"patients\" p ON t.\"patient_id\" = p.\"id\"\nWHERE p.\"diagnosis\" = 'SLE'\nLIMIT 1;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"treatments\" does not exist\nLINE 3: FROM \"treatments\" t\n             ^\n[SQL: SELECT \n  COUNT(CASE WHEN \"treatment_type\" = 'outpatient' THEN 1 END) * 1.0 / NULLIF(COUNT(CASE WHEN \"treatment_type\" = 'inpatient' THEN 1 END), 0) AS ratio\nFROM \"treatments\" t\nJOIN \"patients\" p ON t.\"patient_id\" = p.\"id\"\nWHERE p.\"diagnosis\" = 'SLE'\nLIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the disease patient '30609' diagnosed with. List all the date of laboratory tests done for this patient.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T1.Diagnosis, T2.Date FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T1.ID = 30609",
+      "actual_sql": "Explanation: The provided database schema is empty, and the domain knowledge covers unrelated topics (advertising, concert inventory, fleet routing, etc.). There are no tables or columns related to patients, diagnoses, or laboratory tests, making it impossible to generate the requested SQL query.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"Explanation\"\nLINE 1: Explanation: The provided database schema is empty, and the ...\n        ^\n[SQL: Explanation: The provided database schema is empty, and the domain knowledge covers unrelated topics (advertising, concert inventory, fleet routing, etc.). There are no tables or columns related to patients, diagnoses, or laboratory tests, making it impossible to generate the requested SQL query.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List the patient ID, sex and birthday of patient with LDH beyond normal range.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT DISTINCT T1.ID, T1.SEX, T1.Birthday FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.LDH > 500",
+      "actual_sql": "SELECT \"patient_id\", \"sex\", \"birthday\" FROM \"patients\" WHERE \"patient_id\" IN (SELECT \"patient_id\" FROM \"lab_results\" WHERE \"test_name\" = 'LDH' AND \"value\" > \"normal_max\") LIMIT 10;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"patients\" does not exist\nLINE 1: SELECT \"patient_id\", \"sex\", \"birthday\" FROM \"patients\" WHERE...\n                                                    ^\n[SQL: SELECT \"patient_id\", \"sex\", \"birthday\" FROM \"patients\" WHERE \"patient_id\" IN (SELECT \"patient_id\" FROM \"lab_results\" WHERE \"test_name\" = 'LDH' AND \"value\" > \"normal_max\") LIMIT 10]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "State the ID and age of patient with positive degree of coagulation.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT T1.ID, EXTRACT(YEAR FROM CURRENT_TIMESTAMP) - EXTRACT(YEAR FROM T1.Birthday) AS Age FROM Patient AS T1 INNER JOIN Examination AS T2 ON T1.ID = T2.ID WHERE T2.RVVT = '+'",
+      "actual_sql": "SELECT \"id\", \"age\" FROM \"patient\" WHERE \"coagulation_degree\" = 'positive' LIMIT 10;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column \"age\" does not exist\nLINE 1: SELECT \"id\", \"age\" FROM \"patient\" WHERE \"coagulation_degree\"...\n                     ^\n[SQL: SELECT \"id\", \"age\" FROM \"patient\" WHERE \"coagulation_degree\" = 'positive' LIMIT 10]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For patients with severe degree of thrombosis, list their ID, sex and disease the patient is diagnosed with.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT DISTINCT T1.ID, T1.SEX, T1.Diagnosis FROM Patient AS T1 INNER JOIN Examination AS T2 ON T1.ID = T2.ID WHERE T2.Thrombosis = 2",
+      "actual_sql": "SELECT \"Patient\", \"Sex\", \"Disease\" FROM \"patient\" WHERE \"Thrombosis_Degree\" = 'Severe' LIMIT 100",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column \"Patient\" does not exist\nLINE 1: SELECT \"Patient\", \"Sex\", \"Disease\" FROM \"patient\" WHERE \"Thr...\n               ^\n[SQL: SELECT \"Patient\", \"Sex\", \"Disease\" FROM \"patient\" WHERE \"Thrombosis_Degree\" = 'Severe' LIMIT 100]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many female patients who came at the hospital in 1997 was immediately followed at the outpatient clinic?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(*) FROM Patient WHERE TO_CHAR(CAST(Description AS TIMESTAMP), 'YYYY') = '1997' AND SEX = 'F' AND Admission = '-'",
+      "actual_sql": "SELECT COUNT(*) FROM \"patients\" WHERE \"gender\" = 'Female' AND EXTRACT(YEAR FROM \"visit_date\") = 1997 AND \"followed_up_at_outpatient\" = true;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"patients\" does not exist\nLINE 1: SELECT COUNT(*) FROM \"patients\" WHERE \"gender\" = 'Female' AN...\n                             ^\n[SQL: SELECT COUNT(*) FROM \"patients\" WHERE \"gender\" = 'Female' AND EXTRACT(YEAR FROM \"visit_date\") = 1997 AND \"followed_up_at_outpatient\" = true\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many of the patients with the most serious thrombosis cases examined in 1997 are women?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(*) FROM Patient AS T1 INNER JOIN Examination AS T2 ON T1.ID = T2.ID WHERE T1.SEX = 'F' AND TO_CHAR(CAST(T2.\"Examination Date\" AS TIMESTAMP), 'YYYY') = '1997' AND T2.Thrombosis = 1",
+      "actual_sql": "SELECT COUNT(*) FROM \"patients\" WHERE \"condition\" = 'thrombosis' AND \"severity\" = 'most serious' AND EXTRACT(YEAR FROM \"exam_date\") = 1997 AND \"gender\" = 'female';",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"patients\" does not exist\nLINE 1: SELECT COUNT(*) FROM \"patients\" WHERE \"condition\" = 'thrombo...\n                             ^\n[SQL: SELECT COUNT(*) FROM \"patients\" WHERE \"condition\" = 'thrombosis' AND \"severity\" = 'most serious' AND EXTRACT(YEAR FROM \"exam_date\") = 1997 AND \"gender\" = 'female'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What are the symptoms observed by the youngest patient to ever did a medical examination? Identify their diagnosis.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T2.Symptoms, T1.Diagnosis FROM Patient AS T1 INNER JOIN Examination AS T2 ON T1.ID = T2.ID WHERE NOT T2.Symptoms IS NULL ORDER BY T1.Birthday DESC NULLS LAST LIMIT 1",
+      "actual_sql": "SELECT \"p\".\"date_of_birth\", \"s\".\"symptom_text\", \"d\".\"diagnosis_text\"\nFROM \"patients\" \"p\"\nJOIN \"examinations\" \"e\" ON \"p\".\"patient_id\" = \"e\".\"patient_id\"\nJOIN \"symptoms\" \"s\" ON \"e\".\"exam_id\" = \"s\".\"exam_id\"\nJOIN \"diagnoses\" \"d\" ON \"e\".\"exam_id\" = \"d\".\"exam_id\"\nORDER BY \"p\".\"date_of_birth\" DESC\nLIMIT 1;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"patients\" does not exist\nLINE 2: FROM \"patients\" \"p\"\n             ^\n[SQL: SELECT \"p\".\"date_of_birth\", \"s\".\"symptom_text\", \"d\".\"diagnosis_text\"\nFROM \"patients\" \"p\"\nJOIN \"examinations\" \"e\" ON \"p\".\"patient_id\" = \"e\".\"patient_id\"\nJOIN \"symptoms\" \"s\" ON \"e\".\"exam_id\" = \"s\".\"exam_id\"\nJOIN \"diagnoses\" \"d\" ON \"e\".\"exam_id\" = \"d\".\"exam_id\"\nORDER BY \"p\".\"date_of_birth\" DESC\nLIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "The oldest SJS patient's medical laboratory work was completed on what date, and what age was the patient when they initially arrived at the hospital?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT T1.Date, EXTRACT(YEAR FROM T2.\"First Date\") - EXTRACT(YEAR FROM T2.Birthday) AS Age, T2.Birthday FROM Laboratory AS T1 INNER JOIN Patient AS T2 ON T1.ID = T2.ID WHERE T2.Diagnosis = 'SJS' AND T2.Birthday IS NOT NULL ORDER BY T2.Birthday ASC LIMIT 1",
+      "actual_sql": "SELECT \"lab_work_date\", \"age_at_arrival\"\nFROM \"medical_lab_work\" mlw\nJOIN \"patients\" p ON mlw.\"patient_id\" = p.\"patient_id\"\nWHERE p.\"diagnosis\" = 'SJS'\nORDER BY p.\"age_at_arrival\" DESC\nLIMIT 1;\n\nNote: The database schema was not provided in the prompt. This query assumes standard table and column names (`patients`, `medical_lab_work`, `patient_id`, `diagnosis`, `lab_work_date`, `age_at_arrival`). Please replace them with your actual schema identifiers. If \"oldest\" refers to the earliest arrival date rather than highest age, change `ORDER BY p.\"age_at_arrival\" DESC` to `ORDER BY p.\"arrival_date\" ASC`.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"Note\"\nLINE 8: Note: The database schema was not provided in the prompt. Th...\n        ^\n[SQL: SELECT \"lab_work_date\", \"age_at_arrival\"\nFROM \"medical_lab_work\" mlw\nJOIN \"patients\" p ON mlw.\"patient_id\" = p.\"patient_id\"\nWHERE p.\"diagnosis\" = 'SJS'\nORDER BY p.\"age_at_arrival\" DESC\nLIMIT 1;\n\nNote: The database schema was not provided in the prompt. This query assumes standard table and column names (`patients`, `medical_lab_work`, `patient_id`, `diagnosis`, `lab_work_date`, `age_at_arrival`). Please replace them with your actual schema identifiers. If \"oldest\" refers to the earliest arrival date rather than highest age, change `ORDER BY p.\"age_at_arrival\" DESC` to `ORDER BY p.\"arrival_date\" ASC`.]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the ratio of male to female patients among all those with abnormal uric acid counts?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN T2.UA <= 8.0 AND T1.SEX = 'M' THEN 1 ELSE 0 END) AS REAL) / NULLIF(SUM(CASE WHEN T2.UA <= 6.5 AND T1.SEX = 'F' THEN 1 ELSE 0 END), 0) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID",
+      "actual_sql": "SELECT\n  SUM(CASE WHEN \"p\".\"gender\" = 'Male' THEN 1 ELSE 0 END) * 1.0 / NULLIF(SUM(CASE WHEN \"p\".\"gender\" = 'Female' THEN 1 ELSE 0 END), 0) AS \"male_to_female_ratio\"\nFROM \"patients\" \"p\"\nJOIN \"lab_results\" \"lr\" ON \"p\".\"patient_id\" = \"lr\".\"patient_id\"\nWHERE \"lr\".\"test_name\" = 'Uric Acid' AND \"lr\".\"abnormal_flag\" = 'Yes';",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"patients\" does not exist\nLINE 3: FROM \"patients\" \"p\"\n             ^\n[SQL: SELECT\n  SUM(CASE WHEN \"p\".\"gender\" = 'Male' THEN 1 ELSE 0 END) * 1.0 / NULLIF(SUM(CASE WHEN \"p\".\"gender\" = 'Female' THEN 1 ELSE 0 END), 0) AS \"male_to_female_ratio\"\nFROM \"patients\" \"p\"\nJOIN \"lab_results\" \"lr\" ON \"p\".\"patient_id\" = \"lr\".\"patient_id\"\nWHERE \"lr\".\"test_name\" = 'Uric Acid' AND \"lr\".\"abnormal_flag\" = 'Yes'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many underage patients were examined during the course of the three-year period from 1990 to 1993?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT COUNT(T1.ID) FROM Patient AS T1 INNER JOIN Examination AS T2 ON T1.ID = T2.ID WHERE EXTRACT(YEAR FROM T2.\"Examination Date\") BETWEEN 1990 AND 1993 AND EXTRACT(YEAR FROM T2.\"Examination Date\") - EXTRACT(YEAR FROM T1.Birthday) < 18",
+      "actual_sql": "SELECT COUNT(DISTINCT \"patient_id\") FROM \"examinations\" WHERE \"exam_date\" BETWEEN '1990-01-01' AND '1993-12-31' AND \"age\" < 18;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"examinations\" does not exist\nLINE 1: SELECT COUNT(DISTINCT \"patient_id\") FROM \"examinations\" WHER...\n                                                 ^\n[SQL: SELECT COUNT(DISTINCT \"patient_id\") FROM \"examinations\" WHERE \"exam_date\" BETWEEN '1990-01-01' AND '1993-12-31' AND \"age\" < 18\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How old was the patient who had the highest hemoglobin count at the time of the examination, and what is the doctor's diagnosis?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT EXTRACT(YEAR FROM T2.Date) - EXTRACT(YEAR FROM T1.Birthday) AS age_difference, T1.Diagnosis FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.HGB IS NOT NULL ORDER BY T2.HGB DESC LIMIT 1",
+      "actual_sql": "SELECT \"patient\".\"age\", \"examination\".\"diagnosis\"\nFROM \"patient\"\nJOIN \"examination\" ON \"patient\".\"id\" = \"examination\".\"patient_id\"\nORDER BY \"examination\".\"hemoglobin\" DESC\nLIMIT 1;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column examination.patient_id does not exist\nLINE 3: JOIN \"examination\" ON \"patient\".\"id\" = \"examination\".\"patien...\n                                               ^\n[SQL: SELECT \"patient\".\"age\", \"examination\".\"diagnosis\"\nFROM \"patient\"\nJOIN \"examination\" ON \"patient\".\"id\" = \"examination\".\"patient_id\"\nORDER BY \"examination\".\"hemoglobin\" DESC\nLIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For the patient who was diagnosed with SLE on 1994/2/19, what was his/her anti-Cardiolipin antibody concentration status on 1993/11/12?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT \"aCL IgA\", \"aCL IgG\", \"aCL IgM\" FROM Examination WHERE ID IN (SELECT ID FROM Patient WHERE Diagnosis = 'SLE' AND Description = '1994-02-19') AND \"Examination Date\" = '1993-11-12'",
+      "actual_sql": "SELECT \"lr\".\"status\" FROM \"lab_result\" \"lr\" JOIN \"lab_test\" \"lt\" ON \"lr\".\"test_id\" = \"lt\".\"test_id\" JOIN \"diagnosis\" \"d\" ON \"lr\".\"patient_id\" = \"d\".\"patient_id\" WHERE \"d\".\"diagnosis_name\" = 'SLE' AND \"d\".\"diagnosis_date\" = '1994-02-19' AND \"lt\".\"test_name\" = 'anti-Cardiolipin antibody' AND \"lr\".\"test_date\" = '1993-11-12' LIMIT 1;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"lab_result\" does not exist\nLINE 1: SELECT \"lr\".\"status\" FROM \"lab_result\" \"lr\" JOIN \"lab_test\" ...\n                                  ^\n[SQL: SELECT \"lr\".\"status\" FROM \"lab_result\" \"lr\" JOIN \"lab_test\" \"lt\" ON \"lr\".\"test_id\" = \"lt\".\"test_id\" JOIN \"diagnosis\" \"d\" ON \"lr\".\"patient_id\" = \"d\".\"patient_id\" WHERE \"d\".\"diagnosis_name\" = 'SLE' AND \"d\".\"diagnosis_date\" = '1994-02-19' AND \"lt\".\"test_name\" = 'anti-Cardiolipin antibody' AND \"lr\".\"test_date\" = '1993-11-12' LIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For the patient who was born on 1959/2/18, what is the decrease rate for his/her total cholesterol from November to December in 1981?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT CAST((SUM(CASE WHEN T2.date::text LIKE '1981-11-%' THEN T2.\"T-CHO\" ELSE 0 END) - SUM(CASE WHEN T2.date::text LIKE '1981-12-%' THEN T2.\"T-CHO\" ELSE 0 END)) AS REAL) / NULLIF(SUM(CASE WHEN T2.date::text LIKE '1981-12-%' THEN T2.\"T-CHO\" ELSE 0 END), 0) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T1.Birthday = '1959-02-18'",
+      "actual_sql": "SELECT (\"nov_val\"::numeric - \"dec_val\") / \"nov_val\" AS \"decrease_rate\"\nFROM (\n  SELECT MAX(CASE WHEN EXTRACT(MONTH FROM \"test_date\") = 11 THEN \"cholesterol_value\" END) AS \"nov_val\",\n         MAX(CASE WHEN EXTRACT(MONTH FROM \"test_date\") = 12 THEN \"cholesterol_value\" END) AS \"dec_val\"\n  FROM \"patient_records\"\n  WHERE \"birth_date\" = '1959-02-18'\n    AND EXTRACT(YEAR FROM \"test_date\") = 1981\n    AND \"test_type\" = 'Total Cholesterol'\n) sub\nLIMIT 1",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"patient_records\" does not exist\nLINE 5:   FROM \"patient_records\"\n               ^\n[SQL: SELECT (\"nov_val\"::numeric - \"dec_val\") / \"nov_val\" AS \"decrease_rate\"\nFROM (\n  SELECT MAX(CASE WHEN EXTRACT(MONTH FROM \"test_date\") = 11 THEN \"cholesterol_value\" END) AS \"nov_val\",\n         MAX(CASE WHEN EXTRACT(MONTH FROM \"test_date\") = 12 THEN \"cholesterol_value\" END) AS \"dec_val\"\n  FROM \"patient_records\"\n  WHERE \"birth_date\" = '1959-02-18'\n    AND EXTRACT(YEAR FROM \"test_date\") = 1981\n    AND \"test_type\" = 'Total Cholesterol'\n) sub\nLIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many patients who were examined between 1987/7/6 and 1996/1/31 had a GPT level greater than 30 and an ALB level less than 4? List them by their ID.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT ID FROM Laboratory WHERE Date BETWEEN '1987-07-06' AND '1996-01-31' AND GPT > 30 AND ALB < 4",
+      "actual_sql": "SELECT count(*), \"PatientID\" FROM \"patient\" WHERE \"ExamDate\" BETWEEN '1987/7/6' AND '1996/1/31' AND \"GPT\" > 30 AND \"ALB\" < 4 GROUP BY \"PatientID\"",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column \"PatientID\" does not exist\nLINE 1: SELECT count(*), \"PatientID\" FROM \"patient\" WHERE \"ExamDate\"...\n                         ^\n[SQL: SELECT count(*), \"PatientID\" FROM \"patient\" WHERE \"ExamDate\" BETWEEN '1987/7/6' AND '1996/1/31' AND \"GPT\" > 30 AND \"ALB\" < 4 GROUP BY \"PatientID\"\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What number of patients with a degree of thrombosis level 2 and ANA pattern of only S, have a level of anti-Cardiolip in antibody (IgM) 20% higher than average?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT COUNT(*) FROM Examination WHERE Thrombosis = 2 AND \"ANA Pattern\" = 'S' AND \"aCL IgM\" > (SELECT AVG(\"aCL IgM\") * 1.2 FROM Examination WHERE Thrombosis = 2 AND \"ANA Pattern\" = 'S')",
+      "actual_sql": "SELECT COUNT(*) FROM \"patients\" WHERE \"thrombosis_level\" = 2 AND \"ana_pattern\" = 'S' AND \"anti_cardiolipin_igm\" > (SELECT AVG(\"anti_cardiolipin_igm\") * 1.2 FROM \"patients\");",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"patients\" does not exist\nLINE 1: SELECT COUNT(*) FROM \"patients\" WHERE \"thrombosis_level\" = 2...\n                             ^\n[SQL: SELECT COUNT(*) FROM \"patients\" WHERE \"thrombosis_level\" = 2 AND \"ana_pattern\" = 'S' AND \"anti_cardiolipin_igm\" > (SELECT AVG(\"anti_cardiolipin_igm\") * 1.2 FROM \"patients\")\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List all patients who were followed up at the outpatient clinic who underwent a laboratory test in October 1991 and had a total blood bilirubin level within the normal range.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT DISTINCT T1.ID FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T1.Admission = '-' AND T2.\"T-BIL\" < 2.0 AND T2.Date::text LIKE '1991-10-%'",
+      "actual_sql": "SELECT DISTINCT \"p\".\"patient_id\", \"p\".\"first_name\", \"p\".\"last_name\"\nFROM \"patients\" \"p\"\nJOIN \"follow_ups\" \"fu\" ON \"p\".\"patient_id\" = \"fu\".\"patient_id\"\nJOIN \"laboratory_tests\" \"lt\" ON \"p\".\"patient_id\" = \"lt\".\"patient_id\"\nJOIN \"lab_results\" \"lr\" ON \"lt\".\"test_id\" = \"lr\".\"test_id\"\nWHERE \"fu\".\"clinic_type\" = 'outpatient'\n  AND \"lt\".\"test_date\" >= '1991-10-01' AND \"lt\".\"test_date\" < '1991-11-01'\n  AND \"lr\".\"test_name\" = 'Total Blood Bilirubin'\n  AND \"lr\".\"result_value\" BETWEEN \"lr\".\"normal_low\" AND \"lr\".\"normal_high\"\nLIMIT 100;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"patients\" does not exist\nLINE 2: FROM \"patients\" \"p\"\n             ^\n[SQL: SELECT DISTINCT \"p\".\"patient_id\", \"p\".\"first_name\", \"p\".\"last_name\"\nFROM \"patients\" \"p\"\nJOIN \"follow_ups\" \"fu\" ON \"p\".\"patient_id\" = \"fu\".\"patient_id\"\nJOIN \"laboratory_tests\" \"lt\" ON \"p\".\"patient_id\" = \"lt\".\"patient_id\"\nJOIN \"lab_results\" \"lr\" ON \"lt\".\"test_id\" = \"lr\".\"test_id\"\nWHERE \"fu\".\"clinic_type\" = 'outpatient'\n  AND \"lt\".\"test_date\" >= '1991-10-01' AND \"lt\".\"test_date\" < '1991-11-01'\n  AND \"lr\".\"test_name\" = 'Total Blood Bilirubin'\n  AND \"lr\".\"result_value\" BETWEEN \"lr\".\"normal_low\" AND \"lr\".\"normal_high\"\nLIMIT 100]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the average blood albumin level for female patients with a PLT greater than 400 who have been diagnosed with SLE?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT AVG(T2.ALB) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.PLT > 400 AND T1.Diagnosis = 'SLE' AND T1.SEX = 'F'",
+      "actual_sql": "SELECT AVG(\"lr\".\"value\") FROM \"lab_results\" \"lr\" JOIN \"patients\" \"p\" ON \"lr\".\"patient_id\" = \"p\".\"patient_id\" JOIN \"diagnoses\" \"d\" ON \"p\".\"patient_id\" = \"d\".\"patient_id\" WHERE \"p\".\"gender\" = 'Female' AND \"d\".\"diagnosis\" = 'SLE' AND \"lr\".\"test_name\" = 'Albumin' AND EXISTS (SELECT 1 FROM \"lab_results\" \"lr2\" WHERE \"lr2\".\"patient_id\" = \"p\".\"patient_id\" AND \"lr2\".\"test_name\" = 'PLT' AND \"lr2\".\"value\" > 400) LIMIT 100;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"lab_results\" does not exist\nLINE 1: SELECT AVG(\"lr\".\"value\") FROM \"lab_results\" \"lr\" JOIN \"patie...\n                                      ^\n[SQL: SELECT AVG(\"lr\".\"value\") FROM \"lab_results\" \"lr\" JOIN \"patients\" \"p\" ON \"lr\".\"patient_id\" = \"p\".\"patient_id\" JOIN \"diagnoses\" \"d\" ON \"p\".\"patient_id\" = \"d\".\"patient_id\" WHERE \"p\".\"gender\" = 'Female' AND \"d\".\"diagnosis\" = 'SLE' AND \"lr\".\"test_name\" = 'Albumin' AND EXISTS (SELECT 1 FROM \"lab_results\" \"lr2\" WHERE \"lr2\".\"patient_id\" = \"p\".\"patient_id\" AND \"lr2\".\"test_name\" = 'PLT' AND \"lr2\".\"value\" > 400) LIMIT 100]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many female patients were given an APS diagnosis?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT COUNT(ID) FROM Patient WHERE SEX = 'F' AND Diagnosis = 'APS'",
+      "actual_sql": "SELECT COUNT(*) FROM \"patients\" p JOIN \"diagnoses\" d ON p.\"id\" = d.\"patient_id\" WHERE p.\"gender\" = 'Female' AND d.\"diagnosis\" = 'APS';",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"patients\" does not exist\nLINE 1: SELECT COUNT(*) FROM \"patients\" p JOIN \"diagnoses\" d ON p.\"i...\n                             ^\n[SQL: SELECT COUNT(*) FROM \"patients\" p JOIN \"diagnoses\" d ON p.\"id\" = d.\"patient_id\" WHERE p.\"gender\" = 'Female' AND d.\"diagnosis\" = 'APS'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What percentage of patients who were born in 1980 and were diagnosed with RA are women?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN SEX = 'F' THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(COUNT(ID), 0) FROM Patient WHERE Diagnosis = 'RA' AND TO_CHAR(CAST(Birthday AS TIMESTAMP), 'YYYY') = '1980'",
+      "actual_sql": "SELECT \n  (COUNT(CASE WHEN \"gender\" = 'Female' THEN 1 END) * 100.0 / COUNT(*)) AS \"percentage\"\nFROM \"patients\"\nWHERE \"birth_year\" = 1980 \n  AND \"diagnosis\" = 'RA';",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"patients\" does not exist\nLINE 3: FROM \"patients\"\n             ^\n[SQL: SELECT \n  (COUNT(CASE WHEN \"gender\" = 'Female' THEN 1 END) * 100.0 / COUNT(*)) AS \"percentage\"\nFROM \"patients\"\nWHERE \"birth_year\" = 1980 \n  AND \"diagnosis\" = 'RA'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Was the patient with the number 57266's uric acid within a normal range?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CASE WHEN (T1.SEX = 'F' AND T2.UA > 6.5) OR (T1.SEX = 'M' AND T2.UA > 8.0) THEN TRUE ELSE FALSE END FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T1.ID = 57266",
+      "actual_sql": "SELECT \"uric_acid\" FROM \"lab_results\" WHERE \"patient_number\" = 57266 LIMIT 1;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"lab_results\" does not exist\nLINE 1: SELECT \"uric_acid\" FROM \"lab_results\" WHERE \"patient_number\"...\n                                ^\n[SQL: SELECT \"uric_acid\" FROM \"lab_results\" WHERE \"patient_number\" = 57266 LIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Provide IDs for male patients with ALT glutamic pylvic transaminase (GPT) that have history of ALT glutamic pylvic transaminase (GPT) exceed the normal range.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT T1.ID FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T1.SEX = 'M' AND T2.GPT >= 60",
+      "actual_sql": "SELECT DISTINCT \"p\".\"id\" FROM \"patients\" \"p\" JOIN \"lab_results\" \"lr\" ON \"p\".\"id\" = \"lr\".\"patient_id\" WHERE \"p\".\"gender\" = 'Male' AND \"lr\".\"test_name\" = 'ALT' AND \"lr\".\"value\" > \"lr\".\"normal_range_upper\" LIMIT 100;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"patients\" does not exist\nLINE 1: SELECT DISTINCT \"p\".\"id\" FROM \"patients\" \"p\" JOIN \"lab_resul...\n                                      ^\n[SQL: SELECT DISTINCT \"p\".\"id\" FROM \"patients\" \"p\" JOIN \"lab_results\" \"lr\" ON \"p\".\"id\" = \"lr\".\"patient_id\" WHERE \"p\".\"gender\" = 'Male' AND \"lr\".\"test_name\" = 'ALT' AND \"lr\".\"value\" > \"lr\".\"normal_range_upper\" LIMIT 100]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Please provide the diagnosis of patients with ALT glutamic pylvic transaminase beyond the normal range by ascending order of their date of birth.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT ON (T1.Birthday) T1.Diagnosis FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.GPT > 60 ORDER BY T1.Birthday ASC",
+      "actual_sql": "SELECT \"patient_id\", \"diagnosis\", \"alt_value\", \"date_of_birth\"\nFROM \"patients\"\nWHERE \"alt_value\" > 40\nORDER BY \"date_of_birth\" ASC\nLIMIT 100;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"patients\" does not exist\nLINE 2: FROM \"patients\"\n             ^\n[SQL: SELECT \"patient_id\", \"diagnosis\", \"alt_value\", \"date_of_birth\"\nFROM \"patients\"\nWHERE \"alt_value\" > 40\nORDER BY \"date_of_birth\" ASC\nLIMIT 100]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Provide all ID, sex and birthday of patients whose urea nitrogen (UN) just within the borderline of passing?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT DISTINCT T1.ID, T1.SEX, T1.Birthday FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.UN = 29",
+      "actual_sql": "SELECT \"id\", \"sex\", \"birthday\" FROM \"patient\" WHERE \"un\" = 20 LIMIT 100;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column \"un\" does not exist\nLINE 1: ...LECT \"id\", \"sex\", \"birthday\" FROM \"patient\" WHERE \"un\" = 20 ...\n                                                             ^\n[SQL: SELECT \"id\", \"sex\", \"birthday\" FROM \"patient\" WHERE \"un\" = 20 LIMIT 100]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List and group all patients by sex for total bilirubin (T-BIL) level not within the normal range.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.ID, T1.SEX FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.\"T-BIL\" >= 2.0 GROUP BY T1.SEX,T1.ID",
+      "actual_sql": "SELECT \"sex\", COUNT(*) AS \"patient_count\" FROM \"patient_lab_results\" WHERE \"test_name\" = 'T-BIL' AND \"result_status\" != 'Normal' GROUP BY \"sex\" LIMIT 100;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"patient_lab_results\" does not exist\nLINE 1: SELECT \"sex\", COUNT(*) AS \"patient_count\" FROM \"patient_lab_...\n                                                       ^\n[SQL: SELECT \"sex\", COUNT(*) AS \"patient_count\" FROM \"patient_lab_results\" WHERE \"test_name\" = 'T-BIL' AND \"result_status\" != 'Normal' GROUP BY \"sex\" LIMIT 100]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the average age of the male patient with high cholesterol?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT AVG(EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM T1.Birthday)) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.\"T-CHO\" >= 250 AND T1.SEX = 'M'",
+      "actual_sql": "SELECT AVG(\"age\") FROM \"patients\" WHERE \"gender\" = 'male' AND \"condition\" = 'high cholesterol'",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"patients\" does not exist\nLINE 1: SELECT AVG(\"age\") FROM \"patients\" WHERE \"gender\" = 'male' AN...\n                               ^\n[SQL: SELECT AVG(\"age\") FROM \"patients\" WHERE \"gender\" = 'male' AND \"condition\" = 'high cholesterol'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For all patients with triglyceride (TG) level beyond the normal range, how many are age more than 50 years?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(DISTINCT T1.ID) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.TG >= 200 AND EXTRACT(YEAR FROM CURRENT_TIMESTAMP) - EXTRACT(YEAR FROM T1.Birthday) > 50",
+      "actual_sql": "The provided database schema and domain knowledge do not contain any tables or columns related to patients, triglyceride levels, or age. Therefore, it is not possible to generate a valid SQL query for this question based on the given information.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"The\"\nLINE 1: The provided database schema and domain knowledge do not con...\n        ^\n[SQL: The provided database schema and domain knowledge do not contain any tables or columns related to patients, triglyceride levels, or age. Therefore, it is not possible to generate a valid SQL query for this question based on the given information.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For patient born between 1936-1956, how many male patients have creatinine phosphokinase beyond the normal range?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT COUNT(DISTINCT T1.ID) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE TO_CHAR(CAST(T1.Birthday AS TIMESTAMP), 'YYYY') BETWEEN '1936' AND '1956' AND T1.SEX = 'M' AND T2.CPK >= 250",
+      "actual_sql": "SELECT COUNT(*) FROM \"patients\" WHERE \"gender\" = 'Male' AND EXTRACT(YEAR FROM \"birth_date\") BETWEEN 1936 AND 1956 AND (\"creatinine_phosphokinase\" > \"normal_max\" OR \"creatinine_phosphokinase\" < \"normal_min\")",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"patients\" does not exist\nLINE 1: SELECT COUNT(*) FROM \"patients\" WHERE \"gender\" = 'Male' AND ...\n                             ^\n[SQL: SELECT COUNT(*) FROM \"patients\" WHERE \"gender\" = 'Male' AND EXTRACT(YEAR FROM \"birth_date\") BETWEEN 1936 AND 1956 AND (\"creatinine_phosphokinase\" > \"normal_max\" OR \"creatinine_phosphokinase\" < \"normal_min\")\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Provide ID, sex and age of patient who has blood glucose (GLU) not within normal range but with total cholesterol(T-CHO) within normal range.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT DISTINCT T1.ID, T1.SEX, EXTRACT(YEAR FROM CURRENT_TIMESTAMP) - EXTRACT(YEAR FROM T1.Birthday) AS Age FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.GLU >= 180 AND T2.\"T-CHO\" < 250",
+      "actual_sql": "SELECT \"id\", \"sex\", \"age\" FROM \"patient\" WHERE \"glu\" NOT BETWEEN 70 AND 110 AND \"t_cho\" BETWEEN 0 AND 200 LIMIT 100;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column \"age\" does not exist\nLINE 1: SELECT \"id\", \"sex\", \"age\" FROM \"patient\" WHERE \"glu\" NOT BET...\n                            ^\n[SQL: SELECT \"id\", \"sex\", \"age\" FROM \"patient\" WHERE \"glu\" NOT BETWEEN 70 AND 110 AND \"t_cho\" BETWEEN 0 AND 200 LIMIT 100]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What are the patient's diagnosis for those who has lower red blood blood cell? State their ID and age.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT T1.Diagnosis, T1.ID, EXTRACT(YEAR FROM CURRENT_TIMESTAMP) - EXTRACT(YEAR FROM T1.Birthday) AS Age FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.RBC < 3.5",
+      "actual_sql": "SELECT d.\"diagnosis\", p.\"id\", p.\"age\"\nFROM \"patients\" p\nJOIN \"diagnoses\" d ON p.\"id\" = d.\"patient_id\"\nJOIN \"lab_results\" l ON p.\"id\" = l.\"patient_id\"\nWHERE l.\"test_name\" = 'red_blood_cell_count' AND l.\"value\" < (SELECT AVG(\"value\") FROM \"lab_results\" WHERE \"test_name\" = 'red_blood_cell_count')\nLIMIT 100;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"patients\" does not exist\nLINE 2: FROM \"patients\" p\n             ^\n[SQL: SELECT d.\"diagnosis\", p.\"id\", p.\"age\"\nFROM \"patients\" p\nJOIN \"diagnoses\" d ON p.\"id\" = d.\"patient_id\"\nJOIN \"lab_results\" l ON p.\"id\" = l.\"patient_id\"\nWHERE l.\"test_name\" = 'red_blood_cell_count' AND l.\"value\" < (SELECT AVG(\"value\") FROM \"lab_results\" WHERE \"test_name\" = 'red_blood_cell_count')\nLIMIT 100]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the patients who were diagnosed with SLE, who is the oldest with normal hemoglobin level. Provide the ID and sex.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.ID, T1.SEX FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T1.Diagnosis = 'SLE' AND T2.HGB > 10 AND T2.HGB < 17 ORDER BY T1.Birthday ASC NULLS FIRST LIMIT 1",
+      "actual_sql": "SELECT \"id\", \"sex\" FROM \"patient\" WHERE \"diagnosis\" = 'SLE' AND \"hemoglobin\" = 'normal' ORDER BY \"age\" DESC LIMIT 1;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column \"hemoglobin\" does not exist\nLINE 1: ...sex\" FROM \"patient\" WHERE \"diagnosis\" = 'SLE' AND \"hemoglobi...\n                                                             ^\n[SQL: SELECT \"id\", \"sex\" FROM \"patient\" WHERE \"diagnosis\" = 'SLE' AND \"hemoglobin\" = 'normal' ORDER BY \"age\" DESC LIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Name the ID and age of patient with two or more laboratory examinations which show their hematoclit level exceeded the normal range.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT DISTINCT T1.ID, EXTRACT(YEAR FROM CURRENT_TIMESTAMP) - EXTRACT(YEAR FROM T1.Birthday) AS Age FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T1.ID IN (SELECT ID FROM Laboratory WHERE HCT >= 52 GROUP BY ID HAVING COUNT(ID) >= 2)",
+      "actual_sql": "SELECT \"p\".\"id\", \"p\".\"age\"\nFROM \"patient\" \"p\"\nJOIN \"laboratory_examination\" \"le\" ON \"p\".\"id\" = \"le\".\"patient_id\"\nJOIN \"laboratory_result\" \"lr\" ON \"le\".\"id\" = \"lr\".\"examination_id\"\nWHERE \"lr\".\"test_name\" = 'hematocrit' AND \"lr\".\"value\" > \"lr\".\"normal_range\"\nGROUP BY \"p\".\"id\", \"p\".\"age\"\nHAVING COUNT(*) >= 2\nLIMIT 10;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"laboratory_examination\" does not exist\nLINE 3: JOIN \"laboratory_examination\" \"le\" ON \"p\".\"id\" = \"le\".\"patie...\n             ^\n[SQL: SELECT \"p\".\"id\", \"p\".\"age\"\nFROM \"patient\" \"p\"\nJOIN \"laboratory_examination\" \"le\" ON \"p\".\"id\" = \"le\".\"patient_id\"\nJOIN \"laboratory_result\" \"lr\" ON \"le\".\"id\" = \"lr\".\"examination_id\"\nWHERE \"lr\".\"test_name\" = 'hematocrit' AND \"lr\".\"value\" > \"lr\".\"normal_range\"\nGROUP BY \"p\".\"id\", \"p\".\"age\"\nHAVING COUNT(*) >= 2\nLIMIT 10]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For patients with abnormal platelet level, state the number of patients with lower than normal range. How is it compare to the number of patients with higher than normal range?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT SUM(CASE WHEN T2.PLT <= 100 THEN 1 ELSE 0 END) - SUM(CASE WHEN T2.PLT >= 400 THEN 1 ELSE 0 END) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID",
+      "actual_sql": "SELECT\n  COUNT(CASE WHEN \"platelet_level\" < 150 THEN 1 END) AS \"lower_than_normal\",\n  COUNT(CASE WHEN \"platelet_level\" > 450 THEN 1 END) AS \"higher_than_normal\",\n  COUNT(CASE WHEN \"platelet_level\" < 150 THEN 1 END) - COUNT(CASE WHEN \"platelet_level\" > 450 THEN 1 END) AS \"comparison_difference\"\nFROM \"patient_lab_results\"",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"patient_lab_results\" does not exist\nLINE 5: FROM \"patient_lab_results\"\n             ^\n[SQL: SELECT\n  COUNT(CASE WHEN \"platelet_level\" < 150 THEN 1 END) AS \"lower_than_normal\",\n  COUNT(CASE WHEN \"platelet_level\" > 450 THEN 1 END) AS \"higher_than_normal\",\n  COUNT(CASE WHEN \"platelet_level\" < 150 THEN 1 END) - COUNT(CASE WHEN \"platelet_level\" > 450 THEN 1 END) AS \"comparison_difference\"\nFROM \"patient_lab_results\"\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For laboratory examinations take in 1984, list all patients below 50 years old with normal platelet level.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT DISTINCT T1.ID FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.PLT BETWEEN 100 AND 400 AND EXTRACT(YEAR FROM T2.Date) - EXTRACT(YEAR FROM T1.Birthday) < 50 AND EXTRACT(YEAR FROM T2.Date) = 1984",
+      "actual_sql": "SELECT DISTINCT p.\"patient_id\", p.\"patient_name\"\nFROM \"patient\" p\nJOIN \"examination\" e ON p.\"patient_id\" = e.\"patient_id\"\nJOIN \"lab_result\" lr ON e.\"examination_id\" = lr.\"examination_id\"\nJOIN \"lab_test\" lt ON lr.\"test_id\" = lt.\"test_id\"\nWHERE p.\"age\" < 50\n  AND EXTRACT(YEAR FROM e.\"examination_date\") = 1984\n  AND lt.\"test_name\" = 'Platelet'\n  AND lr.\"status\" = 'Normal'\nLIMIT 100;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column p.patient_id does not exist\nLINE 3: JOIN \"examination\" e ON p.\"patient_id\" = e.\"patient_id\"\n                                ^\n[SQL: SELECT DISTINCT p.\"patient_id\", p.\"patient_name\"\nFROM \"patient\" p\nJOIN \"examination\" e ON p.\"patient_id\" = e.\"patient_id\"\nJOIN \"lab_result\" lr ON e.\"examination_id\" = lr.\"examination_id\"\nJOIN \"lab_test\" lt ON lr.\"test_id\" = lt.\"test_id\"\nWHERE p.\"age\" < 50\n  AND EXTRACT(YEAR FROM e.\"examination_date\") = 1984\n  AND lt.\"test_name\" = 'Platelet'\n  AND lr.\"status\" = 'Normal'\nLIMIT 100]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For all patients who are older than 55 years old, what is the percentage of female who has abnormal prothrombin time (PT)?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN T2.PT >= 14 AND T1.SEX = 'F' THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(COUNT(CASE WHEN T2.PT >= 14 THEN 1 ELSE 0 END), 0) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE EXTRACT(YEAR FROM CURRENT_TIMESTAMP) - EXTRACT(YEAR FROM T1.Birthday) > 55",
+      "actual_sql": "SELECT \n  COUNT(CASE WHEN \"gender\" = 'F' AND \"pt_status\" = 'Abnormal' THEN 1 END) * 100.0 / NULLIF(SUM(CASE WHEN \"gender\" = 'F' THEN 1 END), 0) AS \"percentage\"\nFROM \"patients\"\nWHERE \"age\" > 55;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"patients\" does not exist\nLINE 3: FROM \"patients\"\n             ^\n[SQL: SELECT \n  COUNT(CASE WHEN \"gender\" = 'F' AND \"pt_status\" = 'Abnormal' THEN 1 END) * 100.0 / NULLIF(SUM(CASE WHEN \"gender\" = 'F' THEN 1 END), 0) AS \"percentage\"\nFROM \"patients\"\nWHERE \"age\" > 55\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the male patients who have a normal level of white blood cells, how many of them have an abnormal fibrinogen level?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT COUNT(DISTINCT T1.ID) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.FG <= 150 OR T2.FG >= 450 AND T2.WBC > 3.5 AND T2.WBC < 9.0 AND T1.SEX = 'M'",
+      "actual_sql": "SELECT count(DISTINCT p.\"patient_id\") FROM \"patient\" p JOIN \"lab_result\" lr1 ON p.\"patient_id\" = lr1.\"patient_id\" JOIN \"lab_test\" lt1 ON lr1.\"test_id\" = lt1.\"test_id\" JOIN \"lab_result\" lr2 ON p.\"patient_id\" = lr2.\"patient_id\" JOIN \"lab_test\" lt2 ON lr2.\"test_id\" = lt2.\"test_id\" WHERE p.\"sex\" = 'Male' AND lt1.\"test_name\" = 'White Blood Cells' AND lr1.\"result_status\" = 'Normal' AND lt2.\"test_name\" = 'Fibrinogen' AND lr2.\"result_status\" = 'Abnormal'",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"lab_result\" does not exist\nLINE 1: ...nt(DISTINCT p.\"patient_id\") FROM \"patient\" p JOIN \"lab_resul...\n                                                             ^\n[SQL: SELECT count(DISTINCT p.\"patient_id\") FROM \"patient\" p JOIN \"lab_result\" lr1 ON p.\"patient_id\" = lr1.\"patient_id\" JOIN \"lab_test\" lt1 ON lr1.\"test_id\" = lt1.\"test_id\" JOIN \"lab_result\" lr2 ON p.\"patient_id\" = lr2.\"patient_id\" JOIN \"lab_test\" lt2 ON lr2.\"test_id\" = lt2.\"test_id\" WHERE p.\"sex\" = 'Male' AND lt1.\"test_name\" = 'White Blood Cells' AND lr1.\"result_status\" = 'Normal' AND lt2.\"test_name\" = 'Fibrinogen' AND lr2.\"result_status\" = 'Abnormal'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many patients with an Ig G higher than normal?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT COUNT(DISTINCT T1.ID) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID INNER JOIN Examination AS T3 ON T3.ID = T2.ID WHERE T2.IGG >= 2000",
+      "actual_sql": "SELECT COUNT(*) FROM \"patients\" WHERE \"ig_g\" > \"normal_ig_g_upper\";",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"patients\" does not exist\nLINE 1: SELECT COUNT(*) FROM \"patients\" WHERE \"ig_g\" > \"normal_ig_g_...\n                             ^\n[SQL: SELECT COUNT(*) FROM \"patients\" WHERE \"ig_g\" > \"normal_ig_g_upper\"\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the patients with a normal Ig G level, how many of them have symptoms?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T1.ID) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID INNER JOIN Examination AS T3 ON T3.ID = T2.ID WHERE T2.IGG BETWEEN 900 AND 2000 AND NOT T3.Symptoms IS NULL",
+      "actual_sql": "SELECT COUNT(*) FROM \"patients\" WHERE \"ig_g_level\" = 'normal' AND \"symptom\" IS NOT NULL;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"patients\" does not exist\nLINE 1: SELECT COUNT(*) FROM \"patients\" WHERE \"ig_g_level\" = 'normal...\n                             ^\n[SQL: SELECT COUNT(*) FROM \"patients\" WHERE \"ig_g_level\" = 'normal' AND \"symptom\" IS NOT NULL\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many patients with a normal Ig A level came to the hospital after 1990/1/1?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T1.ID) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.IGA BETWEEN 80 AND 500 AND TO_CHAR(CAST(T1.\"First Date\" AS TIMESTAMP), 'YYYY') > '1990'",
+      "actual_sql": "SELECT COUNT(*) FROM \"patients\" WHERE \"Ig A level\" = 'normal' AND \"admission_date\" > '1990-01-01' LIMIT 10;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"patients\" does not exist\nLINE 1: SELECT COUNT(*) FROM \"patients\" WHERE \"Ig A level\" = 'normal...\n                             ^\n[SQL: SELECT COUNT(*) FROM \"patients\" WHERE \"Ig A level\" = 'normal' AND \"admission_date\" > '1990-01-01' LIMIT 10]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For the patients with an abnormal Ig M level, what is the most common disease they are diagnosed with?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.Diagnosis FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE NOT T2.IGM BETWEEN 40 AND 400 GROUP BY T1.Diagnosis ORDER BY COUNT(T1.Diagnosis) DESC NULLS LAST LIMIT 1",
+      "actual_sql": "SELECT \"disease\"\nFROM \"patients\" \"p\"\nJOIN \"lab_results\" \"lr\" ON \"p\".\"patient_id\" = \"lr\".\"patient_id\"\nJOIN \"diagnoses\" \"d\" ON \"p\".\"patient_id\" = \"d\".\"patient_id\"\nWHERE \"lr\".\"test_name\" = 'IgM' AND \"lr\".\"result\" = 'abnormal'\nGROUP BY \"disease\"\nORDER BY COUNT(*) DESC\nLIMIT 1;\n\nNote: The provided database schema was empty, so this query uses generic table and column names inferred from the question. Please replace them with your actual schema identifiers.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"Note\"\nLINE 10: Note: The provided database schema was empty, so this query ...\n         ^\n[SQL: SELECT \"disease\"\nFROM \"patients\" \"p\"\nJOIN \"lab_results\" \"lr\" ON \"p\".\"patient_id\" = \"lr\".\"patient_id\"\nJOIN \"diagnoses\" \"d\" ON \"p\".\"patient_id\" = \"d\".\"patient_id\"\nWHERE \"lr\".\"test_name\" = 'IgM' AND \"lr\".\"result\" = 'abnormal'\nGROUP BY \"disease\"\nORDER BY COUNT(*) DESC\nLIMIT 1;\n\nNote: The provided database schema was empty, so this query uses generic table and column names inferred from the question. Please replace them with your actual schema identifiers.]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many patients with a abnormal C-reactive protein don't have their data recorded?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T1.ID) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE (T2.CRP = '+') AND T1.Description IS NULL",
+      "actual_sql": "SELECT COUNT(*) FROM \"patients\" WHERE \"c_reactive_protein_status\" = 'abnormal' AND \"data_recorded\" IS NULL;\n\nNote: The provided database schema and domain knowledge do not contain any tables or columns related to patients or medical data. This query assumes a hypothetical table named `patients` with columns matching the question's intent. If the actual table/column names differ, please provide the correct schema.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"Note\"\nLINE 3: Note: The provided database schema and domain knowledge do n...\n        ^\n[SQL: SELECT COUNT(*) FROM \"patients\" WHERE \"c_reactive_protein_status\" = 'abnormal' AND \"data_recorded\" IS NULL;\n\nNote: The provided database schema and domain knowledge do not contain any tables or columns related to patients or medical data. This query assumes a hypothetical table named `patients` with columns matching the question's intent. If the actual table/column names differ, please provide the correct schema.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the patients whose creatinine level is abnormal, how many of them aren't 70 yet?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT COUNT(DISTINCT T1.ID) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.CRE >= 1.5 AND EXTRACT(YEAR FROM AGE(CURRENT_DATE, T1.Birthday)) < 70",
+      "actual_sql": "SELECT COUNT(*) FROM \"patients\" WHERE \"creatinine_level\" = 'Abnormal' AND \"age\" < 70",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"patients\" does not exist\nLINE 1: SELECT COUNT(*) FROM \"patients\" WHERE \"creatinine_level\" = '...\n                             ^\n[SQL: SELECT COUNT(*) FROM \"patients\" WHERE \"creatinine_level\" = 'Abnormal' AND \"age\" < 70\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many patients have a normal level of anti-ribonuclear protein and have been admitted to the hospital?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(DISTINCT T1.ID) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.RNP = 'negative' OR T2.RNP = '0' AND T1.Admission = '+'",
+      "actual_sql": "SELECT count(\"PatientID\") FROM \"patient\" WHERE \"AntiRiboNuclearProtein\" = 'Normal' AND \"AdmissionStatus\" = 'Admitted'",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column \"PatientID\" does not exist\nLINE 1: SELECT count(\"PatientID\") FROM \"patient\" WHERE \"AntiRiboNucl...\n                     ^\n[SQL: SELECT count(\"PatientID\") FROM \"patient\" WHERE \"AntiRiboNuclearProtein\" = 'Normal' AND \"AdmissionStatus\" = 'Admitted'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the patients with normal anti-SM, how many of them does not have thrombosis?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T1.ID) FROM Examination AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.SM IN ('negative', '0') AND T1.Thrombosis = 0",
+      "actual_sql": "SELECT COUNT(*) FROM \"patients\" WHERE \"anti_sm\" = 'normal' AND \"thrombosis\" = 'no';",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"patients\" does not exist\nLINE 1: SELECT COUNT(*) FROM \"patients\" WHERE \"anti_sm\" = 'normal' A...\n                             ^\n[SQL: SELECT COUNT(*) FROM \"patients\" WHERE \"anti_sm\" = 'normal' AND \"thrombosis\" = 'no'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the patients who has a normal anti-scl70, how many of them are female and does not have any symptom?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT COUNT(DISTINCT T1.ID) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID INNER JOIN Examination AS T3 ON T3.ID = T2.ID WHERE (T2.SC170 = 'negative' OR T2.SC170 = '0') AND T1.SEX = 'F' AND T3.Symptoms IS NULL",
+      "actual_sql": "SELECT COUNT(*) FROM \"patients\" WHERE \"gender\" = 'Female' AND \"anti-scl70\" = 'Normal' AND (\"symptom\" IS NULL OR \"symptom\" = '');",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"patients\" does not exist\nLINE 1: SELECT COUNT(*) FROM \"patients\" WHERE \"gender\" = 'Female' AN...\n                             ^\n[SQL: SELECT COUNT(*) FROM \"patients\" WHERE \"gender\" = 'Female' AND \"anti-scl70\" = 'Normal' AND (\"symptom\" IS NULL OR \"symptom\" = '')\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the patients who has a normal level of anti-centromere and a normal level of anti-SSB, how many of them are male?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(DISTINCT T1.ID) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.CENTROMEA IN ('negative', '0') AND T2.SSB IN ('negative', '0') AND T1.SEX = 'M'",
+      "actual_sql": "SELECT count(*) FROM \"patient\" WHERE \"gender\" = 'Male' AND \"anti_centromere\" = 'Normal' AND \"anti_ssb\" = 'Normal';",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column \"gender\" does not exist\nLINE 1: SELECT count(*) FROM \"patient\" WHERE \"gender\" = 'Male' AND \"...\n                                             ^\n[SQL: SELECT count(*) FROM \"patient\" WHERE \"gender\" = 'Male' AND \"anti_centromere\" = 'Normal' AND \"anti_ssb\" = 'Normal'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the patients who have an abnormal level of glutamic oxaloacetic transaminase, when was the youngest of them born?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.Birthday FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID WHERE T2.GOT >= 60 ORDER BY T1.Birthday DESC NULLS LAST LIMIT 1",
+      "actual_sql": "SELECT T1.\"BirthDate\" FROM \"patient\" AS T1 JOIN \"lab_result\" AS T2 ON T1.\"PatientID\" = T2.\"PatientID\" JOIN \"lab_test\" AS T3 ON T2.\"TestID\" = T3.\"TestID\" WHERE T3.\"TestName\" = 'glutamic oxaloacetic transaminase' AND T2.\"Flag\" = 'Abnormal' ORDER BY T1.\"BirthDate\" DESC LIMIT 1",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"lab_result\" does not exist\nLINE 1: SELECT T1.\"BirthDate\" FROM \"patient\" AS T1 JOIN \"lab_result\"...\n                                                        ^\n[SQL: SELECT T1.\"BirthDate\" FROM \"patient\" AS T1 JOIN \"lab_result\" AS T2 ON T1.\"PatientID\" = T2.\"PatientID\" JOIN \"lab_test\" AS T3 ON T2.\"TestID\" = T3.\"TestID\" WHERE T3.\"TestName\" = 'glutamic oxaloacetic transaminase' AND T2.\"Flag\" = 'Abnormal' ORDER BY T1.\"BirthDate\" DESC LIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For the patients with a normal range of creatinine phosphokinase, how many of them have a positive measure of degree of coagulation?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT COUNT(T1.ID) FROM Patient AS T1 INNER JOIN Laboratory AS T2 ON T1.ID = T2.ID INNER JOIN Examination AS T3 ON T1.ID = T3.ID WHERE T2.CPK < 250 AND (T3.KCT = '+' OR T3.RVVT = '+' OR T3.LAC = '+')",
+      "actual_sql": "SELECT count(\"PatientID\") FROM \"patient\" WHERE \"creatinine_phosphokinase\" = 'Normal' AND \"degree_of_coagulation\" = 'Positive'",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column \"PatientID\" does not exist\nLINE 1: SELECT count(\"PatientID\") FROM \"patient\" WHERE \"creatinine_p...\n                     ^\n[SQL: SELECT count(\"PatientID\") FROM \"patient\" WHERE \"creatinine_phosphokinase\" = 'Normal' AND \"degree_of_coagulation\" = 'Positive'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    }
+  ]
+}

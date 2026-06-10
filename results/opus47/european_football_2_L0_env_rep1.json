@@ -1,0 +1,918 @@
+{
+  "run_id": "european_football_2_L0_env_rep1",
+  "dataset": "european_football_2",
+  "level": "L0",
+  "dimensions": [],
+  "model": {
+    "provider": "anthropic",
+    "model": "claude-opus-4-7",
+    "base_url": ""
+  },
+  "runtime_params": {
+    "max_tokens": 4096,
+    "effective_max_tokens": 4096,
+    "temperature": 0.6,
+    "seed": 42,
+    "top_p": 0.95,
+    "presence_penalty": 0.0,
+    "top_k": 20,
+    "reasoning_effort": "medium",
+    "num_ctx": null,
+    "bird_docs_dir": "/Users/gary/myapps/4d-metadata-ablation/bird-docs-revised"
+  },
+  "rep": 1,
+  "timestamp": "2026-06-02T02:56:12.112013+00:00",
+  "elapsed_seconds": 183.1,
+  "aggregate_metrics": {
+    "total_cases": 51,
+    "execution_rate_pct": 2.0,
+    "value_match_pct": 0.0,
+    "column_match_pct": 0.0,
+    "soft_f1_mean": 0.0,
+    "er_value_gap_pp": 2.0,
+    "error_count": 50,
+    "bird_ex_pct": 0.0,
+    "er_bex_gap_pp": 2.0,
+    "challenging_er_pct": 0.0,
+    "challenging_vm_pct": 0.0,
+    "challenging_soft_f1": 0.0,
+    "challenging_bird_ex_pct": 0.0,
+    "moderate_er_pct": 4.0,
+    "moderate_vm_pct": 0.0,
+    "moderate_soft_f1": 0.0,
+    "moderate_bird_ex_pct": 0.0,
+    "simple_er_pct": 0.0,
+    "simple_vm_pct": 0.0,
+    "simple_soft_f1": 0.0,
+    "simple_bird_ex_pct": 0.0
+  },
+  "per_case_results": [
+    {
+      "question": "Give the name of the league had the most goals in the 2016 season?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT t2.name FROM Match AS t1 INNER JOIN League AS t2 ON t1.league_id = t2.id WHERE t1.season = '2015/2016' GROUP BY t2.name ORDER BY SUM(t1.home_team_goal + t1.away_team_goal) DESC NULLS LAST LIMIT 1",
+      "actual_sql": "SELECT \"l\".\"name\" FROM \"leagues\" \"l\" JOIN \"matchs\" \"m\" ON \"l\".\"id\" = \"m\".\"league_id\" WHERE \"m\".\"season\" = 2016 GROUP BY \"l\".\"name\" ORDER BY SUM(\"m\".\"home_team_goal\" + \"m\".\"away_team_goal\") DESC LIMIT 1",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"leagues\" does not exist\nLINE 1: SELECT \"l\".\"name\" FROM \"leagues\" \"l\" JOIN \"matchs\" \"m\" ON \"l...\n                               ^\n[SQL: SELECT \"l\".\"name\" FROM \"leagues\" \"l\" JOIN \"matchs\" \"m\" ON \"l\".\"id\" = \"m\".\"league_id\" WHERE \"m\".\"season\" = 2016 GROUP BY \"l\".\"name\" ORDER BY SUM(\"m\".\"home_team_goal\" + \"m\".\"away_team_goal\") DESC LIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "In Scotland Premier League, which away team won the most during the 2010 season?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT teamInfo.team_long_name FROM League AS leagueData INNER JOIN Match AS matchData ON leagueData.id = matchData.league_id INNER JOIN Team AS teamInfo ON matchData.away_team_api_id = teamInfo.team_api_id WHERE leagueData.name = 'Scotland Premier League' AND matchData.season = '2009/2010' AND matchData.away_team_goal - matchData.home_team_goal > 0 GROUP BY teamInfo.team_long_name, matchData.away_team_api_id ORDER BY COUNT(*) DESC LIMIT 1",
+      "actual_sql": "SELECT \"away_team_api_id\", COUNT(*) AS \"wins\"\nFROM \"Match\"\nWHERE \"league_id\" = (SELECT \"id\" FROM \"League\" WHERE \"name\" = 'Scotland Premier League')\n  AND \"season\" = '2009/2010'\n  AND \"away_team_goal\" > \"home_team_goal\"\nGROUP BY \"away_team_api_id\"\nORDER BY \"wins\" DESC\nLIMIT 1",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Match\" does not exist\nLINE 2: FROM \"Match\"\n             ^\n[SQL: SELECT \"away_team_api_id\", COUNT(*) AS \"wins\"\nFROM \"Match\"\nWHERE \"league_id\" = (SELECT \"id\" FROM \"League\" WHERE \"name\" = 'Scotland Premier League')\n  AND \"season\" = '2009/2010'\n  AND \"away_team_goal\" > \"home_team_goal\"\nGROUP BY \"away_team_api_id\"\nORDER BY \"wins\" DESC\nLIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What are the speed in which attacks are put together of the top 4 teams with the highest build Up Play Speed?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT t1.buildUpPlaySpeed FROM Team_Attributes AS t1 INNER JOIN Team AS t2 ON t1.team_api_id = t2.team_api_id ORDER BY t1.buildUpPlaySpeed ASC NULLS FIRST LIMIT 4",
+      "actual_sql": "SELECT \"buildUpPlaySpeed\" FROM \"Team_Attributes\" ORDER BY \"buildUpPlaySpeed\" DESC LIMIT 4;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Team_Attributes\" does not exist\nLINE 1: SELECT \"buildUpPlaySpeed\" FROM \"Team_Attributes\" ORDER BY \"b...\n                                       ^\n[SQL: SELECT \"buildUpPlaySpeed\" FROM \"Team_Attributes\" ORDER BY \"buildUpPlaySpeed\" DESC LIMIT 4]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Give the name of the league had the most matches end as draw in the 2016 season?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT t2.name FROM Match AS t1 INNER JOIN League AS t2 ON t1.league_id = t2.id WHERE t1.season = '2015/2016' AND t1.home_team_goal = t1.away_team_goal GROUP BY t2.name ORDER BY COUNT(t1.id) DESC NULLS LAST LIMIT 1",
+      "actual_sql": "SELECT \"l\".\"name\" FROM \"league\" \"l\" JOIN \"match\" \"m\" ON \"l\".\"id\" = \"m\".\"league_id\" WHERE \"m\".\"season\" = '2016' AND \"m\".\"home_team_goal\" = \"m\".\"away_team_goal\" GROUP BY \"l\".\"name\" ORDER BY COUNT(*) DESC LIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "At present, calculate for the player's age who have a sprint speed of no less than 97 between 2013 to 2015.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT DISTINCT EXTRACT(YEAR FROM AGE(NOW(), t2.birthday::timestamp)) + (CASE WHEN EXTRACT(MONTH FROM AGE(NOW(), t2.birthday::timestamp)) > 0 OR EXTRACT(DAY FROM AGE(NOW(), t2.birthday::timestamp)) > 0 THEN 1 ELSE 0 END) AS age FROM Player_Attributes AS t1 INNER JOIN Player AS t2 ON t1.player_api_id = t2.player_api_id WHERE EXTRACT(YEAR FROM t1.date::date) BETWEEN 2013 AND 2015 AND t1.sprint_speed >= 97",
+      "actual_sql": "SELECT (DATE_PART('year', CURRENT_DATE) - DATE_PART('year', \"birthdate\"))::int AS \"age\"\nFROM \"Players\"\nWHERE \"sprint_speed\" >= 97\n  AND DATE_PART('year', \"date\") BETWEEN 2013 AND 2015;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Players\" does not exist\nLINE 2: FROM \"Players\"\n             ^\n[SQL: SELECT (DATE_PART('year', CURRENT_DATE) - DATE_PART('year', \"birthdate\"))::int AS \"age\"\nFROM \"Players\"\nWHERE \"sprint_speed\" >= 97\n  AND DATE_PART('year', \"date\") BETWEEN 2013 AND 2015\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Give the name of the league with the highest matches of all time and how many matches were played in the said league.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT t2.name, t1.max_count FROM League AS t2 JOIN (SELECT league_id, MAX(cnt) AS max_count FROM (SELECT league_id, COUNT(id) AS cnt FROM Match GROUP BY league_id) AS subquery GROUP BY league_id ORDER BY MAX(cnt) DESC LIMIT 1) AS t1 ON t1.league_id = t2.id",
+      "actual_sql": "SELECT \"League\".\"name\", COUNT(\"Match\".\"id\") AS \"match_count\"\nFROM \"League\"\nJOIN \"Match\" ON \"League\".\"id\" = \"Match\".\"league_id\"\nGROUP BY \"League\".\"name\"\nORDER BY \"match_count\" DESC\nLIMIT 1;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"League\" does not exist\nLINE 2: FROM \"League\"\n             ^\n[SQL: SELECT \"League\".\"name\", COUNT(\"Match\".\"id\") AS \"match_count\"\nFROM \"League\"\nJOIN \"Match\" ON \"League\".\"id\" = \"Match\".\"league_id\"\nGROUP BY \"League\".\"name\"\nORDER BY \"match_count\" DESC\nLIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Give the team_fifa_api_id of teams with more than 50 but less than 60 build-up play speed.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT DISTINCT team_fifa_api_id FROM Team_Attributes WHERE buildUpPlaySpeed > 50 AND buildUpPlaySpeed < 60",
+      "actual_sql": "SELECT \"team_fifa_api_id\" FROM \"Team_Attributes\" WHERE \"buildUpPlaySpeed\" > 50 AND \"buildUpPlaySpeed\" < 60 LIMIT 100;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Team_Attributes\" does not exist\nLINE 1: SELECT \"team_fifa_api_id\" FROM \"Team_Attributes\" WHERE \"buil...\n                                       ^\n[SQL: SELECT \"team_fifa_api_id\" FROM \"Team_Attributes\" WHERE \"buildUpPlaySpeed\" > 50 AND \"buildUpPlaySpeed\" < 60 LIMIT 100]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List the long name of teams with above-average build-up play passing in 2012.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT DISTINCT t4.team_long_name FROM Team_Attributes AS t3 INNER JOIN Team AS t4 ON t3.team_api_id = t4.team_api_id WHERE SUBSTR(t3.\"date\", 1, 4) = '2012' AND t3.buildUpPlayPassing > (SELECT CAST(SUM(t2.buildUpPlayPassing) AS REAL) / NULLIF(COUNT(t1.id), 0) FROM Team AS t1 INNER JOIN Team_Attributes AS t2 ON t1.team_api_id = t2.team_api_id WHERE TO_CHAR(CAST(t2.\"date\" AS TIMESTAMP), 'YYYY') = '2012')",
+      "actual_sql": "SELECT t.\"team_long_name\"\nFROM \"Team\" t\nJOIN \"Team_Attributes\" ta ON t.\"team_api_id\" = ta.\"team_api_id\"\nWHERE EXTRACT(YEAR FROM ta.\"date\") = 2012\n  AND ta.\"buildUpPlayPassing\" > (\n    SELECT AVG(\"buildUpPlayPassing\")\n    FROM \"Team_Attributes\"\n    WHERE EXTRACT(YEAR FROM \"date\") = 2012\n  )\nLIMIT 100;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Team\" does not exist\nLINE 2: FROM \"Team\" t\n             ^\n[SQL: SELECT t.\"team_long_name\"\nFROM \"Team\" t\nJOIN \"Team_Attributes\" ta ON t.\"team_api_id\" = ta.\"team_api_id\"\nWHERE EXTRACT(YEAR FROM ta.\"date\") = 2012\n  AND ta.\"buildUpPlayPassing\" > (\n    SELECT AVG(\"buildUpPlayPassing\")\n    FROM \"Team_Attributes\"\n    WHERE EXTRACT(YEAR FROM \"date\") = 2012\n  )\nLIMIT 100]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Calculate the percentage of players who prefer left foot, who were born between 1987 and 1992.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT CAST(COUNT(CASE WHEN t2.preferred_foot = 'left' THEN t1.id ELSE NULL END) AS REAL) * 100 / NULLIF(COUNT(t1.id), 0) AS percent FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE SUBSTR(t1.birthday, 1, 4) BETWEEN '1987' AND '1992'",
+      "actual_sql": "SELECT (SUM(CASE WHEN \"preferred_foot\" = 'left' THEN 1 ELSE 0 END) * 100.0) / COUNT(*) AS \"percentage\"\nFROM \"Player_Attributes\" pa\nJOIN \"Player\" p ON pa.\"player_api_id\" = p.\"player_api_id\"\nWHERE CAST(SUBSTRING(\"birthday\", 1, 4) AS INTEGER) BETWEEN 1987 AND 1992",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Player_Attributes\" does not exist\nLINE 2: FROM \"Player_Attributes\" pa\n             ^\n[SQL: SELECT (SUM(CASE WHEN \"preferred_foot\" = 'left' THEN 1 ELSE 0 END) * 100.0) / COUNT(*) AS \"percentage\"\nFROM \"Player_Attributes\" pa\nJOIN \"Player\" p ON pa.\"player_api_id\" = p.\"player_api_id\"\nWHERE CAST(SUBSTRING(\"birthday\", 1, 4) AS INTEGER) BETWEEN 1987 AND 1992\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Find the average number of long-shot done by Ahmed Samir Farag.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT CAST(SUM(t2.long_shots) AS REAL) / NULLIF(COUNT(t2.\"date\"), 0) FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE t1.player_name = 'Ahmed Samir Farag'",
+      "actual_sql": "SELECT AVG(\"long_shots\") FROM \"Player_Attributes\" WHERE \"player_api_id\" = (SELECT \"player_api_id\" FROM \"Player\" WHERE \"player_name\" = 'Ahmed Samir Farag')",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Player_Attributes\" does not exist\nLINE 1: SELECT AVG(\"long_shots\") FROM \"Player_Attributes\" WHERE \"pla...\n                                      ^\n[SQL: SELECT AVG(\"long_shots\") FROM \"Player_Attributes\" WHERE \"player_api_id\" = (SELECT \"player_api_id\" FROM \"Player\" WHERE \"player_name\" = 'Ahmed Samir Farag')\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List the top 10 players' names whose heights are above 180 in descending order of average heading accuracy.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT t1.player_name FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE t1.height > 180 GROUP BY t1.id ORDER BY CAST(SUM(t2.heading_accuracy) AS REAL) / NULLIF(COUNT(t2.\"player_fifa_api_id\"), 0) DESC NULLS LAST LIMIT 10",
+      "actual_sql": "SELECT \"p\".\"player_name\", AVG(\"a\".\"heading_accuracy\") AS \"avg_heading_accuracy\"\nFROM \"Player\" AS \"p\"\nJOIN \"Player_Attributes\" AS \"a\" ON \"p\".\"player_api_id\" = \"a\".\"player_api_id\"\nWHERE \"p\".\"height\" > 180\nGROUP BY \"p\".\"player_name\"\nORDER BY \"avg_heading_accuracy\" DESC\nLIMIT 10;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Player\" does not exist\nLINE 2: FROM \"Player\" AS \"p\"\n             ^\n[SQL: SELECT \"p\".\"player_name\", AVG(\"a\".\"heading_accuracy\") AS \"avg_heading_accuracy\"\nFROM \"Player\" AS \"p\"\nJOIN \"Player_Attributes\" AS \"a\" ON \"p\".\"player_api_id\" = \"a\".\"player_api_id\"\nWHERE \"p\".\"height\" > 180\nGROUP BY \"p\".\"player_name\"\nORDER BY \"avg_heading_accuracy\" DESC\nLIMIT 10]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List the name of leagues in which the average goals by the home team is higher than the away team in the 2009/2010 season.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT t1.name FROM League AS t1 INNER JOIN Match AS t2 ON t1.id = t2.league_id WHERE t2.season = '2009/2010' GROUP BY t1.name HAVING (CAST(SUM(t2.home_team_goal) AS REAL) / NULLIF(COUNT(DISTINCT t2.id), 0)) - (CAST(SUM(t2.away_team_goal) AS REAL) / NULLIF(COUNT(DISTINCT t2.id), 0)) > 0",
+      "actual_sql": "SELECT \"L\".\"name\"\nFROM \"League\" AS \"L\"\nJOIN \"Match\" AS \"M\" ON \"M\".\"league_id\" = \"L\".\"id\"\nWHERE \"M\".\"season\" = '2009/2010'\nGROUP BY \"L\".\"id\", \"L\".\"name\"\nHAVING AVG(\"M\".\"home_team_goal\") > AVG(\"M\".\"away_team_goal\")\nLIMIT 100;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"League\" does not exist\nLINE 2: FROM \"League\" AS \"L\"\n             ^\n[SQL: SELECT \"L\".\"name\"\nFROM \"League\" AS \"L\"\nJOIN \"Match\" AS \"M\" ON \"M\".\"league_id\" = \"L\".\"id\"\nWHERE \"M\".\"season\" = '2009/2010'\nGROUP BY \"L\".\"id\", \"L\".\"name\"\nHAVING AVG(\"M\".\"home_team_goal\") > AVG(\"M\".\"away_team_goal\")\nLIMIT 100]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List the football players with a birthyear of 1970 and a birthmonth of October.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT player_name FROM Player WHERE SUBSTR(birthday, 1, 7) = '1970-10'",
+      "actual_sql": "SELECT * FROM \"players\" WHERE \"birthYear\" = 1970 AND \"birthMonth\" = 10 LIMIT 100;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"players\" does not exist\nLINE 1: SELECT * FROM \"players\" WHERE \"birthYear\" = 1970 AND \"birthM...\n                      ^\n[SQL: SELECT * FROM \"players\" WHERE \"birthYear\" = 1970 AND \"birthMonth\" = 10 LIMIT 100]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the overall rating of the football player Gabriel Tamas in year 2011?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT t2.overall_rating FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE t1.player_name = 'Gabriel Tamas' AND TO_CHAR(CAST(t2.date AS TIMESTAMP), 'YYYY') = '2011'",
+      "actual_sql": "SELECT AVG(\"overall_rating\") FROM \"Player\" p JOIN \"Player_Attributes\" pa ON p.\"player_api_id\" = pa.\"player_api_id\" WHERE p.\"player_name\" = 'Gabriel Tamas' AND EXTRACT(YEAR FROM pa.\"date\"::timestamp) = 2011",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Player\" does not exist\nLINE 1: SELECT AVG(\"overall_rating\") FROM \"Player\" p JOIN \"Player_At...\n                                          ^\n[SQL: SELECT AVG(\"overall_rating\") FROM \"Player\" p JOIN \"Player_Attributes\" pa ON p.\"player_api_id\" = pa.\"player_api_id\" WHERE p.\"player_name\" = 'Gabriel Tamas' AND EXTRACT(YEAR FROM pa.\"date\"::timestamp) = 2011\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Calculate the average home team goal in the 2010/2011 season in the country of Poland.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(SUM(t2.home_team_goal) AS REAL) / NULLIF(COUNT(t2.id), 0) FROM Country AS t1 INNER JOIN Match AS t2 ON t1.id = t2.country_id WHERE t1.name = 'Poland' AND t2.season = '2010/2011'",
+      "actual_sql": "SELECT AVG(\"home_team_goal\") FROM \"Match\" m JOIN \"Country\" c ON m.\"country_id\" = c.\"id\" WHERE m.\"season\" = '2010/2011' AND c.\"name\" = 'Poland'",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Match\" does not exist\nLINE 1: SELECT AVG(\"home_team_goal\") FROM \"Match\" m JOIN \"Country\" c...\n                                          ^\n[SQL: SELECT AVG(\"home_team_goal\") FROM \"Match\" m JOIN \"Country\" c ON m.\"country_id\" = c.\"id\" WHERE m.\"season\" = '2010/2011' AND c.\"name\" = 'Poland'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Who has the highest average finishing rate between the highest and shortest football player?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT A FROM (SELECT AVG(finishing) AS result, 'Max' AS A FROM Player AS T1 INNER JOIN Player_Attributes AS T2 ON T1.player_api_id = T2.player_api_id WHERE T1.height = (SELECT MAX(height) FROM Player) UNION SELECT AVG(finishing) AS result, 'Min' AS A FROM Player AS T1 INNER JOIN Player_Attributes AS T2 ON T1.player_api_id = T2.player_api_id WHERE T1.height = (SELECT MIN(height) FROM Player)) AS subquery ORDER BY result DESC LIMIT 1",
+      "actual_sql": "SELECT \n  CASE \n    WHEN (SELECT AVG(\"finishing\") FROM \"Player_Attributes\" WHERE \"player_api_id\" = (SELECT \"player_api_id\" FROM \"Player\" ORDER BY \"height\" DESC LIMIT 1))\n       > (SELECT AVG(\"finishing\") FROM \"Player_Attributes\" WHERE \"player_api_id\" = (SELECT \"player_api_id\" FROM \"Player\" ORDER BY \"height\" ASC LIMIT 1))\n    THEN (SELECT \"player_name\" FROM \"Player\" ORDER BY \"height\" DESC LIMIT 1)\n    ELSE (SELECT \"player_name\" FROM \"Player\" ORDER BY \"height\" ASC LIMIT 1)\n  END AS \"player_with_higher_avg_finishing\";",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Player_Attributes\" does not exist\nLINE 3:     WHEN (SELECT AVG(\"finishing\") FROM \"Player_Attributes\" W...\n                                               ^\n[SQL: SELECT \n  CASE \n    WHEN (SELECT AVG(\"finishing\") FROM \"Player_Attributes\" WHERE \"player_api_id\" = (SELECT \"player_api_id\" FROM \"Player\" ORDER BY \"height\" DESC LIMIT 1))\n       > (SELECT AVG(\"finishing\") FROM \"Player_Attributes\" WHERE \"player_api_id\" = (SELECT \"player_api_id\" FROM \"Player\" ORDER BY \"height\" ASC LIMIT 1))\n    THEN (SELECT \"player_name\" FROM \"Player\" ORDER BY \"height\" DESC LIMIT 1)\n    ELSE (SELECT \"player_name\" FROM \"Player\" ORDER BY \"height\" ASC LIMIT 1)\n  END AS \"player_with_higher_avg_finishing\"]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "From 2010 to 2015, what was the average overall rating of players who are higher than 170?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(SUM(t2.overall_rating) AS REAL) / NULLIF(COUNT(t2.id), 0) FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE t1.height > 170 AND TO_CHAR(CAST(t2.\"date\" AS TIMESTAMP), 'YYYY') >= '2010' AND TO_CHAR(CAST(t2.\"date\" AS TIMESTAMP), 'YYYY') <= '2015'",
+      "actual_sql": "SELECT AVG(\"pa\".\"overall_rating\") FROM \"Player_Attributes\" AS \"pa\" JOIN \"Player\" AS \"p\" ON \"pa\".\"player_api_id\" = \"p\".\"player_api_id\" WHERE \"p\".\"height\" > 170 AND \"pa\".\"date\" BETWEEN '2010-01-01 00:00:00' AND '2015-12-31 23:59:59'",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Player_Attributes\" does not exist\nLINE 1: SELECT AVG(\"pa\".\"overall_rating\") FROM \"Player_Attributes\" A...\n                                               ^\n[SQL: SELECT AVG(\"pa\".\"overall_rating\") FROM \"Player_Attributes\" AS \"pa\" JOIN \"Player\" AS \"p\" ON \"pa\".\"player_api_id\" = \"p\".\"player_api_id\" WHERE \"p\".\"height\" > 170 AND \"pa\".\"date\" BETWEEN '2010-01-01 00:00:00' AND '2015-12-31 23:59:59'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the difference of the average ball control score between Abdou Diallo and Aaron Appindangoye\n?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN t1.player_name = 'Abdou Diallo' THEN t2.ball_control ELSE 0 END) AS REAL) / NULLIF(COUNT(CASE WHEN t1.player_name = 'Abdou Diallo' THEN t2.id ELSE NULL END), 0) - CAST(SUM(CASE WHEN t1.player_name = 'Aaron Appindangoye' THEN t2.ball_control ELSE 0 END) AS REAL) / NULLIF(COUNT(CASE WHEN t1.player_name = 'Aaron Appindangoye' THEN t2.id ELSE NULL END), 0) FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id",
+      "actual_sql": "SELECT (AVG(CASE WHEN \"player_name\" = 'Abdou Diallo' THEN \"ball_control\" END) - AVG(CASE WHEN \"player_name\" = 'Aaron Appindangoye' THEN \"ball_control\" END)) AS \"difference\"\nFROM \"Player\" p\nJOIN \"Player_Attributes\" pa ON p.\"player_api_id\" = pa.\"player_api_id\"\nWHERE \"player_name\" IN ('Abdou Diallo', 'Aaron Appindangoye');",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Player\" does not exist\nLINE 2: FROM \"Player\" p\n             ^\n[SQL: SELECT (AVG(CASE WHEN \"player_name\" = 'Abdou Diallo' THEN \"ball_control\" END) - AVG(CASE WHEN \"player_name\" = 'Aaron Appindangoye' THEN \"ball_control\" END)) AS \"difference\"\nFROM \"Player\" p\nJOIN \"Player_Attributes\" pa ON p.\"player_api_id\" = pa.\"player_api_id\"\nWHERE \"player_name\" IN ('Abdou Diallo', 'Aaron Appindangoye')\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Which player is older, Aaron Lennon or Abdelaziz Barrada?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT player_name FROM Player WHERE player_name IN ('Aaron Lennon', 'Abdelaziz Barrada') ORDER BY birthday ASC NULLS FIRST LIMIT 1",
+      "actual_sql": "SELECT \"player_name\", \"birthday\" FROM \"Player\" WHERE \"player_name\" IN ('Aaron Lennon', 'Abdelaziz Barrada') ORDER BY \"birthday\" ASC LIMIT 1;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Player\" does not exist\nLINE 1: SELECT \"player_name\", \"birthday\" FROM \"Player\" WHERE \"player...\n                                              ^\n[SQL: SELECT \"player_name\", \"birthday\" FROM \"Player\" WHERE \"player_name\" IN ('Aaron Lennon', 'Abdelaziz Barrada') ORDER BY \"birthday\" ASC LIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Which player is the tallest?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT player_name FROM Player ORDER BY height DESC NULLS LAST LIMIT 1",
+      "actual_sql": "SELECT \"player_name\", \"height\" FROM \"Player\" ORDER BY \"height\" DESC LIMIT 1;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Player\" does not exist\nLINE 1: SELECT \"player_name\", \"height\" FROM \"Player\" ORDER BY \"heigh...\n                                            ^\n[SQL: SELECT \"player_name\", \"height\" FROM \"Player\" ORDER BY \"height\" DESC LIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the players whose preferred foot was the left foot when attacking, how many of them would remain in his position when the team attacked?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(player_api_id) FROM Player_Attributes WHERE preferred_foot = 'left' AND attacking_work_rate = 'low'",
+      "actual_sql": "SELECT COUNT(*) \nFROM \"Player_Attributes\" \nWHERE \"preferred_foot\" = 'left' \n  AND \"attacking_work_rate\" = 'medium';",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Player_Attributes\" does not exist\nLINE 2: FROM \"Player_Attributes\" \n             ^\n[SQL: SELECT COUNT(*) \nFROM \"Player_Attributes\" \nWHERE \"preferred_foot\" = 'left' \n  AND \"attacking_work_rate\" = 'medium'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the players born before the year 1986, how many of them would remain in his position and defense while the team attacked?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT COUNT(DISTINCT t1.player_name) FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE TO_CHAR(CAST(t1.birthday AS TIMESTAMP), 'YYYY') < '1986' AND t2.defensive_work_rate = 'high'",
+      "actual_sql": "SELECT COUNT(*) \nFROM \"Player\" AS \"p\"\nJOIN \"Player_Attributes\" AS \"pa\" ON \"p\".\"player_api_id\" = \"pa\".\"player_api_id\"\nWHERE CAST(SUBSTR(\"p\".\"birthday\", 1, 4) AS INTEGER) < 1986\n  AND \"pa\".\"defensive_work_rate\" = 'high'\n  AND \"pa\".\"attacking_work_rate\" = 'low';",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Player\" does not exist\nLINE 2: FROM \"Player\" AS \"p\"\n             ^\n[SQL: SELECT COUNT(*) \nFROM \"Player\" AS \"p\"\nJOIN \"Player_Attributes\" AS \"pa\" ON \"p\".\"player_api_id\" = \"pa\".\"player_api_id\"\nWHERE CAST(SUBSTR(\"p\".\"birthday\", 1, 4) AS INTEGER) < 1986\n  AND \"pa\".\"defensive_work_rate\" = 'high'\n  AND \"pa\".\"attacking_work_rate\" = 'low'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Please list the names of the players whose volley score and dribbling score are over 70.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT t1.player_name FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE t2.volleys > 70 AND t2.dribbling > 70",
+      "actual_sql": "SELECT \"player_name\" FROM \"Player_Attributes\" pa JOIN \"Player\" p ON pa.\"player_api_id\" = p.\"player_api_id\" WHERE pa.\"volleys\" > 70 AND pa.\"dribbling\" > 70 LIMIT 100;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Player_Attributes\" does not exist\nLINE 1: SELECT \"player_name\" FROM \"Player_Attributes\" pa JOIN \"Playe...\n                                  ^\n[SQL: SELECT \"player_name\" FROM \"Player_Attributes\" pa JOIN \"Player\" p ON pa.\"player_api_id\" = p.\"player_api_id\" WHERE pa.\"volleys\" > 70 AND pa.\"dribbling\" > 70 LIMIT 100]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many matches were held in the Belgium Jupiler League in April, 2009?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(t2.id) FROM League AS t1 INNER JOIN Match AS t2 ON t1.id = t2.league_id WHERE t1.name = 'Belgium Jupiler League' AND SUBSTR(t2.\"date\", 1, 7) = '2009-04'",
+      "actual_sql": "SELECT COUNT(*) FROM \"Match\" m JOIN \"League\" l ON m.\"league_id\" = l.\"id\" WHERE l.\"name\" = 'Belgium Jupiler League' AND m.\"date\" >= '2009-04-01' AND m.\"date\" < '2009-05-01'",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Match\" does not exist\nLINE 1: SELECT COUNT(*) FROM \"Match\" m JOIN \"League\" l ON m.\"league_...\n                             ^\n[SQL: SELECT COUNT(*) FROM \"Match\" m JOIN \"League\" l ON m.\"league_id\" = l.\"id\" WHERE l.\"name\" = 'Belgium Jupiler League' AND m.\"date\" >= '2009-04-01' AND m.\"date\" < '2009-05-01'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Give the name of the league had the most matches in the 2008/2009 season?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT t1.name FROM League AS t1 JOIN Match AS t2 ON t1.id = t2.league_id WHERE t2.season = '2008/2009' GROUP BY t1.name HAVING COUNT(t2.id) = (SELECT MAX(match_count) FROM (SELECT COUNT(t2.id) AS match_count FROM Match AS t2 WHERE t2.season = '2008/2009' GROUP BY t2.league_id) AS subquery)",
+      "actual_sql": "SELECT \"League\".\"name\" FROM \"League\" JOIN \"Match\" ON \"League\".\"id\" = \"Match\".\"league_id\" WHERE \"Match\".\"season\" = '2008/2009' GROUP BY \"League\".\"name\" ORDER BY COUNT(*) DESC LIMIT 1",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"League\" does not exist\nLINE 1: SELECT \"League\".\"name\" FROM \"League\" JOIN \"Match\" ON \"League...\n                                    ^\n[SQL: SELECT \"League\".\"name\" FROM \"League\" JOIN \"Match\" ON \"League\".\"id\" = \"Match\".\"league_id\" WHERE \"Match\".\"season\" = '2008/2009' GROUP BY \"League\".\"name\" ORDER BY COUNT(*) DESC LIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How much higher in percentage is Ariel Borysiuk's overall rating than that of Paulin Puel?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT (SUM(CASE WHEN t1.player_name = 'Ariel Borysiuk' THEN t2.overall_rating ELSE 0 END) * 1.0 - SUM(CASE WHEN t1.player_name = 'Paulin Puel' THEN t2.overall_rating ELSE 0 END)) * 100 / NULLIF(SUM(CASE WHEN t1.player_name = 'Paulin Puel' THEN t2.overall_rating ELSE 0 END), 0) FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id",
+      "actual_sql": "SELECT (MAX(CASE WHEN \"player_name\" = 'Ariel Borysiuk' THEN \"overall_rating\" END) \n        - MAX(CASE WHEN \"player_name\" = 'Paulin Puel' THEN \"overall_rating\" END)) * 100.0 \n        / MAX(CASE WHEN \"player_name\" = 'Paulin Puel' THEN \"overall_rating\" END) AS \"percentage_difference\"\nFROM \"Player\"\nJOIN \"Player_Attributes\" ON \"Player\".\"player_api_id\" = \"Player_Attributes\".\"player_api_id\"\nWHERE \"player_name\" IN ('Ariel Borysiuk', 'Paulin Puel');",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Player\" does not exist\nLINE 4: FROM \"Player\"\n             ^\n[SQL: SELECT (MAX(CASE WHEN \"player_name\" = 'Ariel Borysiuk' THEN \"overall_rating\" END) \n        - MAX(CASE WHEN \"player_name\" = 'Paulin Puel' THEN \"overall_rating\" END)) * 100.0 \n        / MAX(CASE WHEN \"player_name\" = 'Paulin Puel' THEN \"overall_rating\" END) AS \"percentage_difference\"\nFROM \"Player\"\nJOIN \"Player_Attributes\" ON \"Player\".\"player_api_id\" = \"Player_Attributes\".\"player_api_id\"\nWHERE \"player_name\" IN ('Ariel Borysiuk', 'Paulin Puel')\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Calculate the average overall rating of Pietro Marino.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(SUM(t2.overall_rating) AS REAL) / NULLIF(COUNT(t2.id), 0) FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE t1.player_name = 'Pietro Marino'",
+      "actual_sql": "SELECT AVG(\"overall_rating\") FROM \"Player_Attributes\" WHERE \"player_api_id\" = (SELECT \"player_api_id\" FROM \"Player\" WHERE \"player_name\" = 'Pietro Marino')",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Player_Attributes\" does not exist\nLINE 1: SELECT AVG(\"overall_rating\") FROM \"Player_Attributes\" WHERE ...\n                                          ^\n[SQL: SELECT AVG(\"overall_rating\") FROM \"Player_Attributes\" WHERE \"player_api_id\" = (SELECT \"player_api_id\" FROM \"Player\" WHERE \"player_name\" = 'Pietro Marino')\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is Ajax's highest chance creation passing score and what is it classified as?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT t2.chanceCreationPassing, t2.chanceCreationPassingClass FROM Team AS t1 INNER JOIN Team_Attributes AS t2 ON t1.team_api_id = t2.team_api_id WHERE t1.team_long_name = 'Ajax' ORDER BY t2.chanceCreationPassing DESC NULLS LAST LIMIT 1",
+      "actual_sql": "SELECT MAX(\"chanceCreationPassing\") AS \"highest_score\", \"chanceCreationPassingClass\" FROM \"Team_Attributes\" WHERE \"team_api_id\" IN (SELECT \"team_api_id\" FROM \"Team\" WHERE \"team_long_name\" = 'Ajax') GROUP BY \"chanceCreationPassingClass\" ORDER BY \"highest_score\" DESC LIMIT 1",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Team_Attributes\" does not exist\nLINE 1: ...highest_score\", \"chanceCreationPassingClass\" FROM \"Team_Attr...\n                                                             ^\n[SQL: SELECT MAX(\"chanceCreationPassing\") AS \"highest_score\", \"chanceCreationPassingClass\" FROM \"Team_Attributes\" WHERE \"team_api_id\" IN (SELECT \"team_api_id\" FROM \"Team\" WHERE \"team_long_name\" = 'Ajax') GROUP BY \"chanceCreationPassingClass\" ORDER BY \"highest_score\" DESC LIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For the players who had a 77 points overall rating on 2016/6/23, who was the oldest? Give the name of the player.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT t1.player_name FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE SUBSTR(t2.\"date\", 1, 10) = '2016-06-23' AND t2.overall_rating = 77 ORDER BY t1.birthday ASC NULLS FIRST LIMIT 1",
+      "actual_sql": "SELECT \"p\".\"player_name\" FROM \"Player\" \"p\" JOIN \"Player_Attributes\" \"pa\" ON \"p\".\"player_api_id\" = \"pa\".\"player_api_id\" WHERE \"pa\".\"overall_rating\" = 77 AND \"pa\".\"date\" = '2016-06-23 00:00:00' ORDER BY \"p\".\"birthday\" ASC LIMIT 1;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Player\" does not exist\nLINE 1: SELECT \"p\".\"player_name\" FROM \"Player\" \"p\" JOIN \"Player_Attr...\n                                      ^\n[SQL: SELECT \"p\".\"player_name\" FROM \"Player\" \"p\" JOIN \"Player_Attributes\" \"pa\" ON \"p\".\"player_api_id\" = \"pa\".\"player_api_id\" WHERE \"pa\".\"overall_rating\" = 77 AND \"pa\".\"date\" = '2016-06-23 00:00:00' ORDER BY \"p\".\"birthday\" ASC LIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What was the overall rating for Aaron Mooy on 2016/2/4?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT t2.overall_rating FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE SUBSTR(t2.\"date\", 1, 10) = '2016-02-04' AND t1.player_name = 'Aaron Mooy'",
+      "actual_sql": "SELECT \"overall_rating\" FROM \"Player_Attributes\" WHERE \"player_api_id\" = (SELECT \"player_api_id\" FROM \"Player\" WHERE \"player_name\" = 'Aaron Mooy') AND \"date\" = '2016-02-04 00:00:00' LIMIT 1;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Player_Attributes\" does not exist\nLINE 1: SELECT \"overall_rating\" FROM \"Player_Attributes\" WHERE \"play...\n                                     ^\n[SQL: SELECT \"overall_rating\" FROM \"Player_Attributes\" WHERE \"player_api_id\" = (SELECT \"player_api_id\" FROM \"Player\" WHERE \"player_name\" = 'Aaron Mooy') AND \"date\" = '2016-02-04 00:00:00' LIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How was Francesco Migliore's attacking work rate on 2015/5/1?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT t2.attacking_work_rate FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE t2.\"date\" LIKE '2015-05-01%' AND t1.player_name = 'Francesco Migliore'",
+      "actual_sql": "SELECT \"attacking_work_rate\" FROM \"Player_Attributes\" WHERE \"player_api_id\" = (SELECT \"player_api_id\" FROM \"Player\" WHERE \"player_name\" = 'Francesco Migliore') AND \"date\" LIKE '2015-05-01%' LIMIT 1;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Player_Attributes\" does not exist\nLINE 1: SELECT \"attacking_work_rate\" FROM \"Player_Attributes\" WHERE ...\n                                          ^\n[SQL: SELECT \"attacking_work_rate\" FROM \"Player_Attributes\" WHERE \"player_api_id\" = (SELECT \"player_api_id\" FROM \"Player\" WHERE \"player_name\" = 'Francesco Migliore') AND \"date\" LIKE '2015-05-01%%' LIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "When was the first time did Kevin Constant have his highest crossing score? Give the date.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT \"date\" FROM (SELECT t2.crossing, t2.\"date\" FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_fifa_api_id = t2.player_fifa_api_id WHERE t1.player_name = 'Kevin Constant' ORDER BY t2.crossing DESC) AS subquery ORDER BY \"date\" DESC LIMIT 1",
+      "actual_sql": "SELECT MIN(\"match_date\") AS \"first_date\"\nFROM \"player_stats\"\nWHERE \"player_name\" = 'Kevin Constant'\n  AND \"crossing\" = (\n    SELECT MAX(\"crossing\")\n    FROM \"player_stats\"\n    WHERE \"player_name\" = 'Kevin Constant'\n  );",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"player_stats\" does not exist\nLINE 2: FROM \"player_stats\"\n             ^\n[SQL: SELECT MIN(\"match_date\") AS \"first_date\"\nFROM \"player_stats\"\nWHERE \"player_name\" = 'Kevin Constant'\n  AND \"crossing\" = (\n    SELECT MAX(\"crossing\")\n    FROM \"player_stats\"\n    WHERE \"player_name\" = 'Kevin Constant'\n  )\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Tell the build Up play passing class for \"FC Lorient\" on 2010/2/22.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT t2.buildUpPlayPassingClass FROM Team AS t1 INNER JOIN Team_Attributes AS t2 ON t1.team_api_id = t2.team_api_id WHERE t1.team_long_name = 'FC Lorient' AND t2.\"date\" LIKE '2010-02-22%'",
+      "actual_sql": "SELECT \"buildUpPlayPassingClass\" FROM \"Team_Attributes\" WHERE \"team_api_id\" = (SELECT \"team_api_id\" FROM \"Team\" WHERE \"team_long_name\" = 'FC Lorient') AND \"date\" LIKE '2010-02-22%' LIMIT 1;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Team_Attributes\" does not exist\nLINE 1: SELECT \"buildUpPlayPassingClass\" FROM \"Team_Attributes\" WHER...\n                                              ^\n[SQL: SELECT \"buildUpPlayPassingClass\" FROM \"Team_Attributes\" WHERE \"team_api_id\" = (SELECT \"team_api_id\" FROM \"Team\" WHERE \"team_long_name\" = 'FC Lorient') AND \"date\" LIKE '2010-02-22%%' LIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For the team \"Hannover 96\", what was its defence aggression class on 2015/9/10?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT t2.defenceAggressionClass FROM Team AS t1 INNER JOIN Team_Attributes AS t2 ON t1.team_api_id = t2.team_api_id WHERE t1.team_long_name = 'Hannover 96' AND t2.\"date\" LIKE '2015-09-10%'",
+      "actual_sql": "SELECT \"defenceAggressionClass\"\nFROM \"Team_Attributes\" ta\nJOIN \"Team\" t ON ta.\"team_api_id\" = t.\"team_api_id\"\nWHERE t.\"team_long_name\" = 'Hannover 96'\n  AND ta.\"date\" LIKE '2015-09-10%'\nLIMIT 1;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Team_Attributes\" does not exist\nLINE 2: FROM \"Team_Attributes\" ta\n             ^\n[SQL: SELECT \"defenceAggressionClass\"\nFROM \"Team_Attributes\" ta\nJOIN \"Team\" t ON ta.\"team_api_id\" = t.\"team_api_id\"\nWHERE t.\"team_long_name\" = 'Hannover 96'\n  AND ta.\"date\" LIKE '2015-09-10%%'\nLIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What was the average overall rating for Marko Arnautovic from 2007/2/22 to 2016/4/21?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT CAST(SUM(t2.overall_rating) AS REAL) / NULLIF(COUNT(t2.id), 0) FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_fifa_api_id = t2.player_fifa_api_id WHERE t1.player_name = 'Marko Arnautovic' AND SUBSTR(t2.\"date\", 1, 10) BETWEEN '2007-02-22' AND '2016-04-21'",
+      "actual_sql": "SELECT AVG(\"overall_rating\") AS \"avg_overall_rating\"\nFROM \"Player_Attributes\"\nWHERE \"player_api_id\" = (SELECT \"player_api_id\" FROM \"Player\" WHERE \"player_name\" = 'Marko Arnautovic')\n  AND \"date\" BETWEEN '2007-02-22' AND '2016-04-21';",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Player_Attributes\" does not exist\nLINE 2: FROM \"Player_Attributes\"\n             ^\n[SQL: SELECT AVG(\"overall_rating\") AS \"avg_overall_rating\"\nFROM \"Player_Attributes\"\nWHERE \"player_api_id\" = (SELECT \"player_api_id\" FROM \"Player\" WHERE \"player_name\" = 'Marko Arnautovic')\n  AND \"date\" BETWEEN '2007-02-22' AND '2016-04-21'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What percentage is Landon Donovan's overall rating higher than Jordan Bowery on 2013/7/12?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT (SUM(CASE WHEN t1.player_name = 'Landon Donovan' THEN t2.overall_rating ELSE 0 END) * 1.0 - SUM(CASE WHEN t1.player_name = 'Jordan Bowery' THEN t2.overall_rating ELSE 0 END)) * 100 / NULLIF(SUM(CASE WHEN t1.player_name = 'Landon Donovan' THEN t2.overall_rating ELSE 0 END), 0) AS LvsJ_percent FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_fifa_api_id = t2.player_fifa_api_id WHERE SUBSTR(t2.\"date\", 1, 10) = '2013-07-12'",
+      "actual_sql": "SELECT (MAX(CASE WHEN \"player_name\" = 'Landon Donovan' THEN \"overall_rating\" END) \n        - MAX(CASE WHEN \"player_name\" = 'Jordan Bowery' THEN \"overall_rating\" END)) * 100.0 \n       / MAX(CASE WHEN \"player_name\" = 'Jordan Bowery' THEN \"overall_rating\" END) AS \"percentage_higher\"\nFROM \"Player_Attributes\" pa\nJOIN \"Player\" p ON pa.\"player_api_id\" = p.\"player_api_id\"\nWHERE \"player_name\" IN ('Landon Donovan', 'Jordan Bowery')\n  AND \"date\" LIKE '2013-07-12%';",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Player_Attributes\" does not exist\nLINE 4: FROM \"Player_Attributes\" pa\n             ^\n[SQL: SELECT (MAX(CASE WHEN \"player_name\" = 'Landon Donovan' THEN \"overall_rating\" END) \n        - MAX(CASE WHEN \"player_name\" = 'Jordan Bowery' THEN \"overall_rating\" END)) * 100.0 \n       / MAX(CASE WHEN \"player_name\" = 'Jordan Bowery' THEN \"overall_rating\" END) AS \"percentage_higher\"\nFROM \"Player_Attributes\" pa\nJOIN \"Player\" p ON pa.\"player_api_id\" = p.\"player_api_id\"\nWHERE \"player_name\" IN ('Landon Donovan', 'Jordan Bowery')\n  AND \"date\" LIKE '2013-07-12%%'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List down most tallest players' name.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT player_name FROM (SELECT player_name, height, DENSE_RANK() OVER (ORDER BY height DESC) AS rank FROM Player) AS subquery WHERE rank = 1",
+      "actual_sql": "SELECT \"player_name\" FROM \"Player\" WHERE \"height\" = (SELECT MAX(\"height\") FROM \"Player\");",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Player\" does not exist\nLINE 1: SELECT \"player_name\" FROM \"Player\" WHERE \"height\" = (SELECT ...\n                                  ^\n[SQL: SELECT \"player_name\" FROM \"Player\" WHERE \"height\" = (SELECT MAX(\"height\") FROM \"Player\")\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "State the name of the most strongest player.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT DISTINCT t1.player_name FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE t2.overall_rating = (SELECT MAX(overall_rating) FROM Player_Attributes)",
+      "actual_sql": "SELECT \"name\" FROM \"players\" ORDER BY \"strength\" DESC LIMIT 1;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"players\" does not exist\nLINE 1: SELECT \"name\" FROM \"players\" ORDER BY \"strength\" DESC LIMIT ...\n                           ^\n[SQL: SELECT \"name\" FROM \"players\" ORDER BY \"strength\" DESC LIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Who are the players that tend to be attacking when their mates were doing attack moves? List down their name.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT t1.player_name FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE t2.attacking_work_rate = 'high'",
+      "actual_sql": "SELECT \"player_name\"\nFROM \"Player\"\nWHERE \"player_api_id\" IN (\n    SELECT \"player_api_id\"\n    FROM \"Player_Attributes\"\n    WHERE \"attacking_work_rate\" = 'high'\n)\nLIMIT 100;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Player\" does not exist\nLINE 2: FROM \"Player\"\n             ^\n[SQL: SELECT \"player_name\"\nFROM \"Player\"\nWHERE \"player_api_id\" IN (\n    SELECT \"player_api_id\"\n    FROM \"Player_Attributes\"\n    WHERE \"attacking_work_rate\" = 'high'\n)\nLIMIT 100]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What are the short name of team who played safe while creating chance of passing?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT t1.team_short_name FROM Team AS t1 INNER JOIN Team_Attributes AS t2 ON t1.team_api_id = t2.team_api_id WHERE t2.chanceCreationPassingClass = 'Safe'",
+      "actual_sql": "SELECT t.\"team_short_name\" FROM \"Team\" t JOIN \"Team_Attributes\" ta ON t.\"team_api_id\" = ta.\"team_api_id\" WHERE ta.\"chanceCreationPassingClass\" = 'Safe' LIMIT 100;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Team\" does not exist\nLINE 1: SELECT t.\"team_short_name\" FROM \"Team\" t JOIN \"Team_Attribut...\n                                        ^\n[SQL: SELECT t.\"team_short_name\" FROM \"Team\" t JOIN \"Team_Attributes\" ta ON t.\"team_api_id\" = ta.\"team_api_id\" WHERE ta.\"chanceCreationPassingClass\" = 'Safe' LIMIT 100]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many football players born after the 1990s have the first name \"Aaron\"?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT COUNT(id) FROM Player WHERE birthday > '1990' AND player_name LIKE 'Aaron%'",
+      "actual_sql": "SELECT COUNT(*) FROM \"player\" WHERE \"first_name\" = 'Aaron' AND \"birth_date\" > '1999-12-31';",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column \"first_name\" does not exist\nLINE 1: SELECT COUNT(*) FROM \"player\" WHERE \"first_name\" = 'Aaron' A...\n                                            ^\n[SQL: SELECT COUNT(*) FROM \"player\" WHERE \"first_name\" = 'Aaron' AND \"birth_date\" > '1999-12-31'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the difference between players 6 and 23's jumping scores?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT SUM(CASE WHEN t1.id = 6 THEN t1.jumping ELSE 0 END) - SUM(CASE WHEN t1.id = 23 THEN t1.jumping ELSE 0 END) FROM Player_Attributes AS t1",
+      "actual_sql": "SELECT ABS(\n  (SELECT \"jumping\" FROM \"Player_Attributes\" WHERE \"player_api_id\" = 6 ORDER BY \"date\" DESC LIMIT 1)\n  -\n  (SELECT \"jumping\" FROM \"Player_Attributes\" WHERE \"player_api_id\" = 23 ORDER BY \"date\" DESC LIMIT 1)\n) AS \"jumping_difference\";",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Player_Attributes\" does not exist\nLINE 2:   (SELECT \"jumping\" FROM \"Player_Attributes\" WHERE \"player_a...\n                                 ^\n[SQL: SELECT ABS(\n  (SELECT \"jumping\" FROM \"Player_Attributes\" WHERE \"player_api_id\" = 6 ORDER BY \"date\" DESC LIMIT 1)\n  -\n  (SELECT \"jumping\" FROM \"Player_Attributes\" WHERE \"player_api_id\" = 23 ORDER BY \"date\" DESC LIMIT 1)\n) AS \"jumping_difference\"]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Please provide top four football players' IDs who are among the lowest potential players and prefer to use the right foot when attacking.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT id FROM Player_Attributes WHERE preferred_foot = 'right' ORDER BY potential ASC NULLS LAST LIMIT 4",
+      "actual_sql": "SELECT \"player_api_id\" FROM \"Player_Attributes\" WHERE \"preferred_foot\" = 'right' ORDER BY \"potential\" ASC LIMIT 4;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Player_Attributes\" does not exist\nLINE 1: SELECT \"player_api_id\" FROM \"Player_Attributes\" WHERE \"prefe...\n                                    ^\n[SQL: SELECT \"player_api_id\" FROM \"Player_Attributes\" WHERE \"preferred_foot\" = 'right' ORDER BY \"potential\" ASC LIMIT 4]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many players had the highest potential score for crossing that preferred to use their left foots while attacking?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(t1.id) FROM Player_Attributes AS t1 WHERE t1.preferred_foot = 'left' AND t1.crossing = (SELECT MAX(crossing) FROM Player_Attributes)",
+      "actual_sql": "SELECT COUNT(*) FROM \"Player_Attributes\" WHERE \"crossing\" = (SELECT MAX(\"crossing\") FROM \"Player_Attributes\" WHERE \"preferred_foot\" = 'left') AND \"preferred_foot\" = 'left'",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Player_Attributes\" does not exist\nLINE 1: SELECT COUNT(*) FROM \"Player_Attributes\" WHERE \"crossing\" = ...\n                             ^\n[SQL: SELECT COUNT(*) FROM \"Player_Attributes\" WHERE \"crossing\" = (SELECT MAX(\"crossing\") FROM \"Player_Attributes\" WHERE \"preferred_foot\" = 'left') AND \"preferred_foot\" = 'left'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What was the final score for the match on September 24, 2008, in the Belgian Jupiler League between the home team and the away team?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT t2.home_team_goal, t2.away_team_goal FROM League AS t1 INNER JOIN Match AS t2 ON t1.id = t2.league_id WHERE t1.name = 'Belgium Jupiler League' AND t2.\"date\" LIKE '2008-09-24%'",
+      "actual_sql": "SELECT \"home_team_goal\", \"away_team_goal\"\nFROM \"Match\"\nWHERE \"date\" LIKE '2008-09-24%'\n  AND \"league_id\" = (SELECT \"id\" FROM \"League\" WHERE \"name\" = 'Belgium Jupiler League')\nLIMIT 10;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Match\" does not exist\nLINE 2: FROM \"Match\"\n             ^\n[SQL: SELECT \"home_team_goal\", \"away_team_goal\"\nFROM \"Match\"\nWHERE \"date\" LIKE '2008-09-24%%'\n  AND \"league_id\" = (SELECT \"id\" FROM \"League\" WHERE \"name\" = 'Belgium Jupiler League')\nLIMIT 10]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Does the KSV Cercle Brugge team have a slow, balanced or fast speed class?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT t1.buildUpPlaySpeedClass FROM Team_Attributes AS t1 INNER JOIN Team AS t2 ON t1.team_api_id = t2.team_api_id WHERE t2.team_long_name = 'KSV Cercle Brugge'",
+      "actual_sql": "SELECT \"buildUpPlaySpeedClass\" FROM \"Team_Attributes\" ta JOIN \"Team\" t ON ta.\"team_api_id\" = t.\"team_api_id\" WHERE t.\"team_long_name\" = 'KSV Cercle Brugge' LIMIT 1;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Team_Attributes\" does not exist\nLINE 1: SELECT \"buildUpPlaySpeedClass\" FROM \"Team_Attributes\" ta JOI...\n                                            ^\n[SQL: SELECT \"buildUpPlaySpeedClass\" FROM \"Team_Attributes\" ta JOIN \"Team\" t ON ta.\"team_api_id\" = t.\"team_api_id\" WHERE t.\"team_long_name\" = 'KSV Cercle Brugge' LIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Please state the finishing rate and curve score of the player who has the heaviest weight.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT id, finishing, curve FROM Player_Attributes WHERE player_api_id = (SELECT player_api_id FROM Player ORDER BY weight DESC NULLS LAST LIMIT 1) LIMIT 1",
+      "actual_sql": "SELECT \"finishing\", \"curve\" FROM \"player_attributes\" WHERE \"player_api_id\" = (SELECT \"player_api_id\" FROM \"player\" ORDER BY \"weight\" DESC LIMIT 1) LIMIT 1;\n\nNote: The schema wasn't actually provided in your message, so I'm inferring based on the common \"European Soccer Database\" which has `player` (with `weight`, `player_api_id`) and `player_attributes` (with `finishing`, `curve`, `player_api_id`) tables. Please share the schema if this guess is incorrect.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"Note\"\nLINE 3: Note: The schema wasn't actually provided in your message, s...\n        ^\n[SQL: SELECT \"finishing\", \"curve\" FROM \"player_attributes\" WHERE \"player_api_id\" = (SELECT \"player_api_id\" FROM \"player\" ORDER BY \"weight\" DESC LIMIT 1) LIMIT 1;\n\nNote: The schema wasn't actually provided in your message, so I'm inferring based on the common \"European Soccer Database\" which has `player` (with `weight`, `player_api_id`) and `player_attributes` (with `finishing`, `curve`, `player_api_id`) tables. Please share the schema if this guess is incorrect.]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Which top 4 leagues had the most games in the 2015-2016 season?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT t1.name FROM League AS t1 INNER JOIN Match AS t2 ON t1.id = t2.league_id WHERE t2.season = '2015/2016' GROUP BY t1.name ORDER BY COUNT(t2.id) DESC NULLS LAST LIMIT 4",
+      "actual_sql": "SELECT \"league_id\", COUNT(*) AS \"game_count\" FROM \"games\" WHERE \"season\" = 2015 GROUP BY \"league_id\" ORDER BY \"game_count\" DESC LIMIT 4;\n\nNote: I assumed \"season\" is stored as the starting year (2015 for 2015-2016). Without the schema provided, I'm guessing table/column names (`games`, `league_id`, `season`). Please share the schema for an accurate query.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"Note\"\nLINE 3: Note: I assumed \"season\" is stored as the starting year (201...\n        ^\n[SQL: SELECT \"league_id\", COUNT(*) AS \"game_count\" FROM \"games\" WHERE \"season\" = 2015 GROUP BY \"league_id\" ORDER BY \"game_count\" DESC LIMIT 4;\n\nNote: I assumed \"season\" is stored as the starting year (2015 for 2015-2016). Without the schema provided, I'm guessing table/column names (`games`, `league_id`, `season`). Please share the schema for an accurate query.]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Please provide the full name of the away team that scored the most goals.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT t2.team_long_name FROM Match AS t1 INNER JOIN Team AS t2 ON t1.away_team_api_id = t2.team_api_id ORDER BY t1.away_team_goal DESC NULLS LAST LIMIT 1",
+      "actual_sql": "SELECT t.\"team_long_name\" \nFROM \"Match\" m \nJOIN \"Team\" t ON m.\"away_team_api_id\" = t.\"team_api_id\" \nORDER BY m.\"away_team_goal\" DESC \nLIMIT 1",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Match\" does not exist\nLINE 2: FROM \"Match\" m \n             ^\n[SQL: SELECT t.\"team_long_name\" \nFROM \"Match\" m \nJOIN \"Team\" t ON m.\"away_team_api_id\" = t.\"team_api_id\" \nORDER BY m.\"away_team_goal\" DESC \nLIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Please name one player whose overall strength is the greatest.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT DISTINCT t1.player_name FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id WHERE t2.overall_rating = (SELECT MAX(overall_rating) FROM Player_Attributes)",
+      "actual_sql": "SELECT \"player_name\" FROM \"Player_Attributes\" pa JOIN \"Player\" p ON pa.\"player_api_id\" = p.\"player_api_id\" ORDER BY pa.\"overall_rating\" DESC LIMIT 1;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Player_Attributes\" does not exist\nLINE 1: SELECT \"player_name\" FROM \"Player_Attributes\" pa JOIN \"Playe...\n                                  ^\n[SQL: SELECT \"player_name\" FROM \"Player_Attributes\" pa JOIN \"Player\" p ON pa.\"player_api_id\" = p.\"player_api_id\" ORDER BY pa.\"overall_rating\" DESC LIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the percentage of players that are under 180 cm who have an overall strength of more than 70?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(COUNT(CASE WHEN t2.overall_rating > 70 AND t1.height < 180 THEN t1.id ELSE NULL END) AS REAL) * 100 / NULLIF(COUNT(t1.id), 0) AS percent FROM Player AS t1 INNER JOIN Player_Attributes AS t2 ON t1.player_api_id = t2.player_api_id",
+      "actual_sql": "SELECT (CAST(SUM(CASE WHEN \"height\" < 180 THEN 1 ELSE 0 END) AS REAL) * 100.0 / COUNT(*)) AS \"percentage\"\nFROM \"Player\" AS p\nJOIN \"Player_Attributes\" AS pa ON p.\"player_api_id\" = pa.\"player_api_id\"\nWHERE pa.\"strength\" > 70;\n\nNote: This assumes the schema has a \"Player\" table with a \"height\" column and a \"Player_Attributes\" table with a \"strength\" column linked by \"player_api_id\". Please provide the schema for an accurate query.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"Note\"\nLINE 6: Note: This assumes the schema has a \"Player\" table with a \"h...\n        ^\n[SQL: SELECT (CAST(SUM(CASE WHEN \"height\" < 180 THEN 1 ELSE 0 END) AS REAL) * 100.0 / COUNT(*)) AS \"percentage\"\nFROM \"Player\" AS p\nJOIN \"Player_Attributes\" AS pa ON p.\"player_api_id\" = pa.\"player_api_id\"\nWHERE pa.\"strength\" > 70;\n\nNote: This assumes the schema has a \"Player\" table with a \"height\" column and a \"Player_Attributes\" table with a \"strength\" column linked by \"player_api_id\". Please provide the schema for an accurate query.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    }
+  ]
+}

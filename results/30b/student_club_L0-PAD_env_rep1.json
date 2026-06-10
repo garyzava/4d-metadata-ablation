@@ -1,0 +1,868 @@
+{
+  "run_id": "student_club_L0-PAD_env_rep1",
+  "dataset": "student_club",
+  "level": "L0-PAD",
+  "dimensions": [],
+  "model": {
+    "provider": "huggingface",
+    "model": "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+    "base_url": ""
+  },
+  "runtime_params": {
+    "max_tokens": 4096,
+    "effective_max_tokens": 4096,
+    "temperature": 0.0,
+    "seed": 42,
+    "top_p": 1.0,
+    "presence_penalty": 0.0,
+    "top_k": null,
+    "reasoning_effort": null,
+    "num_ctx": null,
+    "bird_docs_dir": "/Users/gary/myapps/4d-metadata-ablation/bird-docs-revised"
+  },
+  "rep": 1,
+  "timestamp": "2026-06-02T03:47:49.765726+00:00",
+  "elapsed_seconds": 83.9,
+  "aggregate_metrics": {
+    "total_cases": 48,
+    "execution_rate_pct": 12.5,
+    "value_match_pct": 0.0,
+    "column_match_pct": 0.0,
+    "soft_f1_mean": 0.0,
+    "er_value_gap_pp": 12.5,
+    "error_count": 42,
+    "bird_ex_pct": 0.0,
+    "er_bex_gap_pp": 12.5,
+    "challenging_er_pct": 0.0,
+    "challenging_vm_pct": 0.0,
+    "challenging_soft_f1": 0.0,
+    "challenging_bird_ex_pct": 0.0,
+    "moderate_er_pct": 4.5,
+    "moderate_vm_pct": 0.0,
+    "moderate_soft_f1": 0.0,
+    "moderate_bird_ex_pct": 0.0,
+    "simple_er_pct": 23.8,
+    "simple_vm_pct": 0.0,
+    "simple_soft_f1": 0.0,
+    "simple_bird_ex_pct": 0.0
+  },
+  "per_case_results": [
+    {
+      "question": "What's Angela Sanders's major?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T2.major_name FROM member AS T1 INNER JOIN major AS T2 ON T1.link_to_major = T2.major_id WHERE T1.first_name = 'Angela' AND T1.last_name = 'Sanders'",
+      "actual_sql": "I cannot determine Angela Sanders's major from the provided database schema. The schema contains tables related to various domains (ad campaigns, concert seating, fleet routing, loyalty programs, ticket auditing, and warehouse inventory) but none appear to contain information about student majors or personal academic information. This type of information would typically be found in an educational database or student information system, which is not represented in the given schema.\n```sql\n-- No query possible - schema does not contain relevant tables",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"I\"\nLINE 1: I cannot determine Angela Sanders's major from the provided ...\n        ^\n[SQL: I cannot determine Angela Sanders's major from the provided database schema. The schema contains tables related to various domains (ad campaigns, concert seating, fleet routing, loyalty programs, ticket auditing, and warehouse inventory) but none appear to contain information about student majors or personal academic information. This type of information would typically be found in an educational database or student information system, which is not represented in the given schema.\n```sql\n-- No query possible - schema does not contain relevant tables\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the students from the Student_Club who attended the event \"Women's Soccer\", how many of them want a T-shirt that's in medium size?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T1.event_id) FROM event AS T1 INNER JOIN attendance AS T2 ON T1.event_id = T2.link_to_event INNER JOIN member AS T3 ON T2.link_to_member = T3.member_id WHERE T1.event_name = 'Women''s Soccer' AND T3.t_shirt_size = 'Medium'",
+      "actual_sql": "SELECT COUNT(*) \nFROM \"Student_Club\" \nWHERE \"attended_event\" = 'Women''s Soccer' \nAND \"want_tshirt\" = 'Medium';",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Student_Club\" does not exist\nLINE 2: FROM \"Student_Club\" \n             ^\n[SQL: SELECT COUNT(*) \nFROM \"Student_Club\" \nWHERE \"attended_event\" = 'Women''s Soccer' \nAND \"want_tshirt\" = 'Medium'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the events attended by more than 10 members of the Student_Club, how many of them are meetings?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(DISTINCT T1.event_id) FROM event AS T1 INNER JOIN attendance AS T2 ON T1.event_id = T2.link_to_event WHERE T1.type = 'Meeting' GROUP BY T1.event_id HAVING COUNT(T2.link_to_event) > 10",
+      "actual_sql": "SELECT COUNT(*) \nFROM \"events\" \nWHERE \"event_type\" = 'meeting' \nAND \"event_id\" IN (\n    SELECT \"event_id\"\n    FROM \"event_attendance\"\n    GROUP BY \"event_id\"\n    HAVING COUNT(DISTINCT \"member_id\") > 10\n)",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"events\" does not exist\nLINE 2: FROM \"events\" \n             ^\n[SQL: SELECT COUNT(*) \nFROM \"events\" \nWHERE \"event_type\" = 'meeting' \nAND \"event_id\" IN (\n    SELECT \"event_id\"\n    FROM \"event_attendance\"\n    GROUP BY \"event_id\"\n    HAVING COUNT(DISTINCT \"member_id\") > 10\n)\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List all the names of events that had an attendance of over 20 students but were not fundraisers.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.event_name FROM event AS T1 INNER JOIN attendance AS T2 ON T1.event_id = T2.link_to_event GROUP BY T1.event_id HAVING COUNT(T2.link_to_event) > 20 EXCEPT SELECT T1.event_name FROM event AS T1 WHERE T1.type = 'Fundraiser'",
+      "actual_sql": "SELECT DISTINCT \"event_name\"\nFROM \"events\"\nWHERE \"attendance\" > 20\nAND \"is_fundraiser\" = FALSE\nLIMIT 1000;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"events\" does not exist\nLINE 2: FROM \"events\"\n             ^\n[SQL: SELECT DISTINCT \"event_name\"\nFROM \"events\"\nWHERE \"attendance\" > 20\nAND \"is_fundraiser\" = FALSE\nLIMIT 1000]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the amount of the funds that the Vice President received?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T2.amount FROM member AS T1 INNER JOIN income AS T2 ON T1.member_id = T2.link_to_member WHERE T1.position = 'Vice President'",
+      "actual_sql": "SELECT \"amount\" FROM \"employee_compensation\" WHERE \"position\" = 'Vice President' LIMIT 1;\n\nNote: This is a hypothetical query since the actual schema does not contain relevant tables or columns for this question.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"Note\"\nLINE 3: Note: This is a hypothetical query since the actual schema d...\n        ^\n[SQL: SELECT \"amount\" FROM \"employee_compensation\" WHERE \"position\" = 'Vice President' LIMIT 1;\n\nNote: This is a hypothetical query since the actual schema does not contain relevant tables or columns for this question.]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List the full name of the Student_Club members that grew up in Illinois state.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T1.first_name, T1.last_name FROM member AS T1 INNER JOIN zip_code AS T2 ON T1.zip = T2.zip_code WHERE T2.state = 'Illinois'",
+      "actual_sql": "SELECT NULL AS \"full_name\"\nWHERE 1 = 0\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Was each expense in October Meeting on October 8, 2019 approved?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T3.approved FROM event AS T1 INNER JOIN budget AS T2 ON T1.event_id = T2.link_to_event INNER JOIN expense AS T3 ON T2.budget_id = T3.link_to_budget WHERE T1.event_name = 'October Meeting' AND T1.event_date LIKE '2019-10-08%'",
+      "actual_sql": "SELECT \"approved_status\"\nFROM \"expenses\"\nWHERE \"meeting_date\" = '2019-10-08'\nLIMIT 10;\n```",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"```\"\nLINE 5: ```\n        ^\n[SQL: SELECT \"approved_status\"\nFROM \"expenses\"\nWHERE \"meeting_date\" = '2019-10-08'\nLIMIT 10;\n```]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Calculate the total average cost that Elijah Allen spent in the events on September and October.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT AVG(T2.cost) FROM member AS T1 INNER JOIN expense AS T2 ON T1.member_id = T2.link_to_member WHERE T1.last_name = 'Allen' AND T1.first_name = 'Elijah' AND (SUBSTR(T2.expense_date, 6, 2) = '09' OR SUBSTR(T2.expense_date, 6, 2) = '10')",
+      "actual_sql": "SELECT AVG(\"cost\") AS \"total_average_cost\"\nFROM \"events\"\nWHERE \"attendee_name\" = 'Elijah Allen'\nAND EXTRACT(MONTH FROM \"event_date\") IN (9, 10)\nLIMIT 1000;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"events\" does not exist\nLINE 2: FROM \"events\"\n             ^\n[SQL: SELECT AVG(\"cost\") AS \"total_average_cost\"\nFROM \"events\"\nWHERE \"attendee_name\" = 'Elijah Allen'\nAND EXTRACT(MONTH FROM \"event_date\") IN (9, 10)\nLIMIT 1000]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Calculate the difference of the total amount spent in all events by the Student_Club in year 2019 and 2020.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT SUM(CASE WHEN SUBSTR(T1.event_date, 1, 4) = '2019' THEN T2.spent ELSE 0 END) - SUM(CASE WHEN SUBSTR(T1.event_date, 1, 4) = '2020' THEN T2.spent ELSE 0 END) AS num FROM event AS T1 INNER JOIN budget AS T2 ON T1.event_id = T2.link_to_event",
+      "actual_sql": "SELECT \n    (SELECT SUM(\"amount\") \n     FROM \"events\" \n     WHERE \"organization\" = 'Student_Club' \n       AND EXTRACT(YEAR FROM \"event_date\") = 2019) -\n    (SELECT SUM(\"amount\") \n     FROM \"events\" \n     WHERE \"organization\" = 'Student_Club' \n       AND EXTRACT(YEAR FROM \"event_date\") = 2020) AS difference\nFROM dual;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"dual\" does not exist\nLINE 10: FROM dual\n              ^\n[SQL: SELECT \n    (SELECT SUM(\"amount\") \n     FROM \"events\" \n     WHERE \"organization\" = 'Student_Club' \n       AND EXTRACT(YEAR FROM \"event_date\") = 2019) -\n    (SELECT SUM(\"amount\") \n     FROM \"events\" \n     WHERE \"organization\" = 'Student_Club' \n       AND EXTRACT(YEAR FROM \"event_date\") = 2020) AS difference\nFROM dual\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What was the notes of the fundraising on 2019/9/14?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT notes FROM income WHERE source = 'Fundraising' AND date_received = '2019-09-14'",
+      "actual_sql": "SELECT \"notes\" FROM \"fundraising\" WHERE \"date\" = '2019-09-14'\n\nBut based on the actual schema provided, no such table exists.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"But\"\nLINE 3: But based on the actual schema provided, no such table exist...\n        ^\n[SQL: SELECT \"notes\" FROM \"fundraising\" WHERE \"date\" = '2019-09-14'\n\nBut based on the actual schema provided, no such table exists.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Tell the phone number of \"Carlo Jacobs\".",
+      "difficulty": "simple",
+      "expected_sql": "SELECT phone FROM member WHERE first_name = 'Carlo' AND last_name = 'Jacobs'",
+      "actual_sql": "-- No query possible - no table found with customer phone number information",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"LIMIT\"\nLINE 2: LIMIT 500\n        ^\n[SQL: -- No query possible - no table found with customer phone number information\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the status of the event which bought \"Post Cards, Posters\" on 2019/8/20?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.event_status FROM budget AS T1 INNER JOIN expense AS T2 ON T1.budget_id = T2.link_to_budget WHERE T2.expense_description = 'Post Cards, Posters' AND T2.expense_date = '2019-08-20'",
+      "actual_sql": "SELECT \"decision_code\", \"timestamp\"\nFROM \"ticket_audit_workflow_v3\"\nWHERE \"timestamp\"::date = '2019-08-20'\nLIMIT 10;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"ticket_audit_workflow_v3\" does not exist\nLINE 2: FROM \"ticket_audit_workflow_v3\"\n             ^\n[SQL: SELECT \"decision_code\", \"timestamp\"\nFROM \"ticket_audit_workflow_v3\"\nWHERE \"timestamp\"::date = '2019-08-20'\nLIMIT 10]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What was Brent Thomason's major?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T2.major_name FROM member AS T1 INNER JOIN major AS T2 ON T1.link_to_major = T2.major_id WHERE T1.first_name = 'Brent' AND T1.last_name = 'Thomason'",
+      "actual_sql": "I cannot answer this question with the provided database schema. The schema contains tables related to advertising campaigns, concert seating inventory, fleet dispatch routing, loyalty programs, ticket auditing, and warehouse inventory - none of which contain information about student majors or academic records. This appears to be a question about academic information that would require a student database schema with tables containing student information and major details.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"I\"\nLINE 1: I cannot answer this question with the provided database sch...\n        ^\n[SQL: I cannot answer this question with the provided database schema. The schema contains tables related to advertising campaigns, concert seating inventory, fleet dispatch routing, loyalty programs, ticket auditing, and warehouse inventory - none of which contain information about student majors or academic records. This appears to be a question about academic information that would require a student database schema with tables containing student information and major details.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For all the club members from \"Business\" major, how many of them wear medium size t-shirt?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T1.member_id) FROM member AS T1 INNER JOIN major AS T2 ON T1.link_to_major = T2.major_id WHERE T2.major_name = 'Business' AND T1.t_shirt_size = 'Medium'",
+      "actual_sql": "SELECT COUNT(*) \nFROM \"club_members\" \nWHERE \"major\" = 'Business' \nAND \"tshirt_size\" = 'Medium'",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"club_members\" does not exist\nLINE 2: FROM \"club_members\" \n             ^\n[SQL: SELECT COUNT(*) \nFROM \"club_members\" \nWHERE \"major\" = 'Business' \nAND \"tshirt_size\" = 'Medium'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Which department was the President of the club in?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T2.department FROM member AS T1 INNER JOIN major AS T2 ON T1.link_to_major = T2.major_id WHERE T1.position = 'President'",
+      "actual_sql": "SELECT NULL AS \"department\"\nWHERE 1 = 0\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "State the date Connor Hilton paid his/her dues.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T2.date_received FROM member AS T1 INNER JOIN income AS T2 ON T1.member_id = T2.link_to_member WHERE T1.first_name = 'Connor' AND T1.last_name = 'Hilton' AND T2.source = 'Dues'",
+      "actual_sql": "Looking at the database schema, I need to find information about Connor Hilton paying dues. However, none of the provided tables contain information about people paying dues or membership fees. The tables describe various business domains like advertising campaigns, concert seating, fleet routing, loyalty programs, ticket auditing, and warehouse inventory, but none have a structure that would store member payment information.\n\nWithout any relevant tables containing member dues payment data, I cannot write a meaningful query to answer this question. This appears to be a question about a specific person's payment history that isn't represented in the given schema.\n\nI cannot provide a valid SQL query because there are no tables in the schema that would contain information about Connor Hilton paying dues.\n```sql\n-- No valid query can be written as the schema does not contain relevant tables for member dues payments",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"Looking\"\nLINE 1: Looking at the database schema, I need to find information a...\n        ^\n[SQL: Looking at the database schema, I need to find information about Connor Hilton paying dues. However, none of the provided tables contain information about people paying dues or membership fees. The tables describe various business domains like advertising campaigns, concert seating, fleet routing, loyalty programs, ticket auditing, and warehouse inventory, but none have a structure that would store member payment information.\n\nWithout any relevant tables containing member dues payment data, I cannot write a meaningful query to answer this question. This appears to be a question about a specific person's payment history that isn't represented in the given schema.\n\nI cannot provide a valid SQL query because there are no tables in the schema that would contain information about Connor Hilton paying dues.\n```sql\n-- No valid query can be written as the schema does not contain relevant tables for member dues payments\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many times was the budget in Advertisement for \"Yearly Kickoff\" meeting more than \"October Meeting\"?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN T2.event_name = 'Yearly Kickoff' THEN T1.amount ELSE 0 END) AS REAL) / NULLIF(SUM(CASE WHEN T2.event_name = 'October Meeting' THEN T1.amount ELSE 0 END), 0) FROM budget AS T1 INNER JOIN event AS T2 ON T1.link_to_event = T2.event_id WHERE T1.category = 'Advertisement' AND T2.type = 'Meeting'",
+      "actual_sql": "SELECT COUNT(*) \nFROM (\n    SELECT \"campaign_name\", \"daily_budget\"\n    FROM \"ad_campaign_pacing\"\n    WHERE \"campaign_name\" = 'Yearly Kickoff'\n    UNION ALL\n    SELECT \"campaign_name\", \"daily_budget\"\n    FROM \"ad_campaign_pacing\"\n    WHERE \"campaign_name\" = 'October Meeting'\n) AS combined_campaigns\nWHERE \"daily_budget\" > (\n    SELECT \"daily_budget\"\n    FROM \"ad_campaign_pacing\"\n    WHERE \"campaign_name\" = 'October Meeting'\n)\nAND \"campaign_name\" = 'Yearly Kickoff';",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"ad_campaign_pacing\" does not exist\nLINE 4:     FROM \"ad_campaign_pacing\"\n                 ^\n[SQL: SELECT COUNT(*) \nFROM (\n    SELECT \"campaign_name\", \"daily_budget\"\n    FROM \"ad_campaign_pacing\"\n    WHERE \"campaign_name\" = 'Yearly Kickoff'\n    UNION ALL\n    SELECT \"campaign_name\", \"daily_budget\"\n    FROM \"ad_campaign_pacing\"\n    WHERE \"campaign_name\" = 'October Meeting'\n) AS combined_campaigns\nWHERE \"daily_budget\" > (\n    SELECT \"daily_budget\"\n    FROM \"ad_campaign_pacing\"\n    WHERE \"campaign_name\" = 'October Meeting'\n)\nAND \"campaign_name\" = 'Yearly Kickoff'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the total cost of the pizzas for all the events?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT SUM(cost) FROM expense WHERE expense_description = 'Pizza'",
+      "actual_sql": "I need to find the total cost of pizzas for all events. However, looking at the provided database schema and domain knowledge, there is no table or column related to \"pizzas\" or \"events\" in any of the described schemas. \n\nThe schemas describe domains like:\n- Ad campaigns and bidding\n- Concert seat inventory\n- Fleet dispatch routing\n- Loyalty tier calculation\n- Ticket audit workflow\n- Warehouse inventory basics\n\nNone of these schemas contain information about pizza costs or events. Without relevant tables and columns, I cannot write a meaningful query to answer this question.\n\nIf there's a specific table that contains pizza-related data and event information that isn't shown in the schema, please provide that information so I can construct the appropriate query.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"I\"\nLINE 1: I need to find the total cost of pizzas for all events. Howe...\n        ^\n[SQL: I need to find the total cost of pizzas for all events. However, looking at the provided database schema and domain knowledge, there is no table or column related to \"pizzas\" or \"events\" in any of the described schemas. \n\nThe schemas describe domains like:\n- Ad campaigns and bidding\n- Concert seat inventory\n- Fleet dispatch routing\n- Loyalty tier calculation\n- Ticket audit workflow\n- Warehouse inventory basics\n\nNone of these schemas contain information about pizza costs or events. Without relevant tables and columns, I cannot write a meaningful query to answer this question.\n\nIf there's a specific table that contains pizza-related data and event information that isn't shown in the schema, please provide that information so I can construct the appropriate query.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many cities are there in Orange County, Virginia?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT COUNT(city) FROM zip_code WHERE county = 'Orange County' AND state = 'Virginia'",
+      "actual_sql": "SELECT COUNT(*) \nFROM \"cities\" \nWHERE \"county\" = 'Orange County' \nAND \"state\" = 'VA';",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"cities\" does not exist\nLINE 2: FROM \"cities\" \n             ^\n[SQL: SELECT COUNT(*) \nFROM \"cities\" \nWHERE \"county\" = 'Orange County' \nAND \"state\" = 'VA'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What does the person with the phone number \"809-555-3360\" major in?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T2.major_name FROM member AS T1 INNER JOIN major AS T2 ON T1.link_to_major = T2.major_id WHERE T1.phone = '809-555-3360'",
+      "actual_sql": "I cannot answer this question because there is no table in the provided schema that contains information about people's phone numbers or their majors. The schema describes various domains like advertising campaigns, concert seating inventory, fleet dispatch routing, loyalty programs, ticket auditing, and warehouse inventory, but none contain personal information such as phone numbers or academic majors.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"I\"\nLINE 1: I cannot answer this question because there is no table in t...\n        ^\n[SQL: I cannot answer this question because there is no table in the provided schema that contains information about people's phone numbers or their majors. The schema describes various domains like advertising campaigns, concert seating inventory, fleet dispatch routing, loyalty programs, ticket auditing, and warehouse inventory, but none contain personal information such as phone numbers or academic majors.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many members attended the \"Women's Soccer\" event?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT COUNT(T2.link_to_member) FROM event AS T1 INNER JOIN attendance AS T2 ON T1.event_id = T2.link_to_event WHERE T1.event_name = 'Women''s Soccer'",
+      "actual_sql": "-- No valid query possible with provided schema\n-- The schema does not contain tables for tracking event attendance or member participation",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"LIMIT\"\nLINE 3: LIMIT 500\n        ^\n[SQL: -- No valid query possible with provided schema\n-- The schema does not contain tables for tracking event attendance or member participation\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List all the members of the \"School of Applied Sciences, Technology and Education\" department.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.first_name, T1.last_name FROM member AS T1 INNER JOIN major AS T2 ON T1.link_to_major = T2.major_id WHERE T2.department = 'School of Applied Sciences, Technology and Education'",
+      "actual_sql": "-- No relevant table structure available to query department members\nSELECT NULL AS result WHERE FALSE\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among all the closed events, which event has the highest spend-to-budget ratio?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T2.event_name FROM budget AS T1 INNER JOIN event AS T2 ON T1.link_to_event = T2.event_id WHERE T2.status = 'Closed' ORDER BY T1.spent / NULLIF(T1.amount, 0) DESC NULLS LAST LIMIT 1",
+      "actual_sql": "SELECT \"event_id\", (\"spend\" / \"budget\") AS \"spend_to_budget_ratio\"\nFROM \"events\"\nWHERE \"status\" = 'closed'\nORDER BY \"spend_to_budget_ratio\" DESC\nLIMIT 1;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"events\" does not exist\nLINE 2: FROM \"events\"\n             ^\n[SQL: SELECT \"event_id\", (\"spend\" / \"budget\") AS \"spend_to_budget_ratio\"\nFROM \"events\"\nWHERE \"status\" = 'closed'\nORDER BY \"spend_to_budget_ratio\" DESC\nLIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the highest amount of budget spend for an event?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT MAX(spent) FROM budget",
+      "actual_sql": "SELECT MAX(\"budget_spend\") AS highest_budget_spend\nFROM \"ad_campaign_pacing\"\nLIMIT 1;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"ad_campaign_pacing\" does not exist\nLINE 2: FROM \"ad_campaign_pacing\"\n             ^\n[SQL: SELECT MAX(\"budget_spend\") AS highest_budget_spend\nFROM \"ad_campaign_pacing\"\nLIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the total amount of money spent for food?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT SUM(spent) FROM budget WHERE category = 'Food'",
+      "actual_sql": "-- No valid query can be generated as there are no tables containing spending or food-related transaction data\nSELECT NULL AS \"total_spent_for_food\"\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List the name of students that have attended more than 7 events.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.first_name, T1.last_name FROM member AS T1 INNER JOIN attendance AS T2 ON T1.member_id = T2.link_to_member GROUP BY T1.member_id, T1.first_name, T1.last_name HAVING COUNT(T2.link_to_event) > 7",
+      "actual_sql": "SELECT \"student_name\"\nFROM \"students\" s\nJOIN \"attendance\" a ON s.\"student_id\" = a.\"student_id\"\nGROUP BY s.\"student_name\"\nHAVING COUNT(a.\"event_id\") > 7\n\nBut since these tables don't exist in the provided schema, I cannot generate a valid query.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"But\"\nLINE 7: But since these tables don't exist in the provided schema, I...\n        ^\n[SQL: SELECT \"student_name\"\nFROM \"students\" s\nJOIN \"attendance\" a ON s.\"student_id\" = a.\"student_id\"\nGROUP BY s.\"student_name\"\nHAVING COUNT(a.\"event_id\") > 7\n\nBut since these tables don't exist in the provided schema, I cannot generate a valid query.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Which student has been entrusted to manage the budget for the Yearly Kickoff?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T4.first_name, T4.last_name FROM event AS T1 INNER JOIN budget AS T2 ON T1.event_id = T2.link_to_event INNER JOIN expense AS T3 ON T2.budget_id = T3.link_to_budget INNER JOIN member AS T4 ON T3.link_to_member = T4.member_id WHERE T1.event_name = 'Yearly Kickoff'",
+      "actual_sql": "SELECT \"student_name\"\nFROM \"student_budgets\"\nWHERE \"event_name\" = 'Yearly Kickoff'\nLIMIT 1;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"student_budgets\" does not exist\nLINE 2: FROM \"student_budgets\"\n             ^\n[SQL: SELECT \"student_name\"\nFROM \"student_budgets\"\nWHERE \"event_name\" = 'Yearly Kickoff'\nLIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Which event has the lowest cost?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T1.event_name FROM event AS T1 INNER JOIN budget AS T2 ON T1.event_id = T2.link_to_event INNER JOIN expense AS T3 ON T2.budget_id = T3.link_to_budget ORDER BY T3.cost NULLS FIRST LIMIT 1",
+      "actual_sql": "SELECT \"event_name\", \"cost\"\nFROM \"events\"\nORDER BY \"cost\" ASC\nLIMIT 1;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"events\" does not exist\nLINE 2: FROM \"events\"\n             ^\n[SQL: SELECT \"event_name\", \"cost\"\nFROM \"events\"\nORDER BY \"cost\" ASC\nLIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Based on the total cost for all event, what is the percentage of cost for Yearly Kickoff event?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN T1.event_name = 'Yearly Kickoff' THEN T3.cost ELSE 0 END) AS REAL) * 100 / NULLIF(SUM(T3.cost), 0) FROM event AS T1 INNER JOIN budget AS T2 ON T1.event_id = T2.link_to_event INNER JOIN expense AS T3 ON T2.budget_id = T3.link_to_budget",
+      "actual_sql": "SELECT \n    (\"event_cost\" * 100.0 / SUM(\"event_cost\") OVER()) AS \"percentage_of_total_cost\"\nFROM \n    \"events\"\nWHERE \n    \"event_name\" = 'Yearly Kickoff';",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"events\" does not exist\nLINE 4:     \"events\"\n            ^\n[SQL: SELECT \n    (\"event_cost\" * 100.0 / SUM(\"event_cost\") OVER()) AS \"percentage_of_total_cost\"\nFROM \n    \"events\"\nWHERE \n    \"event_name\" = 'Yearly Kickoff'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Indicate the top source of funds received in September 2019 based on their amount.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT source FROM income WHERE date_received BETWEEN '2019-09-01' AND '2019-09-30' ORDER BY source DESC NULLS LAST LIMIT 1",
+      "actual_sql": "-- No suitable tables found in the schema that contain fund source information with date filtering capability\nSELECT NULL AS \"top_source_of_funds\"\nWHERE FALSE\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many members of the Student_Club have major in 'Physics Teaching'?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT COUNT(T2.member_id) FROM major AS T1 INNER JOIN member AS T2 ON T1.major_id = T2.link_to_major WHERE T1.major_name = 'Physics Teaching'",
+      "actual_sql": "SELECT COUNT(*) \nFROM \"Student_Club\" \nWHERE \"major\" = 'Physics Teaching'",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"Student_Club\" does not exist\nLINE 2: FROM \"Student_Club\" \n             ^\n[SQL: SELECT COUNT(*) \nFROM \"Student_Club\" \nWHERE \"major\" = 'Physics Teaching'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Name the event with the highest amount spent on advertisement.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T2.event_name FROM budget AS T1 INNER JOIN event AS T2 ON T1.link_to_event = T2.event_id WHERE T1.category = 'Advertisement' ORDER BY T1.spent DESC NULLS LAST LIMIT 1",
+      "actual_sql": "SELECT \"event_name\"\nFROM \"ad_campaign_pacing\"\nORDER BY \"amount_spent\" DESC\nLIMIT 1;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"ad_campaign_pacing\" does not exist\nLINE 2: FROM \"ad_campaign_pacing\"\n             ^\n[SQL: SELECT \"event_name\"\nFROM \"ad_campaign_pacing\"\nORDER BY \"amount_spent\" DESC\nLIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Did Maya Mclean attend the 'Women's Soccer' event?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CASE WHEN T3.event_name = 'Women''s Soccer' THEN 'YES' END AS result FROM member AS T1 INNER JOIN attendance AS T2 ON T1.member_id = T2.link_to_member INNER JOIN event AS T3 ON T2.link_to_event = T3.event_id WHERE T1.first_name = 'Maya' AND T1.last_name = 'Mclean'",
+      "actual_sql": "I need to determine if Maya Mclean attended the 'Women's Soccer' event. Looking at the database schema, I can see there's a table called \"ticket_audit_workflow\" which contains information about tickets and events. However, I don't see any tables that directly contain attendee information or event attendance data.\n\nThe schema shows tables related to:\n- Ad campaigns and pacing\n- Concert seat inventory\n- Fleet dispatch routing\n- Loyalty tier calculation\n- Ticket audit workflow (which seems most relevant)\n- Warehouse inventory basics\n\nThe ticket_audit_workflow table appears to track ticket issuance and audit processes, but doesn't seem to have direct attendee information. Without specific tables containing attendee names and event attendance records, I cannot write a query to answer this question definitively.\n\nHowever, if I had to make an educated guess based on what might exist in the schema, I would need to look for tables that might contain:\n1. Attendee information\n2. Event information\n3. Attendance records\n\nSince these tables aren't present in the provided schema, I cannot construct a meaningful query to answer whether Maya Mclean attended the 'Women's Soccer' event.\n\nLooking more carefully at the schema, I notice that the ticket_audit_workflow tables might contain some relevant information, but they're primarily focused on ticket auditing rather than attendance tracking.\n\nWithout clear tables showing attendees and events, I cannot provide a valid query to answer this question.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"I\"\nLINE 1: I need to determine if Maya Mclean attended the 'Women's Soc...\n        ^\n[SQL: I need to determine if Maya Mclean attended the 'Women's Soccer' event. Looking at the database schema, I can see there's a table called \"ticket_audit_workflow\" which contains information about tickets and events. However, I don't see any tables that directly contain attendee information or event attendance data.\n\nThe schema shows tables related to:\n- Ad campaigns and pacing\n- Concert seat inventory\n- Fleet dispatch routing\n- Loyalty tier calculation\n- Ticket audit workflow (which seems most relevant)\n- Warehouse inventory basics\n\nThe ticket_audit_workflow table appears to track ticket issuance and audit processes, but doesn't seem to have direct attendee information. Without specific tables containing attendee names and event attendance records, I cannot write a query to answer this question definitively.\n\nHowever, if I had to make an educated guess based on what might exist in the schema, I would need to look for tables that might contain:\n1. Attendee information\n2. Event information\n3. Attendance records\n\nSince these tables aren't present in the provided schema, I cannot construct a meaningful query to answer whether Maya Mclean attended the 'Women's Soccer' event.\n\nLooking more carefully at the schema, I notice that the ticket_audit_workflow tables might contain some relevant information, but they're primarily focused on ticket auditing rather than attendance tracking.\n\nWithout clear tables showing attendees and events, I cannot provide a valid query to answer this question.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Indicate the cost of posters for 'September Speaker' event.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T3.cost FROM event AS T1 INNER JOIN budget AS T2 ON T1.event_id = T2.link_to_event INNER JOIN expense AS T3 ON T2.budget_id = T3.link_to_budget WHERE T1.event_name = 'September Speaker' AND T3.expense_description = 'Posters'",
+      "actual_sql": "SELECT \"cost\"\nFROM \"concert_seat_inventory_v3\"\nWHERE \"event_name\" = 'September Speaker'\nAND \"item_type\" = 'poster';",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"concert_seat_inventory_v3\" does not exist\nLINE 2: FROM \"concert_seat_inventory_v3\"\n             ^\n[SQL: SELECT \"cost\"\nFROM \"concert_seat_inventory_v3\"\nWHERE \"event_name\" = 'September Speaker'\nAND \"item_type\" = 'poster'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Indicate the name of the closed event whose cost has exceeded the budget the most.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T2.event_name FROM budget AS T1 INNER JOIN event AS T2 ON T2.event_id = T1.link_to_event WHERE T1.event_status = 'Closed' AND T1.remaining < 0 ORDER BY T1.remaining NULLS FIRST LIMIT 1",
+      "actual_sql": "SELECT \"name\"\nFROM \"event\"\nWHERE \"status\" = 'closed'\nORDER BY (\"cost\" - \"budget\") DESC\nLIMIT 1;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column \"name\" does not exist\nLINE 1: SELECT \"name\"\n               ^\n[SQL: SELECT \"name\"\nFROM \"event\"\nWHERE \"status\" = 'closed'\nORDER BY (\"cost\" - \"budget\") DESC\nLIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Identify the type of expenses and their total value approved for 'October Meeting' event.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.type, SUM(T3.cost) FROM event AS T1 INNER JOIN budget AS T2 ON T1.event_id = T2.link_to_event INNER JOIN expense AS T3 ON T2.budget_id = T3.link_to_budget WHERE T1.event_name = 'October Meeting' GROUP BY T1.type",
+      "actual_sql": "SELECT \"expense_type\", SUM(\"amount\") AS \"total_value\"\nFROM \"expenses\"\nWHERE \"event_name\" = 'October Meeting'\nGROUP BY \"expense_type\";",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"expenses\" does not exist\nLINE 2: FROM \"expenses\"\n             ^\n[SQL: SELECT \"expense_type\", SUM(\"amount\") AS \"total_value\"\nFROM \"expenses\"\nWHERE \"event_name\" = 'October Meeting'\nGROUP BY \"expense_type\"\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Calculate the amount budgeted for 'April Speaker' event. List all the budgeted categories for said event in an ascending order based on their amount budgeted.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T2.category, SUM(T2.amount) FROM event AS T1 INNER JOIN budget AS T2 ON T1.event_id = T2.link_to_event WHERE T1.event_name = 'April Speaker' GROUP BY T2.category ORDER BY SUM(T2.amount) ASC",
+      "actual_sql": "SELECT \"category\", \"amount_budgeted\"\nFROM \"event_budget\"\nWHERE \"event_name\" = 'April Speaker'\nORDER BY \"amount_budgeted\" ASC;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"event_budget\" does not exist\nLINE 2: FROM \"event_budget\"\n             ^\n[SQL: SELECT \"category\", \"amount_budgeted\"\nFROM \"event_budget\"\nWHERE \"event_name\" = 'April Speaker'\nORDER BY \"amount_budgeted\" ASC\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Mention the total expense used on 8/20/2019.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT SUM(cost) FROM expense WHERE expense_date = '2019-08-20'",
+      "actual_sql": "SELECT SUM(\"expense_amount\") AS total_expense\nFROM \"expenses\"\nWHERE DATE(\"expense_date\") = '2019-08-20';",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"expenses\" does not exist\nLINE 2: FROM \"expenses\"\n             ^\n[SQL: SELECT SUM(\"expense_amount\") AS total_expense\nFROM \"expenses\"\nWHERE DATE(\"expense_date\") = '2019-08-20'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List out the full name and total cost that member id \"rec4BLdZHS2Blfp4v\" incurred?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T1.first_name, T1.last_name, SUM(T2.cost) FROM member AS T1 INNER JOIN expense AS T2 ON T1.member_id = T2.link_to_member WHERE T1.member_id = 'rec4BLdZHS2Blfp4v' GROUP BY T1.first_name, T1.last_name",
+      "actual_sql": "SELECT \"full_name\", \"total_cost\"\nFROM \"loyalty_tier_calculation\"\nWHERE \"member_id\" = 'rec4BLdZHS2Blfp4v'\nLIMIT 100;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"loyalty_tier_calculation\" does not exist\nLINE 2: FROM \"loyalty_tier_calculation\"\n             ^\n[SQL: SELECT \"full_name\", \"total_cost\"\nFROM \"loyalty_tier_calculation\"\nWHERE \"member_id\" = 'rec4BLdZHS2Blfp4v'\nLIMIT 100]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "State what kind of expenses that Sacha Harrison incurred?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T2.expense_description FROM member AS T1 INNER JOIN expense AS T2 ON T1.member_id = T2.link_to_member WHERE T1.first_name = 'Sacha' AND T1.last_name = 'Harrison'",
+      "actual_sql": "-- No relevant data found in the provided schema\nSELECT NULL AS \"expense_type\" WHERE FALSE\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "State the category of events were held at MU 215.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT DISTINCT T2.category FROM event AS T1 INNER JOIN budget AS T2 ON T1.event_id = T2.link_to_event WHERE T1.location = 'MU 215'",
+      "actual_sql": "SELECT DISTINCT \"category\"\nFROM \"event\"\nWHERE \"venue_id\" = 'MU 215';",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column \"category\" does not exist\nLINE 1: SELECT DISTINCT \"category\"\n                        ^\n[SQL: SELECT DISTINCT \"category\"\nFROM \"event\"\nWHERE \"venue_id\" = 'MU 215'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List the last name of members with a major in environmental engineering and include its department and college name.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T2.last_name, T1.department, T1.college FROM major AS T1 INNER JOIN member AS T2 ON T1.major_id = T2.link_to_major WHERE T2.position = 'Member' AND T1.major_name = 'Environmental Engineering'",
+      "actual_sql": "SELECT \"last_name\", \"department_name\", \"college_name\"\nFROM \"members\" m\nJOIN \"departments\" d ON m.\"department_id\" = d.\"department_id\"\nJOIN \"colleges\" c ON d.\"college_id\" = c.\"college_id\"\nWHERE m.\"major\" = 'Environmental Engineering'\nLIMIT 100;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"members\" does not exist\nLINE 2: FROM \"members\" m\n             ^\n[SQL: SELECT \"last_name\", \"department_name\", \"college_name\"\nFROM \"members\" m\nJOIN \"departments\" d ON m.\"department_id\" = d.\"department_id\"\nJOIN \"colleges\" c ON d.\"college_id\" = c.\"college_id\"\nWHERE m.\"major\" = 'Environmental Engineering'\nLIMIT 100]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What are the budget category of the events located at MU 215 and a guest speaker type with a 0 budget spent?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT T2.category, T1.type FROM event AS T1 INNER JOIN budget AS T2 ON T1.event_id = T2.link_to_event WHERE T1.location = 'MU 215' AND T2.spent = 0 AND T1.type = 'Guest Speaker'",
+      "actual_sql": "SELECT DISTINCT \"budget_category\"\nFROM \"events\"\nWHERE \"location\" = 'MU 215'\nAND \"guest_speaker_type\" IS NOT NULL\nAND \"budget_spent\" = 0;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"events\" does not exist\nLINE 2: FROM \"events\"\n             ^\n[SQL: SELECT DISTINCT \"budget_category\"\nFROM \"events\"\nWHERE \"location\" = 'MU 215'\nAND \"guest_speaker_type\" IS NOT NULL\nAND \"budget_spent\" = 0\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the members with t-shirt size of medium, what is the percentage of the amount 50 received by the Student_Club?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN T2.amount = 50 THEN 1.0 ELSE 0 END) AS REAL) * 100 / NULLIF(COUNT(T2.income_id), 0) FROM member AS T1 INNER JOIN income AS T2 ON T1.member_id = T2.link_to_member WHERE T1.position = 'Member' AND T1.t_shirt_size = 'Medium'",
+      "actual_sql": "I need to analyze this question step by step:\n\n1. The question asks about \"members with t-shirt size of medium\"\n2. Among those members, I need to find the percentage of \"amount 50 received by the Student_Club\"\n\nHowever, looking at the provided schema and domain knowledge, I don't see any tables that contain:\n- Member information with t-shirt sizes\n- Amounts received by a Student_Club\n- Any relationship between these concepts\n\nThe schema shows various domains like ad campaigns, concert seating, fleet routing, loyalty programs, ticket audits, and warehouse inventory, but none appear to contain member t-shirt size data or student club financial transactions.\n\nSince there's no relevant table structure provided to answer this specific question, I cannot construct a meaningful SQL query. This appears to be asking about data that doesn't exist in the given schema.\n\nIf I had to make an assumption based on typical database structures, I would need tables like:\n- members table with t-shirt_size column\n- transactions/amounts table with club/organization information\n\nBut without such tables in the provided schema, I cannot generate a valid query.\n\nThe question cannot be answered with the given database schema.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"I\"\nLINE 1: I need to analyze this question step by step:\n        ^\n[SQL: I need to analyze this question step by step:\n\n1. The question asks about \"members with t-shirt size of medium\"\n2. Among those members, I need to find the percentage of \"amount 50 received by the Student_Club\"\n\nHowever, looking at the provided schema and domain knowledge, I don't see any tables that contain:\n- Member information with t-shirt sizes\n- Amounts received by a Student_Club\n- Any relationship between these concepts\n\nThe schema shows various domains like ad campaigns, concert seating, fleet routing, loyalty programs, ticket audits, and warehouse inventory, but none appear to contain member t-shirt size data or student club financial transactions.\n\nSince there's no relevant table structure provided to answer this specific question, I cannot construct a meaningful SQL query. This appears to be asking about data that doesn't exist in the given schema.\n\nIf I had to make an assumption based on typical database structures, I would need tables like:\n- members table with t-shirt_size column\n- transactions/amounts table with club/organization information\n\nBut without such tables in the provided schema, I cannot generate a valid query.\n\nThe question cannot be answered with the given database schema.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "List the names of closed event as \"game\" that was closed from 3/15/2019 to 3/20/2020.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT event_name FROM event WHERE type = 'Game' AND DATE(SUBSTR(event_date, 1, 10)) BETWEEN '2019-03-15' AND '2020-03-20' AND status = 'Closed'",
+      "actual_sql": "SELECT \"name\" AS \"game\"\nFROM \"event\"\nWHERE \"status\" = 'closed'\nAND \"closed_date\" >= '2019-03-15'\nAND \"closed_date\" <= '2020-03-20'\nLIMIT 1000;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column \"name\" does not exist\nLINE 1: SELECT \"name\" AS \"game\"\n               ^\n[SQL: SELECT \"name\" AS \"game\"\nFROM \"event\"\nWHERE \"status\" = 'closed'\nAND \"closed_date\" >= '2019-03-15'\nAND \"closed_date\" <= '2020-03-20'\nLIMIT 1000]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Give the full name and contact number of members who had to spend more than average on each expense.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT DISTINCT T3.first_name, T3.last_name, T3.phone FROM expense AS T1 INNER JOIN budget AS T2 ON T1.link_to_budget = T2.budget_id INNER JOIN member AS T3 ON T3.member_id = T1.link_to_member WHERE T1.cost > (SELECT AVG(T1.cost) FROM expense AS T1 INNER JOIN budget AS T2 ON T1.link_to_budget = T2.budget_id INNER JOIN member AS T3 ON T3.member_id = T1.link_to_member)",
+      "actual_sql": "SELECT \"full_name\", \"contact_number\"\nFROM \"members\"\nWHERE \"total_spent\" > (\n    SELECT AVG(\"total_spent\")\n    FROM \"members\"\n)\nLIMIT 100;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"members\" does not exist\nLINE 2: FROM \"members\"\n             ^\n[SQL: SELECT \"full_name\", \"contact_number\"\nFROM \"members\"\nWHERE \"total_spent\" > (\n    SELECT AVG(\"total_spent\")\n    FROM \"members\"\n)\nLIMIT 100]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Write the full name of the member who spent money for water, veggie tray and supplies and include the cost of it.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT T2.first_name, T2.last_name, T1.cost FROM expense AS T1 INNER JOIN member AS T2 ON T1.link_to_member = T2.member_id WHERE T1.expense_description = 'Water, Veggie tray, supplies'",
+      "actual_sql": "Looking at the database schema, I need to find information about members who spent money on water, veggie tray, and supplies. However, none of the provided schemas contain tables with member spending information, product categories like \"water\", \"veggie tray\", or \"supplies\", or any transactional data that would allow me to calculate costs.\n\nThe schemas describe various domains like advertising campaigns, concert seating inventory, fleet dispatch routing, loyalty programs, ticket auditing, and warehouse inventory - but none contain the specific data structure needed to answer this question about member spending on specific items.\n\nI cannot write a valid SQL query to answer this question with the given schema information.",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) syntax error at or near \"Looking\"\nLINE 1: Looking at the database schema, I need to find information a...\n        ^\n[SQL: Looking at the database schema, I need to find information about members who spent money on water, veggie tray, and supplies. However, none of the provided schemas contain tables with member spending information, product categories like \"water\", \"veggie tray\", or \"supplies\", or any transactional data that would allow me to calculate costs.\n\nThe schemas describe various domains like advertising campaigns, concert seating inventory, fleet dispatch routing, loyalty programs, ticket auditing, and warehouse inventory - but none contain the specific data structure needed to answer this question about member spending on specific items.\n\nI cannot write a valid SQL query to answer this question with the given schema information.\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "parse_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Write the full names of students who received funds on the date of 9/9/2019 and include the amount received.",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT DISTINCT T3.first_name, T3.last_name, T4.amount FROM event AS T1 INNER JOIN attendance AS T2 ON T1.event_id = T2.link_to_event INNER JOIN member AS T3 ON T3.member_id = T2.link_to_member INNER JOIN income AS T4 ON T4.link_to_member = T3.member_id WHERE T4.date_received = '2019-09-09'",
+      "actual_sql": "SELECT \"first_name\", \"last_name\", \"amount\"\nFROM \"student_financial_aid\"\nWHERE \"disbursement_date\" = '2019-09-09'\nLIMIT 1000;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) relation \"student_financial_aid\" does not exist\nLINE 2: FROM \"student_financial_aid\"\n             ^\n[SQL: SELECT \"first_name\", \"last_name\", \"amount\"\nFROM \"student_financial_aid\"\nWHERE \"disbursement_date\" = '2019-09-09'\nLIMIT 1000]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    }
+  ]
+}

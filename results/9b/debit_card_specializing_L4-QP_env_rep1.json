@@ -1,0 +1,581 @@
+{
+  "run_id": "debit_card_specializing_L4-QP_env_rep1",
+  "dataset": "debit_card_specializing",
+  "level": "L4-QP",
+  "dimensions": [
+    "data_dictionary",
+    "business_context",
+    "domain_knowledge"
+  ],
+  "model": {
+    "provider": "huggingface",
+    "model": "Qwen/Qwen3.5-9B",
+    "base_url": ""
+  },
+  "runtime_params": {
+    "max_tokens": 4096,
+    "effective_max_tokens": 4096,
+    "temperature": 0.6,
+    "seed": 42,
+    "top_p": 0.95,
+    "presence_penalty": 0.0,
+    "top_k": 20,
+    "reasoning_effort": "medium",
+    "num_ctx": null,
+    "bird_docs_dir": "/Users/gary/myapps/4d-metadata-ablation/bird-docs-revised"
+  },
+  "rep": 1,
+  "timestamp": "2026-05-31T07:16:33.515657+00:00",
+  "elapsed_seconds": 655.3,
+  "aggregate_metrics": {
+    "total_cases": 30,
+    "execution_rate_pct": 63.3,
+    "value_match_pct": 23.3,
+    "column_match_pct": 0.0,
+    "soft_f1_mean": 0.1024,
+    "er_value_gap_pp": 40.0,
+    "error_count": 11,
+    "bird_ex_pct": 23.3,
+    "er_bex_gap_pp": 40.0,
+    "challenging_er_pct": 50.0,
+    "challenging_vm_pct": 25.0,
+    "challenging_soft_f1": 0.0,
+    "challenging_bird_ex_pct": 25.0,
+    "moderate_er_pct": 58.3,
+    "moderate_vm_pct": 25.0,
+    "moderate_soft_f1": 0.0894,
+    "moderate_bird_ex_pct": 8.3,
+    "simple_er_pct": 71.4,
+    "simple_vm_pct": 21.4,
+    "simple_soft_f1": 0.1429,
+    "simple_bird_ex_pct": 35.7
+  },
+  "per_case_results": [
+    {
+      "question": "What is the ratio of customers who pay in EUR against customers who pay in CZK?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN Currency = 'EUR' THEN 1 ELSE 0 END) AS REAL) / NULLIF(SUM(CASE WHEN Currency = 'CZK' THEN 1 ELSE 0 END), 0) FROM customers",
+      "actual_sql": "SELECT \n    COUNT(*) FILTER (WHERE \"currency\" = 'EUR')::NUMERIC / \n    COUNT(*) FILTER (WHERE \"currency\" = 'CZK')::NUMERIC AS ratio\nFROM \"customers\"\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "In 2012, who had the least consumption in LAM?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T1.CustomerID FROM customers AS T1 INNER JOIN yearmonth AS T2 ON T1.CustomerID = T2.CustomerID WHERE T1.Segment = 'LAM' AND SUBSTR(T2.Date, 1, 4) = '2012' GROUP BY T1.CustomerID ORDER BY SUM(T2.Consumption) ASC NULLS FIRST LIMIT 1",
+      "actual_sql": "SELECT \"customerid\", \"consumption\"\nFROM \"yearmonth\"\nWHERE \"date\" = '201201'\n  AND \"date\" = '201202'\n  AND \"date\" = '201203'\n  AND \"date\" = '201204'\n  AND \"date\" = '201205'\n  AND \"date\" = '201206'\n  AND \"date\" = '201207'\n  AND \"date\" = '201208'\n  AND \"date\" = '201209'\n  AND \"date\" = '201210'\n  AND \"date\" = '201211'\n  AND \"date\" = '201212'\nORDER BY \"consumption\" ASC\nLIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What was the average monthly consumption of customers in SME for the year 2013?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT AVG(T2.Consumption) / NULLIF(12, 0) FROM customers AS T1 INNER JOIN yearmonth AS T2 ON T1.CustomerID = T2.CustomerID WHERE SUBSTR(T2.Date, 1, 4) = '2013' AND T1.Segment = 'SME'",
+      "actual_sql": "SELECT AVG(\"yearmonth\".\"consumption\") / 12 AS \"average_monthly_consumption\"\nFROM \"yearmonth\"\nJOIN \"customers\" ON \"yearmonth\".\"customerid\" = \"customers\".\"customerid\"\nWHERE \"customers\".\"segment\" = 'SME'\n  AND \"yearmonth\".\"date\" BETWEEN '201301' AND '201312'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What was the difference in gas consumption between CZK-paying customers and EUR-paying customers in 2012?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT SUM(CASE WHEN T1.Currency = 'CZK' THEN CAST(T2.Consumption AS float) ELSE 0 END) -SUM(CASE WHEN T1.Currency = 'EUR' THEN CAST(T2.Consumption AS float) ELSE 0 END) FROM customers AS T1 INNER JOIN yearmonth AS T2 ON T1.CustomerID = T2.CustomerID WHERE substring(T2.Date, 1, 4) = '2012'",
+      "actual_sql": "SELECT \n    SUM(CASE WHEN c.\"currency\" = 'CZK' THEN CAST(ym.\"consumption\" AS FLOAT) ELSE 0 END) - \n    SUM(CASE WHEN c.\"currency\" = 'EUR' THEN CAST(ym.\"consumption\" AS FLOAT) ELSE 0 END) AS \"difference\"\nFROM \"yearmonth\" ym\nJOIN \"customers\" c ON ym.\"customerid\" = c.\"customerid\"\nWHERE ym.\"date\" BETWEEN '201201' AND '201212'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Which year recorded the most consumption of gas paid in CZK?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT SUBSTR(T2.Date, 1, 4) FROM customers AS T1 INNER JOIN yearmonth AS T2 ON T1.CustomerID = T2.CustomerID WHERE T1.Currency = 'CZK' GROUP BY SUBSTR(T2.Date, 1, 4) ORDER BY SUM(T2.Consumption) DESC NULLS LAST LIMIT 1",
+      "actual_sql": "",
+      "execution_success": false,
+      "error": "text2sql failed: LLM returned empty response (token budget exhausted in reasoning?)",
+      "status": "empty_response_token_exhaustion",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What was the gas consumption peak month for SME customers in 2013?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT SUBSTR(T2.Date, 5, 2) FROM customers AS T1 INNER JOIN yearmonth AS T2 ON T1.CustomerID = T2.CustomerID WHERE SUBSTR(T2.Date, 1, 4) = '2013' AND T1.Segment = 'SME' GROUP BY SUBSTR(T2.Date, 5, 2) ORDER BY SUM(T2.Consumption) DESC NULLS LAST LIMIT 1",
+      "actual_sql": "SELECT SUBSTRING(\"date\", 5, 2) AS \"month\", SUM(\"consumption\") AS \"total_consumption\"\nFROM \"yearmonth\" \"ym\"\nJOIN \"customers\" \"c\" ON \"ym\".\"customerid\" = \"c\".\"customerid\"\nWHERE \"c\".\"segment\" = 'SME'\n  AND \"ym\".\"date\" LIKE '2013%'\nGROUP BY \"month\"\nORDER BY \"total_consumption\" DESC\nLIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the difference in the annual average consumption of the customers with the least amount of consumption paid in CZK for 2013 between SME and LAM, LAM and KAM, and KAM and SME?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN T1.Segment = 'SME' THEN T2.Consumption ELSE 0 END) AS REAL) / NULLIF(COUNT(T1.CustomerID), 0) - CAST(SUM(CASE WHEN T1.Segment = 'LAM' THEN T2.Consumption ELSE 0 END) AS REAL) / NULLIF(COUNT(T1.CustomerID), 0), CAST(SUM(CASE WHEN T1.Segment = 'LAM' THEN T2.Consumption ELSE 0 END) AS REAL) / NULLIF(COUNT(T1.CustomerID), 0) - CAST(SUM(CASE WHEN T1.Segment = 'KAM' THEN T2.Consumption ELSE 0 END) AS REAL) / NULLIF(COUNT(T1.CustomerID), 0), CAST(SUM(CASE WHEN T1.Segment = 'KAM' THEN T2.Consumption ELSE 0 END) AS REAL) / NULLIF(COUNT(T1.CustomerID), 0) - CAST(SUM(CASE WHEN T1.Segment = 'SME' THEN T2.Consumption ELSE 0 END) AS REAL) / NULLIF(COUNT(T1.CustomerID), 0) FROM customers AS T1 INNER JOIN yearmonth AS T2 ON T1.CustomerID = T2.CustomerID WHERE T1.Currency = 'CZK' AND T2.Consumption = (SELECT MIN(Consumption) FROM yearmonth) AND T2.Date::text BETWEEN '201301' AND '201312'",
+      "actual_sql": "SELECT \n    'KAM vs SME' AS \"comparison\",\n    \"avg1\" AS \"sme_avg\",\n    \"avg2\" AS \"lam_avg\",\n    \"avg1\" - \"avg2\" AS \"difference\"\nFROM (\n    SELECT \n        \"segment\" AS \"",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.SyntaxError) unterminated quoted identifier at or near \"\"\nLIMIT 500\"\nLINE 8:         \"segment\" AS \"\n                             ^\n[SQL: SELECT \n    'KAM vs SME' AS \"comparison\",\n    \"avg1\" AS \"sme_avg\",\n    \"avg2\" AS \"lam_avg\",\n    \"avg1\" - \"avg2\" AS \"difference\"\nFROM (\n    SELECT \n        \"segment\" AS \"\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Which of the three segments\u2014SME, LAM and KAM\u2014has the biggest and lowest percentage increases in consumption paid in EUR between 2012 and 2013?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT CAST((SUM(CASE WHEN T1.Segment = 'SME' AND T2.Date LIKE '2013%' THEN T2.Consumption ELSE 0 END) - SUM(CASE WHEN T1.Segment = 'SME' AND T2.Date LIKE '2012%' THEN T2.Consumption ELSE 0 END)) AS REAL) * 100 / NULLIF(SUM(CASE WHEN T1.Segment = 'SME' AND T2.Date LIKE '2012%' THEN T2.Consumption ELSE 0 END), 0), CAST(SUM(CASE WHEN T1.Segment = 'LAM' AND T2.Date LIKE '2013%' THEN T2.Consumption ELSE 0 END) - SUM(CASE WHEN T1.Segment = 'LAM' AND T2.Date LIKE '2012%' THEN T2.Consumption ELSE 0 END) AS REAL) * 100 / NULLIF(SUM(CASE WHEN T1.Segment = 'LAM' AND T2.Date LIKE '2012%' THEN T2.Consumption ELSE 0 END), 0), CAST(SUM(CASE WHEN T1.Segment = 'KAM' AND T2.Date LIKE '2013%' THEN T2.Consumption ELSE 0 END) - SUM(CASE WHEN T1.Segment = 'KAM' AND T2.Date LIKE '2012%' THEN T2.Consumption ELSE 0 END) AS REAL) * 100 / NULLIF(SUM(CASE WHEN T1.Segment = 'KAM' AND T2.Date LIKE '2012%' THEN T2.Consumption ELSE 0 END), 0) FROM customers AS T1 INNER JOIN yearmonth AS T2 ON T1.CustomerID = T2.CustomerID",
+      "actual_sql": "",
+      "execution_success": false,
+      "error": "text2sql failed: LLM returned empty response (token budget exhausted in reasoning?)",
+      "status": "empty_response_token_exhaustion",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How much did customer 6 consume in total between August and November 2013?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT SUM(Consumption) FROM yearmonth WHERE CustomerID = 6 AND Date BETWEEN '201308' AND '201311'",
+      "actual_sql": "SELECT SUM(\"consumption\") AS \"total_consumption\"\nFROM \"yearmonth\"\nWHERE \"customerid\" = 6\n  AND \"date\" BETWEEN '201308' AND '201311'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "How many more \"discount\" gas stations does the Czech Republic have compared to Slovakia?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT SUM(CASE WHEN Country = 'CZE' THEN 1 ELSE 0 END) - SUM(CASE WHEN Country = 'SVK' THEN 1 ELSE 0 END) FROM gasstations WHERE Segment = 'Discount'",
+      "actual_sql": "SELECT \n    (SELECT COUNT(*) FROM \"gasstations\" WHERE \"country\" = 'CZE') - \n    (SELECT COUNT(*) FROM \"gasstations\" WHERE \"country\" = 'SVK') AS difference\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Is it true that more SMEs pay in Czech koruna than in euros? If so, how many more?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT SUM(CASE WHEN Currency = 'CZK' THEN 1 ELSE 0 END) - SUM(CASE WHEN Currency = 'EUR' THEN 1 ELSE 0 END) FROM customers WHERE Segment = 'SME'",
+      "actual_sql": "SELECT (SELECT COUNT(*) FROM \"gasstations\" WHERE \"country\" = 'CZE') - (SELECT COUNT(*) FROM \"gasstations\" WHERE \"country\" = 'SVK')\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "How many percent of LAM customer consumed more than 46.73?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN T2.Consumption > 46.73 THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(COUNT(T1.CustomerID), 0) FROM customers AS T1 INNER JOIN yearmonth AS T2 ON T1.CustomerID = T2.CustomerID WHERE T1.Segment = 'LAM'",
+      "actual_sql": "SELECT (SUM(CASE WHEN total_consumption > 46.73 THEN 1 ELSE 0 END) * 100.0) / COUNT(*) AS percentage\nFROM (\n    SELECT c.\"customerid\", COALESCE(SUM(y.\"consumption\"), 0) AS total_consumption\n    FROM \"customers\" c\n    LEFT JOIN \"yearmonth\" y ON c.\"customerid\" = y.\"customerid\"\n    WHERE c.\"segment\" = 'LAM'\n    GROUP BY c.\"customerid\"\n) AS customer_consumption\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "In February 2012, what percentage of customers consumed more than 528.3?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN Consumption > 528.3 THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(COUNT(CustomerID), 0) FROM yearmonth WHERE Date = '201202'",
+      "actual_sql": "SELECT \n    (COUNT(CASE WHEN \"consumption\" > 528.3 THEN 1 END) * 100.0 / COUNT(*)) AS \"percentage\"\nFROM \"yearmonth\"\nWHERE \"date\" = '201202'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "What is the highest monthly consumption in the year 2012?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT SUM(CAST(Consumption AS float)) FROM yearmonth WHERE SUBSTR(Date, 1, 4) = '2012' GROUP BY SUBSTR(Date, 5, 2) ORDER BY SUM(Consumption) DESC NULLS LAST LIMIT 1",
+      "actual_sql": "SELECT MAX(\"consumption\") FROM \"yearmonth\" WHERE \"date\" BETWEEN '201201' AND '201212'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Please list the product description of the products consumed in September, 2013.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T3.Description FROM transactions_1k AS T1 INNER JOIN yearmonth AS T2 ON T1.CustomerID = T2.CustomerID INNER JOIN products AS T3 ON T1.ProductID = T3.ProductID WHERE T2.Date = '201309'",
+      "actual_sql": "SELECT DISTINCT \"products\".\"description\"\nFROM \"products\"\nJOIN \"transactions_1k\" ON \"products\".\"productid\" = \"transactions_1k\".\"productid\"\nWHERE \"transactions_1k\".\"date\" = '201309'",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.DatetimeFieldOverflow) date/time field value out of range: \"201309\"\nLINE 4: WHERE \"transactions_1k\".\"date\" = '201309'\n                                         ^\nHINT:  Perhaps you need a different \"datestyle\" setting.\n[SQL: SELECT DISTINCT \"products\".\"description\"\nFROM \"products\"\nJOIN \"transactions_1k\" ON \"products\".\"productid\" = \"transactions_1k\".\"productid\"\nWHERE \"transactions_1k\".\"date\" = '201309'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/9h9h)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Please list the countries of the gas stations with transactions taken place in June, 2013.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT T2.Country FROM transactions_1k AS T1 INNER JOIN gasstations AS T2 ON T1.GasStationID = T2.GasStationID INNER JOIN yearmonth AS T3 ON T1.CustomerID = T3.CustomerID WHERE T3.Date = '201306'",
+      "actual_sql": "SELECT DISTINCT \"g\".\"country\"\nFROM \"gasstations\" \"g\"\nJOIN \"transactions_1k\" \"t\" ON \"g\".\"gasstationid\" = \"t\".\"gasstationid\"\nWHERE \"t\".\"date\" = '201306'",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.DatetimeFieldOverflow) date/time field value out of range: \"201306\"\nLINE 4: WHERE \"t\".\"date\" = '201306'\n                           ^\nHINT:  Perhaps you need a different \"datestyle\" setting.\n[SQL: SELECT DISTINCT \"g\".\"country\"\nFROM \"gasstations\" \"g\"\nJOIN \"transactions_1k\" \"t\" ON \"g\".\"gasstationid\" = \"t\".\"gasstationid\"\nWHERE \"t\".\"date\" = '201306'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/9h9h)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Among the customers who paid in euro, how many of them have a monthly consumption of over 1000?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT COUNT(*) FROM yearmonth AS T1 INNER JOIN customers AS T2 ON T1.CustomerID = T2.CustomerID WHERE T2.Currency = 'EUR' AND T1.Consumption > 1000.00",
+      "actual_sql": "SELECT COUNT(DISTINCT \"customerid\")\nFROM \"customers\" \"c\"\nJOIN \"yearmonth\" \"y\" ON \"c\".\"customerid\" = \"y\".\"customerid\"\nWHERE \"c\".\"currency\" = 'euro'\n  AND \"y\".\"consumption\" > 1000",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.AmbiguousColumn) column reference \"customerid\" is ambiguous\nLINE 1: SELECT COUNT(DISTINCT \"customerid\")\n                              ^\n[SQL: SELECT COUNT(DISTINCT \"customerid\")\nFROM \"customers\" \"c\"\nJOIN \"yearmonth\" \"y\" ON \"c\".\"customerid\" = \"y\".\"customerid\"\nWHERE \"c\".\"currency\" = 'euro'\n  AND \"y\".\"consumption\" > 1000\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Please list the product descriptions of the transactions taken place in the gas stations in the Czech Republic.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT DISTINCT T3.Description FROM transactions_1k AS T1 INNER JOIN gasstations AS T2 ON T1.GasStationID = T2.GasStationID INNER JOIN products AS T3 ON T1.ProductID = T3.ProductID WHERE T2.Country = 'CZE'",
+      "actual_sql": "SELECT \"p\".\"description\"\nFROM \"transactions_1k\" \"t\"\nINNER JOIN \"gasstations\" \"g\" ON \"t\".\"gasstationid\" = \"g\".\"gasstationid\"\nINNER JOIN \"products\" \"p\" ON \"t\".\"productid\" = \"p\".\"productid\"\nWHERE \"g\".\"country\" = 'CZE'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 500,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.072937,
+        "soft_f1_precision": 0.038,
+        "soft_f1_recall": 0.904762,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Please list the disparate time of the transactions taken place in the gas stations from chain no. 11.",
+      "difficulty": "simple",
+      "expected_sql": "SELECT DISTINCT T1.Time FROM transactions_1k AS T1 INNER JOIN gasstations AS T2 ON T1.GasStationID = T2.GasStationID WHERE T2.ChainID = 11",
+      "actual_sql": "SELECT DISTINCT \"time\" FROM \"transactions_1k\" JOIN \"gasstations\" ON \"transactions_1k\".\"gasstationid\" = \"gasstations\".\"gasstationid\" WHERE \"gasstations\".\"chainid\" = 11 LIMIT 100",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 2,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "Among the transactions made in the gas stations in the Czech Republic, how many of them are taken place after 2012/1/1?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T1.TransactionID) FROM transactions_1k AS T1 INNER JOIN gasstations AS T2 ON T1.GasStationID = T2.GasStationID WHERE T2.Country = 'CZE' AND TO_CHAR(CAST(T1.Date AS TIMESTAMP), 'YYYY') >= '2012'",
+      "actual_sql": "SELECT COUNT(*)\nFROM \"transactions_1k\" \"t\"\nJOIN \"gasstations\" \"g\" ON \"t\".\"gasstationid\" = \"g\".\"gasstationid\"\nWHERE \"g\".\"country\" = 'CZE'\nAND \"t\".\"date\" > '2012-01-01'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "What kind of currency did the customer paid at 16:25:00 in 2012/8/24?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT DISTINCT T3.Currency FROM transactions_1k AS T1 INNER JOIN gasstations AS T2 ON T1.GasStationID = T2.GasStationID INNER JOIN customers AS T3 ON T1.CustomerID = T3.CustomerID WHERE T1.Date = '2012-08-24' AND T1.Time = '16:25:00'",
+      "actual_sql": "SELECT \"customers\".\"currency\"\nFROM \"transactions_1k\" AS \"t\"\nJOIN \"customers\" AS \"c\" ON \"t\".\"customerid\" = \"c\".\"customerid\"\nWHERE \"t\".\"date\" = '2012-08-24' AND \"t\".\"time\" = '16:25:00';",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedTable) invalid reference to FROM-clause entry for table \"customers\"\nLINE 1: SELECT \"customers\".\"currency\"\n               ^\nHINT:  Perhaps you meant to reference the table alias \"c\".\n[SQL: SELECT \"customers\".\"currency\"\nFROM \"transactions_1k\" AS \"t\"\nJOIN \"customers\" AS \"c\" ON \"t\".\"customerid\" = \"c\".\"customerid\"\nWHERE \"t\".\"date\" = '2012-08-24' AND \"t\".\"time\" = '16:25:00'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What segment did the customer have at 2012/8/23 21:20:00?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T2.Segment FROM transactions_1k AS T1 INNER JOIN customers AS T2 ON T1.CustomerID = T2.CustomerID WHERE T1.date = '2012-08-23' AND T1.time = '21:20:00'",
+      "actual_sql": "SELECT \"c\".\"segment\"\nFROM \"customers\" \"c\"\nJOIN \"transactions_1k\" \"t\" ON \"c\".\"customerid\" = \"t\".\"customerid\"\nWHERE \"t\".\"date\" = '2012-08-23' AND \"t\".\"time\" = '21:20:00'\nLIMIT 1",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": true,
+        "soft_f1": 1.0,
+        "soft_f1_precision": 1.0,
+        "soft_f1_recall": 1.0,
+        "bird_ex": true
+      }
+    },
+    {
+      "question": "For all the transactions happened during 8:00-9:00 in 2012/8/26, how many happened in CZE?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT COUNT(T1.TransactionID) FROM transactions_1k AS T1 INNER JOIN gasstations AS T2 ON T1.GasStationID = T2.GasStationID WHERE T1.Date = '2012-08-26' AND T1.Time BETWEEN '08:00:00' AND '09:00:00' AND T2.Country = 'CZE'",
+      "actual_sql": "SELECT COUNT(*) \nFROM \"transactions_1k\" t\nJOIN \"gasstations\" g ON t.\"gasstationid\" = g.\"gasstationid\"\nWHERE t.\"date\" = '2012-08-26'\n  AND t.\"time\" BETWEEN '08:00:00' AND '09:00:00'\n  AND g.\"Country\" = 'CZE'",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.UndefinedColumn) column g.Country does not exist\nLINE 6:   AND g.\"Country\" = 'CZE'\n              ^\nHINT:  Perhaps you meant to reference the column \"g.country\".\n[SQL: SELECT COUNT(*) \nFROM \"transactions_1k\" t\nJOIN \"gasstations\" g ON t.\"gasstationid\" = g.\"gasstationid\"\nWHERE t.\"date\" = '2012-08-26'\n  AND t.\"time\" BETWEEN '08:00:00' AND '09:00:00'\n  AND g.\"Country\" = 'CZE'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What's the nationality of the customer who spent 548.4 in 2012/8/24?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT T2.Country FROM transactions_1k AS T1 INNER JOIN gasstations AS T2 ON T1.GasStationID = T2.GasStationID WHERE T1.Date = '2012-08-24' AND T1.Price = '548.4'",
+      "actual_sql": "SELECT \"currency\" FROM \"customers\" WHERE \"customerid\" = (SELECT \"customerid\" FROM \"transactions_1k\" WHERE \"price\" = 548.4 AND \"date\" = '2012-08-24')\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the percentage of the customers who used EUR in 2012/8/25?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN T2.Currency = 'EUR' THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(COUNT(T1.CustomerID), 0) FROM transactions_1k AS T1 INNER JOIN customers AS T2 ON T1.CustomerID = T2.CustomerID WHERE T1.Date = '2012-08-25'",
+      "actual_sql": "SELECT 100.0 * COUNT(DISTINCT \"customerid\") / (SELECT COUNT(*) FROM \"customers\" WHERE \"currency\" = 'EUR')\nFROM \"transactions_1k\" \"t\"\nJOIN \"customers\" \"c\" ON \"t\".\"customerid\" = \"c\".\"customerid\"\nWHERE \"t\".\"date\" = '2012-08-25' AND \"c\".\"currency\" = 'EUR';",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.AmbiguousColumn) column reference \"customerid\" is ambiguous\nLINE 1: SELECT 100.0 * COUNT(DISTINCT \"customerid\") / (SELECT COUNT(...\n                                      ^\n[SQL: SELECT 100.0 * COUNT(DISTINCT \"customerid\") / (SELECT COUNT(*) FROM \"customers\" WHERE \"currency\" = 'EUR')\nFROM \"transactions_1k\" \"t\"\nJOIN \"customers\" \"c\" ON \"t\".\"customerid\" = \"c\".\"customerid\"\nWHERE \"t\".\"date\" = '2012-08-25' AND \"c\".\"currency\" = 'EUR'\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/f405)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For the customer who paid 634.8 in 2012/8/25, what was the consumption decrease rate from Year 2012 to 2013?",
+      "difficulty": "challenging",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN SUBSTR(Date, 1, 4) = '2012' THEN Consumption ELSE 0 END) - SUM(CASE WHEN SUBSTR(Date, 1, 4) = '2013' THEN Consumption ELSE 0 END) AS REAL) / NULLIF(SUM(CASE WHEN SUBSTR(Date, 1, 4) = '2012' THEN Consumption ELSE 0 END), 0) FROM yearmonth WHERE CustomerID = (SELECT T1.CustomerID FROM transactions_1k AS T1 INNER JOIN gasstations AS T2 ON T1.GasStationID = T2.GasStationID WHERE T1.Date = '2012-08-25' AND T1.Price = 1513.12 )",
+      "actual_sql": "SELECT \n    (\n        (SELECT SUM(\"y\".\"consumption\") \n         FROM \"yearmonth\" \"y\" \n         WHERE \"y\".\"customerid\" = \"c\".\"customerid\" \n         AND \"y\".\"date\" >= '201201' AND \"y\".\"date\" <= '201212')\n        -\n        (SELECT SUM(\"y\".\"consumption\") \n         FROM \"yearmonth\" \"y\" \n         WHERE \"y\".\"customerid\" = \"c\".\"customerid\" \n         AND \"y\".\"date\" >= '201301' AND \"y\".\"date\" <= '201312')\n    ) / \n    (SELECT SUM(\"y\".\"consumption\") \n     FROM \"yearmonth\" \"y\" \n     WHERE \"y\".\"customerid\" = \"c\".\"customerid\" \n     AND \"y\".\"date\" >= '201201' AND \"y\".\"date\" <= '201212') AS \"consumption_decrease_rate\"\nFROM (\n    SELECT \"customerid\" \n    FROM \"transactions_1k\" \n    WHERE \"price\" = '634.8' AND \"date\" = '201208'\n) \"c\"\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the percentage of \"premium\" against the overall segment in Country = \"SVK\"?",
+      "difficulty": "simple",
+      "expected_sql": "SELECT CAST(SUM(CASE WHEN Country = 'SVK' AND Segment = 'Premium' THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(SUM(CASE WHEN Country = 'SVK' THEN 1 ELSE 0 END), 0) FROM gasstations",
+      "actual_sql": "SELECT \n    (COUNT(CASE WHEN \"segment\" = 'premium' THEN 1 END)::DECIMAL / COUNT(*)::DECIMAL * 100) AS \"percentage\"\nFROM \"gasstations\"\nWHERE \"country\" = 'SVK'\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "What is the amount spent by customer \"38508\" at the gas stations? How much had the customer spent in January 2012?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT SUM(T1.Price ), SUM(CASE WHEN T3.Date = '201201' THEN T1.Price ELSE 0 END) FROM transactions_1k AS T1 INNER JOIN gasstations AS T2 ON T1.GasStationID = T2.GasStationID INNER JOIN yearmonth AS T3 ON T1.CustomerID = T3.CustomerID WHERE T1.CustomerID = '38508'",
+      "actual_sql": "SELECT \n    \"customerid\",\n    SUM(\"amount\") AS \"total_spent\",\n    SUM(CASE WHEN EXTRACT(YEAR FROM \"date\") = 2012 AND EXTRACT(MONTH FROM \"date\") = 1 THEN \"amount\" ELSE 0 END) AS \"january_2012_spent\"\nFROM \"transactions_1k\"\nWHERE \"customerid\" = 38508\nGROUP BY \"customerid\"\nLIMIT 500",
+      "execution_success": true,
+      "error": null,
+      "status": "ok",
+      "prompt_token_count": null,
+      "actual_row_count": 1,
+      "metrics": {
+        "value_match": false,
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "Who is the top spending customer and how much is the average price per single item purchased by this customer? What currency was being used?",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T2.CustomerID, SUM(T2.Price / NULLIF(T2.Amount, 0)), T1.Currency FROM customers AS T1 INNER JOIN transactions_1k AS T2 ON T1.CustomerID = T2.CustomerID WHERE T2.CustomerID = (SELECT CustomerID FROM yearmonth ORDER BY Consumption DESC NULLS LAST LIMIT 1) GROUP BY T2.CustomerID, T1.Currency",
+      "actual_sql": "SELECT \"c\".\"currency\", \"c\".\"customerid\", SUM(\"t\".\"price\") / SUM(\"t\".\"amount\") AS \"average_price_per_item\"\nFROM \"customers\" \"c\"\nJOIN \"transactions_1k\" \"t\" ON \"c\".\"customerid\" = \"t\".\"customerid\"\nGROUP BY \"c\".\"customerid\", \"c\".\"currency\"\nORDER BY SUM(\"t\".\"price\") DESC\nLIMIT 1;",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.DivisionByZero) division by zero\n[SQL: SELECT \"c\".\"currency\", \"c\".\"customerid\", SUM(\"t\".\"price\") / SUM(\"t\".\"amount\") AS \"average_price_per_item\"\nFROM \"customers\" \"c\"\nJOIN \"transactions_1k\" \"t\" ON \"c\".\"customerid\" = \"t\".\"customerid\"\nGROUP BY \"c\".\"customerid\", \"c\".\"currency\"\nORDER BY SUM(\"t\".\"price\") DESC\nLIMIT 1]\n(Background on this error at: https://sqlalche.me/e/20/9h9h)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    },
+    {
+      "question": "For all the people who paid more than 29.00 per unit of product id No.5. Give their consumption status in the August of 2012.",
+      "difficulty": "moderate",
+      "expected_sql": "SELECT T2.Consumption FROM transactions_1k AS T1 INNER JOIN yearmonth AS T2 ON T1.CustomerID = T2.CustomerID WHERE T1.Price / NULLIF(T1.Amount, 0) > 29.00 AND T1.ProductID = 5 AND T2.Date = '201208'",
+      "actual_sql": "SELECT \"yearmonth\".\"customerid\", \"yearmonth\".\"consumption\"\nFROM \"yearmonth\"\nWHERE \"yearmonth\".\"date\" = '201208'\nAND \"yearmonth\".\"customerid\" IN (\n    SELECT DISTINCT \"transactions_1k\".\"customerid\"\n    FROM \"transactions_1k\"\n    WHERE \"transactions_1k\".\"productid\" = 5\n    AND (\"transactions_1k\".\"price\" / \"transactions_1k\".\"amount\") > 29.0\n);",
+      "execution_success": false,
+      "error": "Execution failed: (psycopg.errors.DivisionByZero) division by zero\n[SQL: SELECT \"yearmonth\".\"customerid\", \"yearmonth\".\"consumption\"\nFROM \"yearmonth\"\nWHERE \"yearmonth\".\"date\" = '201208'\nAND \"yearmonth\".\"customerid\" IN (\n    SELECT DISTINCT \"transactions_1k\".\"customerid\"\n    FROM \"transactions_1k\"\n    WHERE \"transactions_1k\".\"productid\" = 5\n    AND (\"transactions_1k\".\"price\" / \"transactions_1k\".\"amount\") > 29.0\n)\nLIMIT 500]\n(Background on this error at: https://sqlalche.me/e/20/9h9h)",
+      "status": "execution_error",
+      "prompt_token_count": null,
+      "actual_row_count": 0,
+      "metrics": {
+        "soft_f1": 0.0,
+        "soft_f1_precision": 0.0,
+        "soft_f1_recall": 0.0,
+        "bird_ex": false
+      }
+    }
+  ]
+}
