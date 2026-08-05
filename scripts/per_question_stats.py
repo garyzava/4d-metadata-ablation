@@ -1,21 +1,29 @@
 """Per-question paired statistical analysis on data.
 
 Addresses the review point "aggregate database-level percentages are not enough"
-by pairing the same question under a baseline vs an L4-effective condition.
+by pairing the same question under two conditions and testing the paired
+difference. All pairing is by (database, question text), never by row position.
 
-Lane structure (verified):
-  - Dimensional lanes  (9b, 27b, 30b)           : EVIDENCE, L0-PAD, L4-DD, L4-QP, L4-BC, L4-DK
-  - Cross-vendor lanes (gemma4, qwen36, opus47) : L0, L0-PAD, L4
+Lane structure (verified against results/):
+  - Dimensional lanes  (9b, 27b, 30b): full ladder L0, L0-PAD, L1..L4,
+    four leave-one-out conditions (L4-DD/QP/BC/DK), and EVIDENCE.
+  - Cross-vendor lanes (gemma4, qwen36, opus47): L0, L0-PAD, L4.
 
-Baseline used per lane (the "L0" reference):
-  - Cross-vendor : L0
-  - Dimensional  : L0-PAD (the token-matched control; the dimensional lanes have no native L0)
+Primary contrasts (camera-ready design):
+  - H1: native L4 vs L0-PAD, per model, all six models. Two-sided exact
+    McNemar, Holm-corrected across the six tests. No pooling: every model
+    has a native L4 condition, so the earlier pooled treatment (L0-PAD
+    against the four leave-one-out conditions) is retired from inference.
+  - Padding effect: L0 vs L0-PAD, per model, all six models. Two-sided
+    exact McNemar, separate Holm correction across the six tests.
+  - H3 drop cost: native L4 vs each L4-minus-dimension condition, the three
+    dimensional Qwen lanes only. Two metric families (BEX and ER), each a
+    12-test Holm family (3 models x 4 dimensions).
+  - The defined-condition LOO table (L0-PAD vs each leave-one-out condition)
+    is retained as a descriptive companion, not as the H1 evidence.
 
-L4-effective per lane (the "L4" treatment):
-  - Cross-vendor : L4
-  - Dimensional  : each of the four leave-one-out conditions (L4-DD/L4-QP/L4-BC/L4-DK),
-             pooled across LOO into a single L4-family contrast for the headline,
-             AND broken out separately for the LOO ablation table.
+EVIDENCE rows are never paired: that condition stores the question with the
+BIRD hint prepended, so its question text differs by design.
 
 Outputs (relative to this repo):
   - data/reports/stats-tables.md
@@ -58,18 +66,17 @@ OUT_PATH = REPO / "data" / "reports" / "stats-tables.md"
 
 L4_LOO = ["L4-DD", "L4-QP", "L4-BC", "L4-DK"]
 
-
-def baseline_level(model: str) -> str:
-    return "L0" if model in SCOPED_MODELS else "L0-PAD"
+EXPECTED_CELLS = 462
+EXPECTED_RECORDS = 21_000
+EXPECTED_QUESTIONS = 500
 
 
 def load_long_dataframe() -> pd.DataFrame:
     """Walk all per-cell result JSONs into one long-format DataFrame.
 
-    One row per (model, database, level, case_index). bird_ex is 0/1.
-    case_index is stable across levels for the same database (the runner
-    iterates cases in load order), so it serves as a question_id within
-    a (model, database) pair.
+    One row per (model, database, level, question). The question text is the
+    pairing key within a database; it is unique per database and identical
+    across all non-EVIDENCE levels (checked by acceptance_checks).
     """
     rows: list[dict] = []
     for model_code, dir_path in RESULTS_DIRS.items():
@@ -94,6 +101,7 @@ def load_long_dataframe() -> pd.DataFrame:
                     "database": db,
                     "level": level,
                     "case_index": i,
+                    "question": c.get("question", ""),
                     "difficulty": c.get("difficulty", "unknown"),
                     "bird_ex": int(bool(m.get("bird_ex", False))),
                     "value_match": int(bool(m.get("value_match", False))),
@@ -101,6 +109,17 @@ def load_long_dataframe() -> pd.DataFrame:
                     "execution_success": int(bool(c.get("execution_success", False))),
                 })
     return pd.DataFrame(rows)
+
+
+def count_result_cells() -> int:
+    """Count per-cell result JSONs (one file per model x condition x database)."""
+    n = 0
+    for dir_path in RESULTS_DIRS.values():
+        if not dir_path.exists():
+            continue
+        n += sum(1 for jp in dir_path.glob("*.json")
+                 if jp.name != "experiment_summary.json")
+    return n
 
 
 def audit_missing_bird_ex() -> pd.DataFrame:
@@ -140,82 +159,131 @@ def audit_missing_bird_ex() -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def _paired_long(df: pd.DataFrame, model: str) -> pd.DataFrame:
-    """Build (baseline_bex, l4_bex) paired rows for a single model.
+def _pair(df: pd.DataFrame, model: str, base_level: str, treat_level: str,
+          col: str = "bird_ex") -> pd.DataFrame:
+    """Pair one model's questions under base_level vs treat_level on `col`.
 
-    Scoped lanes contribute one paired row per question (L0 vs L4).
-    HF lanes contribute up to four paired rows per question (L0-PAD vs each LOO).
+    Merge key is (database, question). Returns columns: database, question,
+    y_base, y_treat.
     """
     sub = df[df["model"] == model]
-    base = sub[sub["level"] == baseline_level(model)][
-        ["database", "case_index", "bird_ex"]
-    ].rename(columns={"bird_ex": "bex_base"})
-    if model in SCOPED_MODELS:
-        treat_levels = ["L4"]
-    else:
-        treat_levels = L4_LOO
-    pieces: list[pd.DataFrame] = []
-    for lvl in treat_levels:
-        t = sub[sub["level"] == lvl][
-            ["database", "case_index", "bird_ex"]
-        ].rename(columns={"bird_ex": "bex_l4"})
-        if t.empty:
-            continue
-        m = base.merge(t, on=["database", "case_index"], how="inner")
-        m["l4_level"] = lvl
-        pieces.append(m)
-    if not pieces:
-        return pd.DataFrame(columns=["database", "case_index", "bex_base", "bex_l4", "l4_level"])
-    return pd.concat(pieces, ignore_index=True)
+    base = sub[sub["level"] == base_level][
+        ["database", "question", col]
+    ].rename(columns={col: "y_base"})
+    treat = sub[sub["level"] == treat_level][
+        ["database", "question", col]
+    ].rename(columns={col: "y_treat"})
+    return base.merge(treat, on=["database", "question"], how="inner")
 
 
-def mcnemar_baseline_vs_l4(df: pd.DataFrame) -> pd.DataFrame:
-    """Per-model paired McNemar on bird_ex, baseline vs L4-effective.
+def _holm(p_raw: pd.Series) -> tuple[np.ndarray, np.ndarray]:
+    """Holm step-down adjusted p-values, order-preserving.
 
-    For HF lanes the unit is (question, L4-LOO condition); for scoped lanes it
-    is just question. b = baseline wrong but L4 right; c = baseline right but
-    L4 wrong. Two-sided exact-binomial p.
+    Returns (p_holm, significant_at_05) aligned to the input order.
+    """
+    p = p_raw.to_numpy(dtype=float)
+    m = len(p)
+    order = np.argsort(p)
+    adj_sorted = np.minimum(1.0, p[order] * (m - np.arange(m)))
+    adj_sorted = np.maximum.accumulate(adj_sorted)
+    p_holm = np.empty(m)
+    p_holm[order] = adj_sorted
+    return p_holm, p_holm < 0.05
+
+
+def _mcnemar_rows(df: pd.DataFrame, models: list[str], base_level: str,
+                  treat_level: str, col: str = "bird_ex") -> pd.DataFrame:
+    """Two-sided exact McNemar per model for one (base, treat) contrast.
+
+    b = base wrong, treat right; c = base right, treat wrong. The effect
+    size is the discordant odds ratio b/c and the paired delta in
+    percentage points.
     """
     out: list[dict] = []
-    for model in [m for m in ALL_MODELS if m in df["model"].unique()]:
-        pair = _paired_long(df, model)
+    for model in [m for m in models if m in df["model"].unique()]:
+        pair = _pair(df, model, base_level, treat_level, col)
         n = len(pair)
         if n == 0:
             continue
-        b = int(((pair["bex_base"] == 0) & (pair["bex_l4"] == 1)).sum())
-        c = int(((pair["bex_base"] == 1) & (pair["bex_l4"] == 0)).sum())
-        agree = n - b - c
+        b = int(((pair["y_base"] == 0) & (pair["y_treat"] == 1)).sum())
+        c = int(((pair["y_base"] == 1) & (pair["y_treat"] == 0)).sum())
+        delta_pp = float((pair["y_treat"] - pair["y_base"]).mean()) * 100
         if b + c > 0:
-            p = stats.binomtest(min(b, c), n=b + c, p=0.5, alternative="two-sided").pvalue
+            p = stats.binomtest(min(b, c), n=b + c, p=0.5,
+                                alternative="two-sided").pvalue
         else:
             p = 1.0
+        odds = round(b / c, 2) if c > 0 else float("inf")
         out.append({
             "model": model,
-            "baseline": baseline_level(model),
-            "n_paired_obs": n,
-            "agree": agree,
-            "baseline_wins_c": c,
-            "L4_wins_b": b,
-            "delta_b_minus_c": b - c,
-            "mcnemar_p": p,
+            "baseline": base_level,
+            "treatment": treat_level,
+            "n_questions": n,
+            "agree": n - b - c,
+            "b_treat_wins": b,
+            "c_base_wins": c,
+            "delta_pp": round(delta_pp, 2),
+            "odds_ratio": odds,
+            "p_exact": p,
+        })
+    res = pd.DataFrame(out)
+    if not res.empty:
+        p_holm, sig = _holm(res["p_exact"])
+        res["p_holm"] = p_holm
+        res["holm_sig_05"] = sig
+    return res
+
+
+def mcnemar_l4_vs_l0pad(df: pd.DataFrame) -> pd.DataFrame:
+    """H1 primary test: native L4 vs L0-PAD, all six models, Holm across 6."""
+    return _mcnemar_rows(df, ALL_MODELS, "L0-PAD", "L4", "bird_ex")
+
+
+def mcnemar_padding(df: pd.DataFrame) -> pd.DataFrame:
+    """Padding effect: L0 vs L0-PAD, all six models, separate Holm across 6."""
+    return _mcnemar_rows(df, ALL_MODELS, "L0", "L0-PAD", "bird_ex")
+
+
+def headline_table(df: pd.DataFrame) -> pd.DataFrame:
+    """Database-macro BEX (%) at L0, L0-PAD, and native L4, with both deltas.
+
+    Database-macro: mean over the 11 per-database means, equal weight per
+    database. This matches the paper's reporting unit.
+    """
+    out: list[dict] = []
+    for model in [m for m in ALL_MODELS if m in df["model"].unique()]:
+        sub = df[df["model"] == model]
+        vals: dict[str, float] = {}
+        for lvl in ("L0", "L0-PAD", "L4"):
+            g = sub[sub["level"] == lvl]
+            if g.empty:
+                vals[lvl] = float("nan")
+                continue
+            vals[lvl] = float(g.groupby("database")["bird_ex"].mean().mean()) * 100
+        out.append({
+            "model": model,
+            "L0": round(vals["L0"], 1),
+            "L0-PAD": round(vals["L0-PAD"], 1),
+            "L4": round(vals["L4"], 1),
+            "delta_L4_minus_L0": round(vals["L4"] - vals["L0"], 1),
+            "delta_L4_minus_L0PAD": round(vals["L4"] - vals["L0-PAD"], 1),
         })
     return pd.DataFrame(out)
 
 
-def bootstrap_question_delta(df: pd.DataFrame, n_resamples: int = 10000, seed: int = 42) -> pd.DataFrame:
-    """Bootstrap 95% CI on baseline -> L4 BEX delta per model.
+def bootstrap_question_delta(df: pd.DataFrame, n_resamples: int = 10000,
+                             seed: int = 42) -> pd.DataFrame:
+    """Bootstrap 95% CI on the L0-PAD -> native L4 BEX delta per model.
 
-    For HF lanes the bootstrap samples paired (question, LOO) observations
-    (so a question can contribute up to 4 rows); for scoped lanes each
-    question contributes one row.
+    Resamples the paired questions (one row per question, all six models).
     """
     rng = np.random.default_rng(seed)
     out: list[dict] = []
     for model in [m for m in ALL_MODELS if m in df["model"].unique()]:
-        pair = _paired_long(df, model)
+        pair = _pair(df, model, "L0-PAD", "L4", "bird_ex")
         if pair.empty:
             continue
-        deltas = (pair["bex_l4"] - pair["bex_base"]).to_numpy()
+        deltas = (pair["y_treat"] - pair["y_base"]).to_numpy()
         n = len(deltas)
         point = float(np.mean(deltas)) * 100
         idx = rng.integers(0, n, size=(n_resamples, n))
@@ -223,7 +291,7 @@ def bootstrap_question_delta(df: pd.DataFrame, n_resamples: int = 10000, seed: i
         lo, hi = np.percentile(boot_means, [2.5, 97.5])
         out.append({
             "model": model,
-            "baseline": baseline_level(model),
+            "baseline": "L0-PAD",
             "n_obs": n,
             "point_estimate_pp": round(point, 2),
             "ci_lo_pp": round(float(lo), 2),
@@ -232,15 +300,16 @@ def bootstrap_question_delta(df: pd.DataFrame, n_resamples: int = 10000, seed: i
     return pd.DataFrame(out)
 
 
-def bootstrap_database_delta(df: pd.DataFrame, n_resamples: int = 10000, seed: int = 42) -> pd.DataFrame:
-    """Bootstrap 95% CI on baseline -> L4 BEX delta, resampling DATABASES."""
+def bootstrap_database_delta(df: pd.DataFrame, n_resamples: int = 10000,
+                             seed: int = 42) -> pd.DataFrame:
+    """Bootstrap 95% CI on the L0-PAD -> native L4 BEX delta, resampling DATABASES."""
     rng = np.random.default_rng(seed)
     out: list[dict] = []
     for model in [m for m in ALL_MODELS if m in df["model"].unique()]:
-        pair = _paired_long(df, model)
+        pair = _pair(df, model, "L0-PAD", "L4", "bird_ex")
         if pair.empty:
             continue
-        per_db = pair.assign(delta=pair["bex_l4"] - pair["bex_base"]) \
+        per_db = pair.assign(delta=pair["y_treat"] - pair["y_base"]) \
             .groupby("database")["delta"].mean()
         deltas_by_db = per_db.to_numpy() * 100
         n_dbs = len(deltas_by_db)
@@ -252,7 +321,7 @@ def bootstrap_database_delta(df: pd.DataFrame, n_resamples: int = 10000, seed: i
         lo, hi = np.percentile(boot_means, [2.5, 97.5])
         out.append({
             "model": model,
-            "baseline": baseline_level(model),
+            "baseline": "L0-PAD",
             "n_databases": n_dbs,
             "point_estimate_pp": round(point, 2),
             "ci_lo_pp": round(float(lo), 2),
@@ -262,34 +331,25 @@ def bootstrap_database_delta(df: pd.DataFrame, n_resamples: int = 10000, seed: i
 
 
 def loo_ablation_table(df: pd.DataFrame) -> pd.DataFrame:
-    """Per-dimension LOO ablation on the HF lanes, paired against L0-PAD.
+    """Descriptive LOO companion: L0-PAD vs each leave-one-out condition.
 
-    For each (HF model, L4-LOO condition) pair, compute paired McNemar of
-    L0-PAD vs the LOO. Holm-Bonferroni adjusts across the 12 comparisons
-    (4 dimensions x 3 HF models). p_holm_lt_05 indicates significance after
-    correction.
+    Answers "does a three-dimension configuration still beat the distractor
+    control", per (dimensional model, dropped dimension). Holm across the 12
+    comparisons. This is not the H1 evidence and not the drop-cost table.
     """
     raw: list[dict] = []
     for model in HF_MODELS:
-        sub = df[df["model"] == model]
-        if sub.empty:
-            continue
-        base = sub[sub["level"] == "L0-PAD"][
-            ["database", "case_index", "bird_ex"]
-        ].rename(columns={"bird_ex": "bex_base"})
         for dim in L4_LOO:
-            ax = sub[sub["level"] == dim][
-                ["database", "case_index", "bird_ex"]
-            ].rename(columns={"bird_ex": "bex_dim"})
-            pair = base.merge(ax, on=["database", "case_index"], how="inner")
+            pair = _pair(df, model, "L0-PAD", dim, "bird_ex")
             n = len(pair)
             if n == 0:
                 continue
-            b = int(((pair["bex_base"] == 0) & (pair["bex_dim"] == 1)).sum())
-            c = int(((pair["bex_base"] == 1) & (pair["bex_dim"] == 0)).sum())
-            delta = float((pair["bex_dim"] - pair["bex_base"]).mean()) * 100
+            b = int(((pair["y_base"] == 0) & (pair["y_treat"] == 1)).sum())
+            c = int(((pair["y_base"] == 1) & (pair["y_treat"] == 0)).sum())
+            delta = float((pair["y_treat"] - pair["y_base"]).mean()) * 100
             if b + c > 0:
-                p_raw = stats.binomtest(min(b, c), n=b + c, p=0.5, alternative="two-sided").pvalue
+                p_raw = stats.binomtest(min(b, c), n=b + c, p=0.5,
+                                        alternative="two-sided").pvalue
             else:
                 p_raw = 1.0
             raw.append({
@@ -304,16 +364,52 @@ def loo_ablation_table(df: pd.DataFrame) -> pd.DataFrame:
     out = pd.DataFrame(raw)
     if out.empty:
         return out
-    out_sorted = out.sort_values("p_raw").reset_index(drop=True)
-    m = len(out_sorted)
-    out_sorted["p_holm"] = [min(1.0, p * (m - i)) for i, p in enumerate(out_sorted["p_raw"])]
-    holm = out_sorted["p_holm"].to_numpy().copy()
-    for i in range(1, len(holm)):
-        if holm[i] < holm[i - 1]:
-            holm[i] = holm[i - 1]
-    out_sorted["p_holm"] = holm
-    out_sorted["p_holm_lt_05"] = out_sorted["p_holm"] < 0.05
-    return out_sorted.sort_values(["model", "dimension_dropped"]).reset_index(drop=True)
+    p_holm, sig = _holm(out["p_raw"])
+    out["p_holm"] = p_holm
+    out["p_holm_lt_05"] = sig
+    return out.sort_values(["model", "dimension_dropped"]).reset_index(drop=True)
+
+
+def loo_drop_table(df: pd.DataFrame, col: str) -> pd.DataFrame:
+    """H3 drop cost: native L4 vs each L4-minus-dimension, dimensional lanes only.
+
+    One 12-test Holm family per metric (col = bird_ex for BEX, or
+    execution_success for ER). delta_pp = mean(LOO) - mean(L4): a negative
+    value means removing the dimension costs accuracy. b = L4 wrong but LOO
+    right; c = L4 right but LOO wrong.
+    """
+    raw: list[dict] = []
+    for model in HF_MODELS:
+        for dim in L4_LOO:
+            pair = _pair(df, model, "L4", dim, col)
+            n = len(pair)
+            if n == 0:
+                continue
+            b = int(((pair["y_base"] == 0) & (pair["y_treat"] == 1)).sum())
+            c = int(((pair["y_base"] == 1) & (pair["y_treat"] == 0)).sum())
+            delta = float((pair["y_treat"] - pair["y_base"]).mean()) * 100
+            if b + c > 0:
+                p_raw = stats.binomtest(min(b, c), n=b + c, p=0.5,
+                                        alternative="two-sided").pvalue
+            else:
+                p_raw = 1.0
+            raw.append({
+                "model": model,
+                "dimension_dropped": dim,
+                "metric": "BEX" if col == "bird_ex" else "ER",
+                "n": n,
+                "delta_pp": round(delta, 2),
+                "L4_wins_c": c,
+                "loo_wins_b": b,
+                "p_raw": p_raw,
+            })
+    out = pd.DataFrame(raw)
+    if out.empty:
+        return out
+    p_holm, sig = _holm(out["p_raw"])
+    out["p_holm"] = p_holm
+    out["p_holm_lt_05"] = sig
+    return out.sort_values(["model", "dimension_dropped"]).reset_index(drop=True)
 
 
 def scoped_logit(df: pd.DataFrame) -> tuple[pd.DataFrame | None, str]:
@@ -347,9 +443,9 @@ def scoped_logit(df: pd.DataFrame) -> tuple[pd.DataFrame | None, str]:
 
 
 def hf_logit(df: pd.DataFrame) -> tuple[pd.DataFrame | None, str]:
-    """Logit on HF lanes: bird_ex ~ C(level) + C(model) + C(difficulty)
+    """Logit on dimensional lanes: bird_ex ~ C(level) + C(model) + C(difficulty)
     with database-cluster-robust SE. Levels included: L0-PAD plus the four
-    L4-LOO conditions. Reference category: L0-PAD.
+    leave-one-out conditions, under their own definitions. Reference: L0-PAD.
     """
     sub = df[(df["lane"] == "HF") & (df["level"].isin(["L0-PAD", *L4_LOO]))].copy()
     if sub.empty:
@@ -373,7 +469,46 @@ def hf_logit(df: pd.DataFrame) -> tuple[pd.DataFrame | None, str]:
             "p": round(float(p), 6),
             "odds_ratio": round(float(np.exp(coef)), 3),
         })
-    return pd.DataFrame(rows), f"HF lanes only; logit on L0-PAD + L4-LOO with cluster-robust SE on database (n={len(sub)})"
+    return pd.DataFrame(rows), f"Dimensional lanes; logit on L0-PAD + leave-one-out conditions with cluster-robust SE on database (n={len(sub)})"
+
+
+def acceptance_checks(df: pd.DataFrame) -> pd.DataFrame:
+    """Camera-ready acceptance checks. Every row must PASS."""
+    rows: list[dict] = []
+
+    def add(name: str, expected, actual) -> None:
+        rows.append({"check": name, "expected": str(expected),
+                     "actual": str(actual),
+                     "status": "PASS" if str(expected) == str(actual) else "FAIL"})
+
+    add("result cells (JSON files)", EXPECTED_CELLS, count_result_cells())
+    add("question-level records", EXPECTED_RECORDS, len(df))
+
+    # Unique questions per direct comparison must be exactly 500.
+    comp_ns: set[int] = set()
+    for model in [m for m in ALL_MODELS if m in df["model"].unique()]:
+        comp_ns.add(len(_pair(df, model, "L0-PAD", "L4")))
+        comp_ns.add(len(_pair(df, model, "L0", "L0-PAD")))
+    for model in HF_MODELS:
+        for dim in L4_LOO:
+            comp_ns.add(len(_pair(df, model, "L4", dim)))
+            comp_ns.add(len(_pair(df, model, "L0-PAD", dim)))
+    add("questions per direct comparison", f"{{{EXPECTED_QUESTIONS}}}", str(set(sorted(comp_ns))))
+
+    # Pairing keys must be unique: no duplicate (model, level, database, question).
+    dup = int(df.duplicated(subset=["model", "level", "database", "question"]).sum())
+    add("duplicate pairing keys", 0, dup)
+
+    # Non-EVIDENCE levels must share one question set per (model, database).
+    mismatched = 0
+    non_ev = df[df["level"] != "EVIDENCE"]
+    for (model, db), g in non_ev.groupby(["model", "database"]):
+        sets = g.groupby("level")["question"].apply(frozenset).unique()
+        if len(sets) > 1:
+            mismatched += 1
+    add("(model, database) groups with level question-set mismatch", 0, mismatched)
+
+    return pd.DataFrame(rows)
 
 
 def df_to_md(df: pd.DataFrame, *, floatfmt: str = ".4f") -> str:
@@ -395,11 +530,12 @@ def df_to_md(df: pd.DataFrame, *, floatfmt: str = ".4f") -> str:
     return "\n".join(lines) + "\n"
 
 
-def render_report(df: pd.DataFrame, mcn: pd.DataFrame, boot_q: pd.DataFrame,
-                  boot_db: pd.DataFrame, loo: pd.DataFrame,
+def render_report(df: pd.DataFrame, headline: pd.DataFrame, mcn: pd.DataFrame,
+                  pad: pd.DataFrame, boot_q: pd.DataFrame, boot_db: pd.DataFrame,
+                  loo: pd.DataFrame, drop_bex: pd.DataFrame, drop_er: pd.DataFrame,
                   scoped_coef: pd.DataFrame | None, scoped_note: str,
                   hf_coef: pd.DataFrame | None, hf_note: str,
-                  excluded: pd.DataFrame) -> str:
+                  checks: pd.DataFrame, excluded: pd.DataFrame) -> str:
     n_rows = len(df)
     n_models = df["model"].nunique()
     n_dbs = df["database"].nunique()
@@ -410,9 +546,10 @@ def render_report(df: pd.DataFrame, mcn: pd.DataFrame, boot_q: pd.DataFrame,
         "# Per-question statistical analysis",
         "",
         "Generated by `scripts/per_question_stats.py`. Walks the existing "
-        "* per-case JSONs (no new LLM calls). Pairs the same question under a baseline "
-        "(L0 for scoped lanes, L0-PAD for HF lanes) with an L4-effective condition "
-        "(native L4 for scoped, each of the four L4 leave-one-out conditions for HF).",
+        "per-case JSONs (no new LLM calls). All paired tests match the same "
+        "question by (database, question text) under two conditions. The "
+        "primary H1 contrast is native L4 vs the L0-PAD distractor control; "
+        "no pooled treatment is used anywhere in this report.",
         "",
         "## 1. Data shape",
         "",
@@ -420,73 +557,96 @@ def render_report(df: pd.DataFrame, mcn: pd.DataFrame, boot_q: pd.DataFrame,
         f"- Levels covered: {sorted(df['level'].unique())}.",
         f"- Cases excluded for missing `bird_ex`: **{n_excluded}** (audit at the bottom).",
         "",
-        "## 2. Paired McNemar - baseline vs L4-effective",
+        "## 2. Headline table - database-macro BEX (%) at L0, L0-PAD, and native L4",
         "",
-        "For each model, b = baseline wrong but L4 right; c = baseline right but L4 wrong. "
-        "Two-sided exact-binomial p-value. HF rows pool the four L4-LOO conditions, so "
-        "n_paired_obs is approximately 4x the question count.",
+        "Equal weight per database (mean of the 11 per-database means).",
+        "",
+        df_to_md(headline, floatfmt=".1f"),
+        "",
+        "## 3. H1 primary test - paired McNemar, native L4 vs L0-PAD",
+        "",
+        "b = L0-PAD wrong but L4 right; c = L0-PAD right but L4 wrong. "
+        "Two-sided exact binomial p, Holm-corrected across the six models. "
+        "odds_ratio is the discordant ratio b/c. delta_pp is the paired "
+        "question-pooled BEX delta.",
         "",
         df_to_md(mcn, floatfmt=".6f"),
         "",
-        "## 3. Bootstrap 95% CI on the BEX delta (percentage points)",
+        "## 4. Padding effect - paired McNemar, L0 vs L0-PAD",
         "",
-        "**3a. Observation-level (10,000 resamples per model)** - robustness to which "
-        "(question, LOO) observations were sampled.",
+        "b = L0 wrong but L0-PAD right; c = L0 right but L0-PAD wrong. "
+        "A negative delta_pp means padding hurt BEX. Separate Holm "
+        "correction across these six tests.",
+        "",
+        df_to_md(pad, floatfmt=".6f"),
+        "",
+        "## 5. Bootstrap 95% CI on the L0-PAD to native-L4 BEX delta (pp)",
+        "",
+        "**5a. Question-level (10,000 resamples per model)** - robustness to "
+        "which questions were sampled.",
         "",
         df_to_md(boot_q, floatfmt=".2f"),
         "",
-        "**3b. Database-level (10,000 resamples of the 11 databases per model)** - "
+        "**5b. Database-level (10,000 resamples of the 11 databases per model)** - "
         "robustness to which databases are in the study. The wider CI is the more "
         "honest cross-database generalization claim.",
         "",
         df_to_md(boot_db, floatfmt=".2f"),
         "",
-        "## 4. Leave-one-out ablation (HF lanes)",
+        "## 6. Leave-one-out vs the distractor control (descriptive companion)",
         "",
-        "Each row pairs L0-PAD against an L4-LOO condition for an HF model. delta_pp > 0 "
-        "means dropping that dimension still beats L0-PAD; delta_pp closer to zero or negative "
-        "means the dropped dimension is load-bearing. Holm-Bonferroni adjusts across the 12 "
-        "comparisons (4 dimensions x 3 HF models).",
+        "Each row pairs L0-PAD against a leave-one-out condition for a "
+        "dimensional model. delta_pp > 0 means the three-dimension "
+        "configuration still beats L0-PAD. Holm across the 12 comparisons. "
+        "This table is descriptive; the H3 drop-cost evidence is section 7.",
         "",
         df_to_md(loo, floatfmt=".4f"),
         "",
-        "## 5. Logistic regression with cluster-robust SE on database",
+        "## 7. H3 drop cost - native L4 vs each L4-minus-dimension",
+        "",
+        "Dimensional Qwen lanes only. delta_pp = LOO minus L4: negative "
+        "means removing the dimension costs accuracy. BEX and ER are "
+        "separate 12-test Holm families.",
+        "",
+        "**7a. BEX family.**",
+        "",
+        df_to_md(drop_bex, floatfmt=".4f"),
+        "",
+        "**7b. ER family.**",
+        "",
+        df_to_md(drop_er, floatfmt=".4f"),
+        "",
+        "## 8. Logistic regression with cluster-robust SE on database",
         "",
         "Two fits, one per lane type, because the level set is lane-specific.",
         "",
-        f"**5a. Scoped lanes.** _{scoped_note}_",
+        f"**8a. Scoped lanes.** _{scoped_note}_",
         "",
         df_to_md(scoped_coef if scoped_coef is not None else pd.DataFrame(), floatfmt=".4f"),
         "",
-        f"**5b. HF lanes.** _{hf_note}_",
+        f"**8b. Dimensional lanes.** _{hf_note}_",
         "",
         df_to_md(hf_coef if hf_coef is not None else pd.DataFrame(), floatfmt=".4f"),
         "",
-        "## 6. Excluded cases - missing `bird_ex` audit",
+        "## 9. Acceptance checks",
+        "",
+        df_to_md(checks),
+        "",
+        "## 10. Excluded cases - missing `bird_ex` audit",
         "",
         f"The loader skips per-case rows where the `metrics` dict has no `bird_ex` key. "
         f"**{n_excluded}** rows total are excluded; the table below lists every one.",
         "",
         df_to_md(excluded, floatfmt=".2f"),
         "",
-        "## 7. Headline takeaways",
-        "",
-        "- Paired McNemar p-values together with question-level AND database-level bootstrap "
-        "CIs give the inferential backbone for the L4 effect. They replace aggregate "
-        "percentage-point claims with significance tests robust to both question-sampling "
-        "and database-sampling assumptions.",
-        "- The HF-lane logit `C(level)` coefficients are log-odds contrasts of each "
-        "L4-LOO against the L0-PAD reference. The LOO table in section 4 is the "
-        "primary reference for the \"which dimension matters most\" question.",
-        "- The database-level bootstrap CI is the cross-database generalization number to "
-        "quote in the paper; the question-level CI is the within-database significance.",
-        "",
     ]
     return "\n".join(parts)
 
 
-def export_csv(mcn: pd.DataFrame, boot_q: pd.DataFrame, boot_db: pd.DataFrame,
-               loo: pd.DataFrame, scoped_coef: pd.DataFrame | None,
+def export_csv(headline: pd.DataFrame, mcn: pd.DataFrame, pad: pd.DataFrame,
+               boot_q: pd.DataFrame, boot_db: pd.DataFrame, loo: pd.DataFrame,
+               drop_bex: pd.DataFrame, drop_er: pd.DataFrame,
+               scoped_coef: pd.DataFrame | None,
                hf_coef: pd.DataFrame | None, csv_path: Path) -> None:
     """Export all stats tables to a single long CSV.
 
@@ -498,14 +658,23 @@ def export_csv(mcn: pd.DataFrame, boot_q: pd.DataFrame, boot_db: pd.DataFrame,
     with csv_path.open("w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=fieldnames)
         w.writeheader()
-        for _, r in mcn.iterrows():
-            for metric in ("n_paired_obs", "agree", "baseline_wins_c", "L4_wins_b",
-                           "delta_b_minus_c", "mcnemar_p"):
+        for _, r in headline.iterrows():
+            for metric in ("L0", "L0-PAD", "L4", "delta_L4_minus_L0",
+                           "delta_L4_minus_L0PAD"):
                 w.writerow({
-                    "table": "mcnemar", "model": r["model"], "term": "",
-                    "baseline": r["baseline"], "n": r["n_paired_obs"],
-                    "metric": metric, "value": r[metric],
+                    "table": "headline", "model": r["model"], "term": "",
+                    "baseline": "", "n": "", "metric": metric, "value": r[metric],
                 })
+        for label, tbl in (("mcnemar", mcn), ("mcnemar_padding", pad)):
+            for _, r in tbl.iterrows():
+                for metric in ("n_questions", "agree", "b_treat_wins", "c_base_wins",
+                               "delta_pp", "odds_ratio", "p_exact", "p_holm",
+                               "holm_sig_05"):
+                    w.writerow({
+                        "table": label, "model": r["model"], "term": "",
+                        "baseline": r["baseline"], "n": r["n_questions"],
+                        "metric": metric, "value": r[metric],
+                    })
         for _, r in boot_q.iterrows():
             for metric in ("point_estimate_pp", "ci_lo_pp", "ci_hi_pp"):
                 w.writerow({
@@ -528,6 +697,15 @@ def export_csv(mcn: pd.DataFrame, boot_q: pd.DataFrame, boot_db: pd.DataFrame,
                     "term": r["dimension_dropped"], "baseline": "L0-PAD",
                     "n": r["n"], "metric": metric, "value": r[metric],
                 })
+        for label, tbl in (("loo_drop_bex", drop_bex), ("loo_drop_er", drop_er)):
+            for _, r in tbl.iterrows():
+                for metric in ("delta_pp", "L4_wins_c", "loo_wins_b", "p_raw",
+                               "p_holm", "p_holm_lt_05"):
+                    w.writerow({
+                        "table": label, "model": r["model"],
+                        "term": r["dimension_dropped"], "baseline": "L4",
+                        "n": r["n"], "metric": metric, "value": r[metric],
+                    })
         for label, coef_df in (("logit_scoped", scoped_coef), ("logit_hf", hf_coef)):
             if coef_df is None or coef_df.empty:
                 continue
@@ -554,32 +732,48 @@ def main() -> None:
         print("No data - verify * result dirs exist.")
         return
 
-    mcn = mcnemar_baseline_vs_l4(df)
+    headline = headline_table(df)
+    mcn = mcnemar_l4_vs_l0pad(df)
+    pad = mcnemar_padding(df)
     boot_q = bootstrap_question_delta(df)
     boot_db = bootstrap_database_delta(df)
     loo = loo_ablation_table(df)
+    drop_bex = loo_drop_table(df, "bird_ex")
+    drop_er = loo_drop_table(df, "execution_success")
     scoped_coef, scoped_note = scoped_logit(df)
     hf_coef, hf_note = hf_logit(df)
+    checks = acceptance_checks(df)
     excluded = audit_missing_bird_ex()
 
-    md = render_report(df, mcn, boot_q, boot_db, loo, scoped_coef, scoped_note,
-                       hf_coef, hf_note, excluded)
+    md = render_report(df, headline, mcn, pad, boot_q, boot_db, loo,
+                       drop_bex, drop_er, scoped_coef, scoped_note,
+                       hf_coef, hf_note, checks, excluded)
     OUT_PATH.write_text(md)
     print(f"Wrote {OUT_PATH}")
 
     if args.csv:
-        export_csv(mcn, boot_q, boot_db, loo, scoped_coef, hf_coef, Path(args.csv))
+        export_csv(headline, mcn, pad, boot_q, boot_db, loo, drop_bex, drop_er,
+                   scoped_coef, hf_coef, Path(args.csv))
         print(f"Wrote {args.csv}")
 
     print()
-    print("McNemar (baseline vs L4-effective):")
+    print("Headline (database-macro BEX %):")
+    print(headline.to_string(index=False))
+    print()
+    print("H1 McNemar (native L4 vs L0-PAD):")
     print(mcn.to_string(index=False))
     print()
-    print("Bootstrap (observation-level):")
-    print(boot_q.to_string(index=False))
+    print("Padding McNemar (L0 vs L0-PAD):")
+    print(pad.to_string(index=False))
     print()
-    print("Bootstrap (database-level):")
-    print(boot_db.to_string(index=False))
+    print("H3 drop cost (BEX):")
+    print(drop_bex.to_string(index=False))
+    print()
+    print("H3 drop cost (ER):")
+    print(drop_er.to_string(index=False))
+    print()
+    print("Acceptance checks:")
+    print(checks.to_string(index=False))
     print()
     print(f"Excluded cases: {len(excluded)}")
 
