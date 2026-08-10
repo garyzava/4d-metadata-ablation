@@ -472,6 +472,39 @@ def hf_logit(df: pd.DataFrame) -> tuple[pd.DataFrame | None, str]:
     return pd.DataFrame(rows), f"Dimensional lanes; logit on L0-PAD + leave-one-out conditions with cluster-robust SE on database (n={len(sub)})"
 
 
+def cumulative_logit(df: pd.DataFrame) -> tuple[pd.DataFrame | None, str]:
+    """Logit on the dimensional lanes over the cumulative ladder L0..L4.
+
+    Ported from the original round analysis (hf_monolithic_logit). Fits
+    bird_ex ~ C(level) + C(model) + C(difficulty) with cluster-robust SE
+    on database, restricted to levels {L0, L1, L2, L3, L4}. Reference: L0.
+    """
+    levels = ["L0", "L1", "L2", "L3", "L4"]
+    sub = df[(df["lane"] == "HF") & (df["level"].isin(levels))].copy()
+    if sub.empty:
+        return None, "no HF rows for the cumulative L0..L4 levels"
+    sub["level"] = pd.Categorical(sub["level"], categories=levels, ordered=True)
+    sub["model"] = pd.Categorical(sub["model"], categories=HF_MODELS)
+    sub["difficulty"] = pd.Categorical(sub["difficulty"], categories=sorted(sub["difficulty"].unique()))
+    try:
+        m = smf.logit("bird_ex ~ C(level) + C(model) + C(difficulty)", data=sub).fit(
+            disp=False, cov_type="cluster", cov_kwds={"groups": sub["database"]},
+        )
+    except Exception as e:
+        return None, f"cumulative logit fit failed: {e}"
+    rows: list[dict] = []
+    for term, coef, se, p in zip(m.params.index, m.params.values, m.bse.values, m.pvalues.values):
+        rows.append({
+            "term": term,
+            "coef": round(float(coef), 4),
+            "stderr": round(float(se), 4),
+            "z": round(float(coef / se) if se else 0.0, 3),
+            "p": round(float(p), 6),
+            "odds_ratio": round(float(np.exp(coef)), 3),
+        })
+    return pd.DataFrame(rows), f"Dimensional lanes; logit on the cumulative ladder L0..L4 with cluster-robust SE on database (n={len(sub)})"
+
+
 def acceptance_checks(df: pd.DataFrame) -> pd.DataFrame:
     """Camera-ready acceptance checks. Every row must PASS."""
     rows: list[dict] = []
@@ -535,6 +568,7 @@ def render_report(df: pd.DataFrame, headline: pd.DataFrame, mcn: pd.DataFrame,
                   loo: pd.DataFrame, drop_bex: pd.DataFrame, drop_er: pd.DataFrame,
                   scoped_coef: pd.DataFrame | None, scoped_note: str,
                   hf_coef: pd.DataFrame | None, hf_note: str,
+                  cum_coef: pd.DataFrame | None, cum_note: str,
                   checks: pd.DataFrame, excluded: pd.DataFrame) -> str:
     n_rows = len(df)
     n_models = df["model"].nunique()
@@ -618,15 +652,21 @@ def render_report(df: pd.DataFrame, headline: pd.DataFrame, mcn: pd.DataFrame,
         "",
         "## 8. Logistic regression with cluster-robust SE on database",
         "",
-        "Two fits, one per lane type, because the level set is lane-specific.",
+        "Three fits: one on the scoped lanes, two on the dimensional lanes "
+        "(leave-one-out set and cumulative ladder), because the level set is "
+        "lane-specific.",
         "",
         f"**8a. Scoped lanes.** _{scoped_note}_",
         "",
         df_to_md(scoped_coef if scoped_coef is not None else pd.DataFrame(), floatfmt=".4f"),
         "",
-        f"**8b. Dimensional lanes.** _{hf_note}_",
+        f"**8b. Dimensional lanes, leave-one-out set.** _{hf_note}_",
         "",
         df_to_md(hf_coef if hf_coef is not None else pd.DataFrame(), floatfmt=".4f"),
+        "",
+        f"**8c. Dimensional lanes, cumulative ladder.** _{cum_note}_",
+        "",
+        df_to_md(cum_coef if cum_coef is not None else pd.DataFrame(), floatfmt=".4f"),
         "",
         "## 9. Acceptance checks",
         "",
@@ -647,7 +687,8 @@ def export_csv(headline: pd.DataFrame, mcn: pd.DataFrame, pad: pd.DataFrame,
                boot_q: pd.DataFrame, boot_db: pd.DataFrame, loo: pd.DataFrame,
                drop_bex: pd.DataFrame, drop_er: pd.DataFrame,
                scoped_coef: pd.DataFrame | None,
-               hf_coef: pd.DataFrame | None, csv_path: Path) -> None:
+               hf_coef: pd.DataFrame | None,
+               cum_coef: pd.DataFrame | None, csv_path: Path) -> None:
     """Export all stats tables to a single long CSV.
 
     Each row: table, model (or term), plus the table-specific fields. Useful for
@@ -706,7 +747,8 @@ def export_csv(headline: pd.DataFrame, mcn: pd.DataFrame, pad: pd.DataFrame,
                         "term": r["dimension_dropped"], "baseline": "L4",
                         "n": r["n"], "metric": metric, "value": r[metric],
                     })
-        for label, coef_df in (("logit_scoped", scoped_coef), ("logit_hf", hf_coef)):
+        for label, coef_df in (("logit_scoped", scoped_coef), ("logit_hf", hf_coef),
+                               ("logit_cumulative", cum_coef)):
             if coef_df is None or coef_df.empty:
                 continue
             for _, r in coef_df.iterrows():
@@ -742,18 +784,19 @@ def main() -> None:
     drop_er = loo_drop_table(df, "execution_success")
     scoped_coef, scoped_note = scoped_logit(df)
     hf_coef, hf_note = hf_logit(df)
+    cum_coef, cum_note = cumulative_logit(df)
     checks = acceptance_checks(df)
     excluded = audit_missing_bird_ex()
 
     md = render_report(df, headline, mcn, pad, boot_q, boot_db, loo,
                        drop_bex, drop_er, scoped_coef, scoped_note,
-                       hf_coef, hf_note, checks, excluded)
+                       hf_coef, hf_note, cum_coef, cum_note, checks, excluded)
     OUT_PATH.write_text(md)
     print(f"Wrote {OUT_PATH}")
 
     if args.csv:
         export_csv(headline, mcn, pad, boot_q, boot_db, loo, drop_bex, drop_er,
-                   scoped_coef, hf_coef, Path(args.csv))
+                   scoped_coef, hf_coef, cum_coef, Path(args.csv))
         print(f"Wrote {args.csv}")
 
     print()
