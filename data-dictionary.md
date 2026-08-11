@@ -32,7 +32,7 @@ from the per-model JSON under `results/<model>/`.
 ## Conditions (`level`)
 
 - **L0–L4**: cumulative metadata ladder: L0 bare schema; +Data Dictionary, +Query Patterns, +Business Context, +Domain Knowledge.
-- **L0-PAD**: token-matched control (L0 padded with irrelevant text to the L4 token budget).
+- **L0-PAD**: distractor-text control (L0 padded with irrelevant text to approximately the L4 token budget).
 - **L4-DD / L4-QP / L4-BC / L4-DK**: leave-one-out (full metadata minus one dimension).
 - **EVIDENCE**: BIRD's built-in per-question hints baseline.
 

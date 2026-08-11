@@ -1,6 +1,6 @@
 # Metadata Completeness Ablation: BIRD Mini-Dev Reproducibility Repo
 
-Companion artifact to *Does Metadata Completeness Predict Text-to-SQL Accuracy? A Six-Model Ablation on BIRD Mini-Dev*. A standalone, runnable reproduction of the experiment's analysis pipeline: from the BIRD documents and the per-cell model outputs, it regenerates every table and figure in the paper.
+Companion artifact to *Beneficial but Not Sufficient: A Multi-Dimensional Ablation of Metadata Richness for Text-to-SQL Correctness* (SYNASC 2026). A standalone, runnable reproduction of the experiment's analysis pipeline: from the BIRD documents and the per-cell model outputs, it regenerates every table and figure in the paper.
 
 ![Methodology of the metadata-completeness ablation](figures/fig00-methodology.png)
 
@@ -120,4 +120,14 @@ The **ER−BEX gap** is the diagnostic: a query can run yet not answer the quest
 
 ## License and citation
 
-Released under the MIT License. If you use this artifact in academic work, please cite the accompanying paper.
+Released under the MIT License. If you use this artifact in academic work, please cite the accompanying paper:
+
+```bibtex
+@inproceedings{zavaleta2026beneficial,
+  author    = {Gary Zavaleta and Laurentiu-Marian Neagu and Mihai Dascalu},
+  title     = {Beneficial but Not Sufficient: A Multi-Dimensional Ablation of Metadata Richness for Text-to-{SQL} Correctness},
+  booktitle = {Proc. 28th Int. Symposium on Symbolic and Numeric Algorithms for Scientific Computing (SYNASC)},
+  year      = {2026},
+  note      = {To appear}
+}
+```

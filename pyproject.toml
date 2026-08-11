@@ -1,7 +1,7 @@
 [project]
 name = "metadata-ablation-repro"
 version = "0.1.0"
-description = "Reproducibility artifact for 'Does Metadata Completeness Predict Text-to-SQL Accuracy? A Six-Model Ablation on BIRD Mini-Dev'"
+description = "Reproducibility artifact for 'Beneficial but Not Sufficient: A Multi-Dimensional Ablation of Metadata Richness for Text-to-SQL Correctness' (SYNASC 2026)"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

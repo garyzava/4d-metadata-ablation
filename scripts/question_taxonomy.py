@@ -4,12 +4,13 @@ Offline rules-based classifier on the gold SQL plus per-database schema metadata
 Cross-tabulates L0->L4 BEX lift by (question type, schema complexity)
 to answer "where does metadata help most?".
 
-The six lanes differ in available levels:
-  - HF lanes      (9b, 27b, 30b)            : EVIDENCE, L0-PAD, L4-DD, L4-QP, L4-BC, L4-DK
+Levels exported per lane:
+  - HF lanes      (9b, 27b, 30b)            : EVIDENCE, L0, L0-PAD, L4, L4-DD, L4-QP, L4-BC, L4-DK
   - Scoped lanes  (gemma4, qwen36, opus47)  : L0, L0-PAD, L4
 
-For the cross-tab summary the L0 baseline is L0 (scoped) or L0-PAD (HF), and the
-L4 effective is L4 (scoped) or the four L4 leave-one-out conditions pooled (HF).
+Every lane has native L0 and L4, so figures can compare L0 vs L4 directly for
+all six models. The cross-tab summary in this script still uses its historical
+baselines; the notebook figures use the native columns.
 
 Outputs (relative to this repo):
   - data/reports/question-taxonomy.md
@@ -45,7 +46,7 @@ HF_MODELS = ["9b", "27b", "30b"]
 SCOPED_MODELS = ["gemma4", "qwen36", "opus47"]
 ALL_MODELS = HF_MODELS + SCOPED_MODELS
 
-HF_LEVELS = ["EVIDENCE", "L0-PAD", "L4-DD", "L4-QP", "L4-BC", "L4-DK"]
+HF_LEVELS = ["EVIDENCE", "L0", "L0-PAD", "L4", "L4-DD", "L4-QP", "L4-BC", "L4-DK"]
 SCOPED_LEVELS = ["L0", "L0-PAD", "L4"]
 LEVELS_BY_MODEL: dict[str, list[str]] = {**{m: HF_LEVELS for m in HF_MODELS},
                                           **{m: SCOPED_LEVELS for m in SCOPED_MODELS}}
