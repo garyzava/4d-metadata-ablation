@@ -5,8 +5,8 @@ Cross-tabulates L0->L4 BEX lift by (question type, schema complexity)
 to answer "where does metadata help most?".
 
 Levels exported per lane:
-  - HF lanes      (9b, 27b, 30b)            : EVIDENCE, L0, L0-PAD, L4, L4-DD, L4-QP, L4-BC, L4-DK
-  - Scoped lanes  (gemma4, qwen36, opus47)  : L0, L0-PAD, L4
+  - Dimensional lanes  (9b, 27b, 30b)           : EVIDENCE, L0, L0-PAD, L4, L4-DD, L4-QP, L4-BC, L4-DK
+  - Cross-vendor lanes (gemma4, qwen36, opus47) : L0, L0-PAD, L4
 
 Every lane has native L0 and L4, so figures can compare L0 vs L4 directly for
 all six models. The cross-tab summary in this script still uses its historical
@@ -139,7 +139,7 @@ def load_per_case(model: str, level: str) -> dict[tuple[str, str], dict[str, Any
 
 
 def baseline_level(model: str) -> str:
-    """L0 baseline used in cross-tabs: L0 for scoped lanes, L0-PAD for HF lanes."""
+    """L0 baseline used in cross-tabs: L0 for the Cross-vendor lanes, L0-PAD for the Dimensional lanes."""
     return "L0" if model in SCOPED_MODELS else "L0-PAD"
 
 
@@ -150,7 +150,7 @@ def l4_effective_bex(case_map: dict[tuple[str, str], dict[str, Any]],
                      question_text: str) -> list[int] | None:
     """Return a list of binary BEX values that stand in for the L4 condition.
 
-    Scoped lanes: single value from native L4. HF lanes: up to four values from
+    Cross-vendor lanes: single value from native L4. Dimensional lanes: up to four values from
     the L4 leave-one-out conditions (each LOO is one paired observation).
     """
     if model in SCOPED_MODELS:
@@ -158,7 +158,7 @@ def l4_effective_bex(case_map: dict[tuple[str, str], dict[str, Any]],
         if case is None:
             return None
         return [int(bool(case.get("metrics", {}).get("bird_ex")))]
-    # HF lane: pool the four LOO conditions
+    # Dimensional lane: pool the four LOO conditions
     vals: list[int] = []
     for loo_level, m in loo_maps.items():
         case = m.get((db_id, question_text))

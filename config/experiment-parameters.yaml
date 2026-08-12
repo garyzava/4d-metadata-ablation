@@ -98,5 +98,5 @@ conditions:
 #   scoped      -> scoped levels only (no EVIDENCE baseline)
 # scripts/run_experiment.py turns this into the per-model run_ablation invocations.
 # Cells = model x condition x 11 databases. Dimensional LOO (3 Qwen x 5 x 11 = 165) +
-# scoped cross-vendor (3 models x 3 x 11 = 99) + cumulative monolithic (3 Qwen x 5 x 11 = 165)
+# cross-vendor (3 models x 3 x 11 = 99) + cumulative ladder (3 Qwen x 5 x 11 = 165)
 # = 429, plus a 33-cell EVIDENCE baseline (3 Qwen x 11).

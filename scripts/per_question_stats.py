@@ -413,7 +413,7 @@ def loo_drop_table(df: pd.DataFrame, col: str) -> pd.DataFrame:
 
 
 def scoped_logit(df: pd.DataFrame) -> tuple[pd.DataFrame | None, str]:
-    """Logit on scoped lanes: bird_ex ~ C(level) + C(model) + C(difficulty)
+    """Logit on the Cross-vendor lanes: bird_ex ~ C(level) + C(model) + C(difficulty)
     with database-cluster-robust SE. Reference categories: L0, GEMMA4, the
     alphabetically-first difficulty class.
     """
