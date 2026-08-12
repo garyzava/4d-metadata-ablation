@@ -1,6 +1,7 @@
 # Secrets — never commit (the API keys / DB URL)
 .env
 .env.*
+!.env.example
 
 # Local working context for Claude sessions (not part of the public artifact)
 CLAUDE.md

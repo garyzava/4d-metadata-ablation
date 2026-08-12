@@ -101,7 +101,7 @@ The committed `results/<model>/` already hold every per-cell model output, so th
 2. Run `notebooks/01-reproducibility-pipeline.ipynb` to produce the BIRD data (`bird_mini_dev/minidev/MINIDEV/`) and the revised metadata docs (`bird-docs-revised/`).
 3. A loaded `bird_minidev` PostgreSQL database (BIRD's official dump).
 4. `uv run python precompute_gold.py` to cache the gold result sets used for BEX scoring.
-5. A `.env` with the provider API keys (`HUGGINGFACE_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY` or `GEMINI_API_KEY`) and `GYZASQL_BIRD_DATABASE_URL` - the SQLAlchemy URL of your local `bird_minidev` Postgres (default `postgresql+psycopg://localhost/bird_minidev`), which the runner uses to execute both the model-generated SQL (for ER) and the gold SQL (for BEX).
+5. A `.env` (start from [`.env.example`](.env.example)) with the provider API keys (`HUGGINGFACE_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY` or `GEMINI_API_KEY`) and `GYZASQL_BIRD_DATABASE_URL` - the SQLAlchemy URL of your local `bird_minidev` Postgres (default `postgresql+psycopg://localhost/bird_minidev`), which the runner uses to execute both the model-generated SQL (for ER) and the gold SQL (for BEX).
 
 **Run**
 
