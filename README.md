@@ -70,17 +70,17 @@ Six models are evaluated on the 11-database BIRD mini-dev benchmark across metad
 | Gemma-4-26B-A4B-IT | Google |
 | Claude Opus 4.7 | Anthropic |
 
-**Lane / cell totals (429 cells across two lanes, plus a 33-cell EVIDENCE baseline):**
+**Lane / cell totals (429 ablation cells across the two lanes, plus a 33-cell EVIDENCE baseline; the Dimensional Lanes run both the leave-one-out and cumulative condition sets):**
 
 | Lane | Composition | Cells |
 |---|---|---:|
-| Dimensional, leave-one-out | Qwen3.5-9B, Qwen3.5-27B, Qwen3-Coder-30B-A3B-Instruct × 5 conditions (L0-PAD, L4-DD, L4-QP, L4-BC, L4-DK) × 11 dbs | 165 |
-| Dimensional, scoped cross-vendor | Qwen3.6-35B-A3B, Gemma-4-26B-A4B-IT, Claude Opus 4.7 × 3 conditions (L0, L0-PAD, L4) × 11 dbs | 99 |
-| Cumulative, monolithic | Qwen3.5-9B, Qwen3.5-27B, Qwen3-Coder-30B-A3B-Instruct × 5 levels (L0→L4) × 11 dbs | 165 |
+| Dimensional Lanes (leave-one-out conditions) | Qwen3.5-9B, Qwen3.5-27B, Qwen3-Coder-30B-A3B-Instruct × 5 conditions (L0-PAD, L4-DD, L4-QP, L4-BC, L4-DK) × 11 dbs | 165 |
+| Dimensional Lanes (cumulative ladder) | Qwen3.5-9B, Qwen3.5-27B, Qwen3-Coder-30B-A3B-Instruct × 5 levels (L0→L4) × 11 dbs | 165 |
+| Cross-vendor Lanes | Qwen3.6-35B-A3B, Gemma-4-26B-A4B-IT, Claude Opus 4.7 × 3 conditions (L0, L0-PAD, L4) × 11 dbs | 99 |
 | **Total** | | **429** |
 | EVIDENCE baseline (BIRD hints) | Qwen3.5-9B, Qwen3.5-27B, Qwen3-Coder-30B-A3B-Instruct × 11 dbs | 33 |
 
-Operationally, the three dimensional models run their leave-one-out and monolithic conditions as a single 10-level invocation each (via [`scripts/run_experiment.py`](scripts/run_experiment.py)); the cell totals are unchanged.
+Operationally, the three Dimensional-Lane models run their leave-one-out and cumulative conditions as a single 10-level invocation each (via [`scripts/run_experiment.py`](scripts/run_experiment.py)); the cell totals are unchanged. L0-PAD is the distractor-text control: the L0 prompt padded with irrelevant, non-BIRD text.
 
 ## Model and parameter configuration
 
@@ -118,9 +118,9 @@ The driver reads `config/experiment-parameters.yaml` (the source of truth) and i
 
 The **ER−BEX gap** is the diagnostic: a query can run yet not answer the question. Full results are in the paper.
 
-## License and citation
+## Citation
 
-Released under the MIT License. If you use this artifact in academic work, please cite the accompanying paper:
+If you use this artifact in academic work, please cite the accompanying paper:
 
 ```bibtex
 @inproceedings{zavaleta2026beneficial,
